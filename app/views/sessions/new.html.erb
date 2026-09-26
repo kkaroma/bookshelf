@@ -1,0 +1,32 @@
+<% content_for :title, "Sign in" %>
+
+<div class="auth">
+  <div class="card auth-card">
+    <div class="auth-header">
+      <span class="auth-icon"><%= render "shared/book_icon", size: 26 %></span>
+      <h1>Welcome back</h1>
+      <p class="muted">Sign in to your Bookshelf</p>
+    </div>
+
+    <%= form_with url: session_path, class: "form" do |form| %>
+      <div class="field">
+        <%= form.label :email_address, "Email address" %>
+        <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "you@example.com", value: params[:email_address], class: "input" %>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <%= form.label :password %>
+          <%= link_to "Forgot password?", new_password_path %>
+        </div>
+        <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Your password", maxlength: 72, class: "input" %>
+      </div>
+
+      <%= form.submit "Sign in", class: "btn btn-primary btn-block" %>
+    <% end %>
+
+    <div class="auth-footer">
+      <p>New here? <%= link_to "Create an account", new_registration_path %></p>
+    </div>
+  </div>
+</div>

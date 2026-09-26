@@ -1,0 +1,11 @@
+<% content_for :title, "Edit #{@book.title}" %>
+
+<div class="form-page">
+  <%= link_to "← Back to book", @book, class: "back-link" %>
+
+  <div class="card">
+    <h1>Edit book</h1>
+    <p class="muted">Update the details for “<%= @book.title %>”.</p>
+    <%= render "form", book: @book %>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<% content_for :title, "Sign up" %>
+
+<div class="auth">
+  <div class="card auth-card">
+    <div class="auth-header">
+      <span class="auth-icon"><%= render "shared/book_icon", size: 26 %></span>
+      <h1>Create your account</h1>
+      <p class="muted">Start building your Bookshelf</p>
+    </div>
+
+    <%= form_with model: @user, url: registration_path, class: "form" do |form| %>
+      <%= render "shared/form_errors", object: @user %>
+
+      <div class="field">
+        <%= form.label :name %>
+        <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name", placeholder: "Jane Reader", class: "input" %>
+      </div>
+
+      <div class="field">
+        <%= form.label :email_address, "Email address" %>
+        <%= form.email_field :email_address, required: true, autocomplete: "username", placeholder: "you@example.com", class: "input" %>
+      </div>
+
+      <div class="field">
+        <%= form.label :password %>
+        <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "At least 8 characters", minlength: 8, maxlength: 72, class: "input" %>
+      </div>
+
+      <div class="field">
+        <%= form.label :password_confirmation, "Confirm password" %>
+        <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Type it again", maxlength: 72, class: "input" %>
+      </div>
+
+      <%= form.submit "Create account", class: "btn btn-primary btn-block" %>
+    <% end %>
+
+    <div class="auth-footer">
+      <p>Already have an account? <%= link_to "Sign in", new_session_path %></p>
+    </div>
+  </div>
+</div>

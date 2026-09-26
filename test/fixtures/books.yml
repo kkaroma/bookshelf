@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+hobbit:
+  title: The Hobbit
+  author: J.R.R. Tolkien
+  description: A hobbit goes on an unexpected journey.
+  published_year: 1937
+
+dune:
+  title: Dune
+  author: Frank Herbert
+  description: Politics and sandworms on the desert planet Arrakis.
+  published_year: 1965

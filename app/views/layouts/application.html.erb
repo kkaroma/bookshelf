@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for?(:title) ? "#{yield(:title)} · Bookshelf" : "Bookshelf" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Bookshelf">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <nav class="nav container">
+        <%= link_to root_path, class: "brand" do %>
+          <%= render "shared/book_icon", size: 26 %>
+          Bookshelf
+        <% end %>
+
+        <div class="nav-links">
+          <% if authenticated? %>
+            <span class="nav-user">Signed in as <strong><%= Current.user.name %></strong></span>
+            <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>
+            <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-ghost" %>
+          <% else %>
+            <%= link_to "Sign in", new_session_path, class: "btn btn-ghost" %>
+            <%= link_to "Sign up", new_registration_path, class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <% flash.each do |type, message| %>
+        <div class="flash flash-<%= type %>" role="status"><%= message %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <footer class="site-footer">
+      Bookshelf — a home for your books
+    </footer>
+  </body>
+</html>

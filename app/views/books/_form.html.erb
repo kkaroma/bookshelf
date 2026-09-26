@@ -1,0 +1,31 @@
+<%= form_with(model: book, class: "form") do |form| %>
+  <%= render "shared/form_errors", object: book %>
+
+  <div class="field">
+    <%= form.label :title %>
+    <%= form.text_field :title, required: true, autofocus: true, placeholder: "The Hobbit", class: "input" %>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <%= form.label :author %>
+      <%= form.text_field :author, required: true, placeholder: "J.R.R. Tolkien", class: "input" %>
+    </div>
+
+    <div class="field">
+      <%= form.label :published_year %>
+      <%= form.number_field :published_year, min: 1, max: Date.current.year, placeholder: "1937", class: "input" %>
+    </div>
+  </div>
+
+  <div class="field">
+    <%= form.label :description %>
+    <%= form.textarea :description, placeholder: "What is this book about?", class: "input" %>
+    <span class="field-hint">Optional</span>
+  </div>
+
+  <div class="form-actions">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", book.persisted? ? book : books_path, class: "btn btn-ghost" %>
+  </div>
+<% end %>

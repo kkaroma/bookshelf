@@ -1,0 +1,31 @@
+<% content_for :title, @book.title %>
+
+<%= link_to "← All books", books_path, class: "back-link" %>
+
+<article class="book-detail">
+  <%= render "cover", book: @book %>
+
+  <div>
+    <h1><%= @book.title %></h1>
+    <p class="book-detail-author">by <%= @book.author %></p>
+
+    <div class="meta-list">
+      <% if @book.published_year %>
+        <span class="pill">Published <%= @book.published_year %></span>
+      <% end %>
+      <span class="pill">Added <%= time_ago_in_words(@book.created_at) %> ago</span>
+    </div>
+
+    <% if @book.description.present? %>
+      <p class="book-description"><%= @book.description %></p>
+    <% else %>
+      <p class="muted">No description yet.</p>
+    <% end %>
+
+    <div class="actions">
+      <%= link_to "Edit book", edit_book_path(@book), class: "btn btn-secondary" %>
+      <%= button_to "Delete book", @book, method: :delete, class: "btn btn-danger",
+            form: { data: { turbo_confirm: "Delete “#{@book.title}”? This can't be undone." } } %>
+    </div>
+  </div>
+</article>

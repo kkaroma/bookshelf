@@ -1,0 +1,9 @@
+<%= link_to book, id: dom_id(book), class: "book-card" do %>
+  <%= render "books/cover", book: book %>
+  <div>
+    <h2 class="book-card-title"><%= book.title %></h2>
+    <p class="book-card-meta">
+      <%= book.author %><%= " · #{book.published_year}" if book.published_year %>
+    </p>
+  </div>
+<% end %>

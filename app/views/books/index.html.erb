@@ -1,0 +1,21 @@
+<% content_for :title, "Books" %>
+
+<div class="page-header">
+  <div>
+    <h1>Books</h1>
+    <p class="muted"><%= pluralize(@books.size, "book") %> on the shelf</p>
+  </div>
+</div>
+
+<% if @books.any? %>
+  <div id="books" class="book-grid">
+    <%= render @books %>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <%= render "shared/book_icon", size: 48 %>
+    <h2>Your shelf is empty</h2>
+    <p class="muted">Add your first book to start building your collection.</p>
+    <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>
+  </div>
+<% end %>
