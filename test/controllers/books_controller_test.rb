@@ -30,6 +30,32 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to book_url(Book.last)
   end
 
+  test "should save subtitle and review" do
+    post books_url, params: { book: { title: "Dune", subtitle: "Book One", author: "Frank Herbert", review: "Loved the worldbuilding." } }
+
+    book = Book.last
+    assert_equal "Book One", book.subtitle
+    assert_equal "Loved the worldbuilding.", book.review
+  end
+
+  test "should add a review to an existing book" do
+    book = books(:dune)
+    patch book_url(book), params: { book: { review: "Slow start, brilliant ending." } }
+
+    assert_equal "Slow start, brilliant ending.", book.reload.review
+  end
+
+  test "show displays the subtitle and review" do
+    get book_url(@book)
+    assert_select ".book-subtitle", "There and Back Again"
+    assert_select ".book-review-text", /cosy adventure/
+  end
+
+  test "show invites the owner to write a review when there is none" do
+    get book_url(books(:dune))
+    assert_select ".book-review a", "Write your review"
+  end
+
   test "should not create book without a title" do
     assert_no_difference("Book.count") do
       post books_url, params: { book: { title: "", author: "Someone" } }

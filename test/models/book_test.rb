@@ -17,6 +17,15 @@ class BookTest < ActiveSupport::TestCase
     assert_includes book.errors[:author], "can't be blank"
   end
 
+  test "subtitle and review are optional" do
+    assert Book.new(title: "T", author: "A", subtitle: nil, review: nil).valid?
+  end
+
+  test "subtitle can be at most 200 characters" do
+    assert Book.new(title: "T", author: "A", subtitle: "x" * 200).valid?
+    assert_not Book.new(title: "T", author: "A", subtitle: "x" * 201).valid?
+  end
+
   test "published year is optional" do
     assert Book.new(title: "T", author: "A", published_year: nil).valid?
   end

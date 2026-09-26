@@ -7,6 +7,9 @@
 
   <div>
     <h1><%= @book.title %></h1>
+    <% if @book.subtitle.present? %>
+      <p class="book-subtitle"><%= @book.subtitle %></p>
+    <% end %>
     <p class="book-detail-author">by <%= @book.author %></p>
 
     <div class="meta-list">
@@ -21,6 +24,18 @@
     <% else %>
       <p class="muted">No description yet.</p>
     <% end %>
+
+    <section class="book-review" id="review">
+      <h2>My review</h2>
+      <% if @book.review.present? %>
+        <blockquote class="book-review-text"><%= @book.review %></blockquote>
+      <% else %>
+        <p class="muted">
+          No review yet. Finished the book?
+          <%= link_to "Write your review", edit_book_path(@book, anchor: "book_review") %>
+        </p>
+      <% end %>
+    </section>
 
     <div class="actions">
       <%= link_to "Edit book", edit_book_path(@book), class: "btn btn-secondary" %>

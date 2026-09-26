@@ -2,9 +2,11 @@
 
 hobbit:
   title: The Hobbit
+  subtitle: There and Back Again
   author: J.R.R. Tolkien
   description: A hobbit goes on an unexpected journey.
   published_year: 1937
+  review: A cosy adventure that still holds up. The riddles in the dark chapter are the best part.
 
 dune:
   title: Dune

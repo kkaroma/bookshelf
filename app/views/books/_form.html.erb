@@ -6,6 +6,12 @@
     <%= form.text_field :title, required: true, autofocus: true, placeholder: "The Hobbit", class: "input" %>
   </div>
 
+  <div class="field">
+    <%= form.label :subtitle %>
+    <%= form.text_field :subtitle, maxlength: 200, placeholder: "There and Back Again", class: "input" %>
+    <span class="field-hint">Optional</span>
+  </div>
+
   <div class="form-row">
     <div class="field">
       <%= form.label :author %>
@@ -22,6 +28,12 @@
     <%= form.label :description %>
     <%= form.textarea :description, placeholder: "What is this book about?", class: "input" %>
     <span class="field-hint">Optional</span>
+  </div>
+
+  <div class="field">
+    <%= form.label :review, "My review" %>
+    <%= form.textarea :review, placeholder: "Finished reading? What did you think of it?", class: "input" %>
+    <span class="field-hint">Optional — you can come back and write this after you've read the book.</span>
   </div>
 
   <div class="form-actions">
