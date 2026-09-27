@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 hobbit:
+  user: one
   title: The Hobbit
   subtitle: There and Back Again
   author: J.R.R. Tolkien
@@ -9,6 +10,7 @@ hobbit:
   review: A cosy adventure that still holds up. The riddles in the dark chapter are the best part.
 
 dune:
+  user: two
   title: Dune
   author: Frank Herbert
   description: Politics and sandworms on the desert planet Arrakis.

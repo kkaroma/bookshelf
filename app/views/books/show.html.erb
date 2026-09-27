@@ -16,7 +16,7 @@
       <% if @book.published_year %>
         <span class="pill">Published <%= @book.published_year %></span>
       <% end %>
-      <span class="pill">Added <%= time_ago_in_words(@book.created_at) %> ago</span>
+      <span class="pill">Added by <%= can_edit?(@book) ? "you" : @book.user.name %> <%= time_ago_in_words(@book.created_at) %> ago</span>
     </div>
 
     <% if @book.description.present? %>
@@ -26,21 +26,25 @@
     <% end %>
 
     <section class="book-review" id="review">
-      <h2>My review</h2>
+      <h2><%= can_edit?(@book) ? "My review" : "#{@book.user.name}'s review" %></h2>
       <% if @book.review.present? %>
         <blockquote class="book-review-text"><%= @book.review %></blockquote>
-      <% else %>
+      <% elsif can_edit?(@book) %>
         <p class="muted">
           No review yet. Finished the book?
           <%= link_to "Write your review", edit_book_path(@book, anchor: "book_review") %>
         </p>
+      <% else %>
+        <p class="muted"><%= @book.user.name %> hasn't reviewed this book yet.</p>
       <% end %>
     </section>
 
-    <div class="actions">
-      <%= link_to "Edit book", edit_book_path(@book), class: "btn btn-secondary" %>
-      <%= button_to "Delete book", @book, method: :delete, class: "btn btn-danger",
-            form: { data: { turbo_confirm: "Delete “#{@book.title}”? This can't be undone." } } %>
-    </div>
+    <% if can_edit?(@book) %>
+      <div class="actions">
+        <%= link_to "Edit book", edit_book_path(@book), class: "btn btn-secondary" %>
+        <%= button_to "Delete book", @book, method: :delete, class: "btn btn-danger",
+              form: { data: { turbo_confirm: "Delete “#{@book.title}”? This can't be undone." } } %>
+      </div>
+    <% end %>
   </div>
 </article>

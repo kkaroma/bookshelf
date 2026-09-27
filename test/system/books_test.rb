@@ -29,4 +29,13 @@ class BooksTest < ApplicationSystemTestCase
     assert_text "Book was successfully destroyed."
     assert_no_text "Piranesi"
   end
+
+  test "viewing someone else's book is read-only" do
+    visit book_path(books(:dune))
+
+    assert_selector "h1", text: "Dune"
+    assert_text "Added by Bob Bookworm"
+    assert_no_link "Edit book"
+    assert_no_button "Delete book"
+  end
 end

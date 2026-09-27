@@ -1,9 +1,11 @@
 class BooksController < ApplicationController
   before_action :set_book, only: %i[ show edit update destroy ]
+  before_action :require_owner, only: %i[ edit update destroy ]
+  helper_method :can_edit?
 
   # GET /books or /books.json
   def index
-    @books = Book.order(:title)
+    @books = Book.includes(:user).order(:title)
   end
 
   # GET /books/1 or /books/1.json
@@ -12,7 +14,7 @@ class BooksController < ApplicationController
 
   # GET /books/new
   def new
-    @book = Book.new
+    @book = Current.user.books.build
   end
 
   # GET /books/1/edit
@@ -21,7 +23,7 @@ class BooksController < ApplicationController
 
   # POST /books or /books.json
   def create
-    @book = Book.new(book_params)
+    @book = Current.user.books.build(book_params)
 
     respond_to do |format|
       if @book.save
@@ -61,6 +63,17 @@ class BooksController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_book
       @book = Book.find(params.expect(:id))
+    end
+
+    # Only the person who added a book may change it.
+    def can_edit?(book)
+      book.owned_by?(Current.user)
+    end
+
+    def require_owner
+      unless can_edit?(@book)
+        redirect_to @book, alert: "Only the person who added this book can change it."
+      end
     end
 
     # Only allow a list of trusted parameters through.

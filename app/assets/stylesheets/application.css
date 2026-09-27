@@ -417,6 +417,7 @@ textarea.input { min-height: 8rem; resize: vertical; }
   overflow: hidden;
 }
 .book-card-meta { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+.book-card-owner { font-size: 0.8rem; color: var(--text-muted); margin: 0.15rem 0 0; opacity: 0.85; }
 
 /* ---------- Book detail (show page) ---------- */
 .book-detail {

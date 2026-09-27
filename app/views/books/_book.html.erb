@@ -8,5 +8,6 @@
     <p class="book-card-meta">
       <%= book.author %><%= " · #{book.published_year}" if book.published_year %>
     </p>
+    <p class="book-card-owner">Added by <%= book.owned_by?(Current.user) ? "you" : book.user.name %></p>
   </div>
 <% end %>

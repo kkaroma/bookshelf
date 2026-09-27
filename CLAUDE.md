@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A personal app for managing the owner's own book collection (multiple users). Stack: Ruby 3.4.4, Rails 8.1.4, SQLite, Hotwire.
 
-Built so far: `Book` CRUD (root is `books#index`) and authentication from the Rails 8 generator (`User`, `Session`, `Current`, `concerns/authentication.rb`) plus a custom `RegistrationsController` for sign-up. Every controller requires login unless it calls `allow_unauthenticated_access`. A book's `review` column is the owner's own write-up after reading it; other users respond to it with comments. The planned build order for the remaining features is: ownership → admin role → comments → ratings → exchange listing → follows.
+Built so far: `Book` CRUD (root is `books#index`) and authentication from the Rails 8 generator (`User`, `Session`, `Current`, `concerns/authentication.rb`) plus a custom `RegistrationsController` for sign-up. Books belong to a user (`Book#owned_by?`); `BooksController#require_owner` blocks edit/update/destroy for anyone else and the `can_edit?` helper hides those controls in views. Every controller requires login unless it calls `allow_unauthenticated_access`. A book's `review` column is the owner's own write-up after reading it; other users respond to it with comments. The planned build order for the remaining features is: ownership → admin role → comments → ratings → exchange listing → follows.
 
 Styling is hand-written CSS in `app/assets/stylesheets/application.css` (no Tailwind/build step), with design tokens as CSS variables in `:root` and a dark-mode override. Reuse its classes (`.btn`, `.card`, `.form`/`.field`/`.input`, `.page-header`, `.book-cover`) and the `shared/_form_errors` partial for new pages.
 
