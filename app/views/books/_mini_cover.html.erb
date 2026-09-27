@@ -1,4 +1,10 @@
-<%= link_to book, class: "mini-cover", style: "--hue: #{book_cover_hue(book)}", title: book.title,
-      data: { turbo_frame: "_top" } do %>
-  <span><%= book.title %></span>
+<% if book.cover_ready? %>
+  <%= link_to book, class: "mini-cover mini-cover-image", title: book.title, data: { turbo_frame: "_top" } do %>
+    <%= image_tag book.cover.variant(:thumb), alt: book.title, loading: "lazy" %>
+  <% end %>
+<% else %>
+  <%= link_to book, class: "mini-cover", style: "--hue: #{book_cover_hue(book)}", title: book.title,
+        data: { turbo_frame: "_top" } do %>
+    <span><%= book.title %></span>
+  <% end %>
 <% end %>

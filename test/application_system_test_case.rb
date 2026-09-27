@@ -9,6 +9,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     options.add_preference("profile.password_manager_enabled", false)
     options.add_preference("profile.password_manager_leak_detection", false)
     options.add_argument("--disable-features=PasswordLeakDetection,PasswordManagerOnboarding")
+    # Cover thumbnails come from Open Library; don't let the test browser
+    # reach the real internet (the images just don't load in tests).
+    options.add_argument("--host-resolver-rules=MAP *.openlibrary.org 127.0.0.1, MAP openlibrary.org 127.0.0.1")
   end
 
   # Give the browser a little longer than Capybara's 2-second default before

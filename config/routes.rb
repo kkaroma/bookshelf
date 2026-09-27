@@ -22,6 +22,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # "Find cover online" in the book form: /cover_search?title=...&author=...&isbn=...
+  resource :cover_search, only: :show
+
   # The exchange shelf: every book available for exchange.
   resources :exchanges, only: :index
 

@@ -99,6 +99,68 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_select "#book_#{@book.id} .exchange-badge", count: 0
   end
 
+  test "the form has ISBN and cover fields" do
+    get new_book_url
+    assert_select "input[name=?]", "book[isbn]"
+    assert_select "input[type=file][name=?]", "book[cover]"
+    assert_select "input[type=hidden][name=?]", "book[open_library_cover_id]"
+    assert_select "button", "Find cover online"
+  end
+
+  test "create a book with an ISBN and an uploaded cover" do
+    post books_url, params: { book: {
+      title: "Piranesi", author: "Susanna Clarke", isbn: "978-1-63557-563-7",
+      cover: fixture_file_upload("cover.jpg", "image/jpeg")
+    } }
+
+    book = Book.last
+    assert_redirected_to book_url(book)
+    assert_equal "9781635575637", book.isbn
+    assert book.cover_ready?
+  end
+
+  test "create a book with a cover picked online" do
+    fake_open_library "covers.openlibrary.org/b/id/42-L.jpg" => open_library_image
+
+    post books_url, params: { book: { title: "Piranesi", author: "Susanna Clarke", open_library_cover_id: "42" } }
+
+    assert Book.last.cover_ready?
+  end
+
+  test "an invalid ISBN shows an error" do
+    assert_no_difference("Book.count") do
+      post books_url, params: { book: { title: "Piranesi", author: "Susanna Clarke", isbn: "123" } }
+    end
+    assert_response :unprocessable_content
+    assert_select ".form-errors", /Isbn isn't a valid ISBN/
+  end
+
+  test "books with a cover show the image; others show the generated cover" do
+    @book.cover.attach(fixture_file_upload("cover.jpg", "image/jpeg"))
+
+    get books_url
+    assert_select "#book_#{@book.id} .book-cover-image img"
+    assert_select "#book_#{@someone_elses_book.id} .book-cover-title", "Dune"
+
+    get book_url(@book)
+    assert_select ".book-detail .book-cover-image img"
+  end
+
+  test "the book page shows the ISBN" do
+    @book.update!(isbn: "9780547928227")
+    get book_url(@book)
+    assert_select ".pill", "ISBN 9780547928227"
+  end
+
+  test "the edit form offers to remove an existing cover" do
+    @book.cover.attach(fixture_file_upload("cover.jpg", "image/jpeg"))
+    get edit_book_url(@book)
+    assert_select "input[type=checkbox][name=?]", "book[remove_cover]"
+
+    patch book_url(@book), params: { book: { remove_cover: "1" } }
+    assert_not @book.reload.cover.attached?
+  end
+
   test "should not create book without a title" do
     assert_no_difference("Book.count") do
       post books_url, params: { book: { title: "", author: "Someone" } }

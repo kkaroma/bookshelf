@@ -1,0 +1,46 @@
+<%# Cover picker in the book form: upload a file, or search Open Library.
+    The cover_picker Stimulus controller shows a preview of whichever you chose. %>
+<div class="field cover-field" data-controller="cover-picker"
+     data-cover-picker-search-url-value="<%= cover_search_path %>">
+  <span class="field-label">Cover</span>
+
+  <div class="cover-field-body">
+    <div class="cover-preview" data-cover-picker-target="preview">
+      <% if book.open_library_cover_id.present? %>
+        <%= image_tag OpenLibrary.cover_url(book.open_library_cover_id, size: "M"), alt: "Chosen cover" %>
+      <% elsif book.cover_ready? %>
+        <%= image_tag book.cover.variant(:thumb), alt: "Current cover" %>
+      <% else %>
+        <span>No cover yet</span>
+      <% end %>
+    </div>
+
+    <div class="cover-field-options">
+      <div class="cover-buttons">
+        <label class="btn btn-secondary btn-sm file-button">
+          Upload image
+          <%= form.file_field :cover, accept: Book::COVER_TYPES.join(","), class: "visually-hidden",
+                data: { cover_picker_target: "file", action: "cover-picker#uploaded" } %>
+        </label>
+        <button type="button" class="btn btn-secondary btn-sm" data-action="cover-picker#search">
+          Find cover online
+        </button>
+      </div>
+
+      <% if book.cover_ready? %>
+        <label class="remove-cover">
+          <%= form.check_box :remove_cover %> Remove current cover
+        </label>
+      <% end %>
+
+      <%= form.hidden_field :open_library_cover_id, data: { cover_picker_target: "coverId" } %>
+      <span class="field-hint">
+        JPEG, PNG or WebP up to 5 MB. “Find cover online” searches
+        <a href="https://openlibrary.org" target="_blank" rel="noopener">Open Library</a>
+        using the ISBN, or the title and author.
+      </span>
+    </div>
+  </div>
+
+  <%= turbo_frame_tag "cover_results", data: { cover_picker_target: "results" } %>
+</div>

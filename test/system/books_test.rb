@@ -249,4 +249,41 @@ class BooksTest < ApplicationSystemTestCase
     click_on "Exchange shelf"
     assert_no_selector ".book-card", text: "Dune"
   end
+
+  test "adding a book with a cover found online" do
+    fake_open_library(
+      "search.json" => open_library_json([
+        { "title" => "Piranesi", "author_name" => [ "Susanna Clarke" ], "cover_i" => 555,
+          "first_publish_year" => 2020, "isbn" => [ "9781635575637" ] }
+      ]),
+      "covers.openlibrary.org/b/id/555-L.jpg" => open_library_image
+    )
+
+    click_on "Add a book", match: :first
+    fill_in "Title", with: "Piranesi"
+    fill_in "Author", with: "Susanna Clarke"
+    click_on "Find cover online"
+
+    click_on "Use cover: Piranesi, 2020"
+    assert_selector ".cover-result[aria-pressed='true']"
+    assert_selector ".cover-preview img"
+    assert_field "ISBN", with: "9781635575637" # filled in from the result
+
+    click_on "Create Book"
+    assert_text "Book was successfully created."
+    assert_selector ".book-detail .book-cover-image img"
+    assert_text "ISBN 9781635575637"
+  end
+
+  test "uploading a cover from your computer" do
+    visit edit_book_path(books(:hobbit))
+    attach_file "Upload image", file_fixture("cover.png"), make_visible: true
+    assert_selector ".cover-preview img"
+
+    click_on "Update Book"
+    assert_selector ".book-detail .book-cover-image img"
+
+    visit books_path
+    assert_selector "#book_#{books(:hobbit).id} .book-cover-image img"
+  end
 end

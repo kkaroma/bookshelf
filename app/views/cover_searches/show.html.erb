@@ -1,0 +1,28 @@
+<%= turbo_frame_tag "cover_results" do %>
+  <% if @query.empty? %>
+    <p class="cover-results-message">Type a title or ISBN first, then search again.</p>
+  <% elsif @failed %>
+    <p class="cover-results-message">Couldn't reach Open Library just now. Try again in a moment, or upload an image.</p>
+  <% elsif @results.empty? %>
+    <p class="cover-results-message">
+      No covers found for “<%= @query[:isbn] || @query[:title] %>”.
+      Try adding the author or ISBN, or upload an image instead.
+    </p>
+  <% else %>
+    <p class="cover-results-message">Pick a cover:</p>
+    <div class="cover-results">
+      <% @results.each do |result| %>
+        <button type="button" class="cover-result" aria-pressed="false"
+                aria-label="Use cover: <%= [ result.title, result.year ].compact.join(", ") %>"
+                data-action="cover-picker#pick"
+                data-cover-picker-id-param="<%= result.cover_id %>"
+                data-cover-picker-url-param="<%= result.thumbnail_url %>"
+                data-cover-picker-isbn-param="<%= result.isbn %>">
+          <img src="<%= result.thumbnail_url %>" alt="" loading="lazy">
+          <span class="cover-result-title"><%= result.title %></span>
+          <span class="cover-result-meta"><%= [ result.author, result.year ].compact.join(" · ") %></span>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

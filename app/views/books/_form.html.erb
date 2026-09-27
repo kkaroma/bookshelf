@@ -25,6 +25,14 @@
   </div>
 
   <div class="field">
+    <%= form.label :isbn, "ISBN" %>
+    <%= form.text_field :isbn, inputmode: "numeric", autocomplete: "off", placeholder: "978-0-547-92822-7", class: "input" %>
+    <span class="field-hint">Optional. The 10- or 13-digit number near the barcode — dashes are fine.</span>
+  </div>
+
+  <%= render "books/cover_field", form: form, book: book %>
+
+  <div class="field">
     <%= form.label :description %>
     <%= form.textarea :description, placeholder: "What is this book about?", class: "input" %>
     <span class="field-hint">Optional</span>

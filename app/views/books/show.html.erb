@@ -3,7 +3,7 @@
 <%= link_to "← All books", books_path, class: "back-link" %>
 
 <article class="book-detail">
-  <%= render "cover", book: @book %>
+  <%= render "cover", book: @book, size: :large %>
 
   <div>
     <h1><%= @book.title %></h1>
@@ -15,6 +15,9 @@
     <div class="meta-list">
       <% if @book.published_year %>
         <span class="pill">Published <%= @book.published_year %></span>
+      <% end %>
+      <% if @book.isbn %>
+        <span class="pill">ISBN <%= @book.isbn %></span>
       <% end %>
       <% if @book.available_for_exchange? %>
         <span class="pill pill-exchange">⇄ Available for exchange</span>
