@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :books, dependent: :destroy
+  has_many :comments, dependent: :destroy
 
   # Stored as a number in the database (0 or 1), used by name in code:
   # user.admin?, user.member?, user.admin!, User.admins

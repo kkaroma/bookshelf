@@ -1,0 +1,13 @@
+<section class="comments" id="comments">
+  <h2>
+    Comments
+    <span class="count" id="comments_count"><%= book.comments.size %></span>
+  </h2>
+
+  <div id="comments_list" class="comment-list">
+    <%= render comments %>
+  </div>
+  <p class="muted no-comments">No comments yet. Be the first to share your thoughts.</p>
+
+  <%= render "comments/form", book: book, comment: Comment.new %>
+</section>

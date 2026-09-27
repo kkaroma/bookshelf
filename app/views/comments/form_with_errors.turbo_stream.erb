@@ -1,0 +1,6 @@
+<% if @comment.reply? && @comment.parent %>
+  <%= turbo_stream.replace dom_id(@comment.parent, :reply_form), partial: "comments/reply_form",
+        locals: { parent: @comment.parent, comment: @comment, open: true } %>
+<% else %>
+  <%= turbo_stream.replace "new_comment", partial: "comments/form", locals: { book: @book, comment: @comment } %>
+<% end %>

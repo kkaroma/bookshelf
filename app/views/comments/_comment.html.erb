@@ -1,0 +1,10 @@
+<%# A top-level comment with its replies and a (hidden) reply form. %>
+<div id="<%= dom_id comment, :thread %>" class="comment-thread" data-controller="reply">
+  <%= render "comments/body", comment: comment %>
+
+  <div id="<%= dom_id comment, :replies %>" class="replies">
+    <%= render partial: "comments/body", collection: comment.replies, as: :comment %>
+  </div>
+
+  <%= render "comments/reply_form", parent: comment, comment: Comment.new, open: false %>
+</div>

@@ -1,0 +1,16 @@
+<%= form_with model: [ parent.book, comment ], id: dom_id(parent, :reply_form),
+      class: "form reply-form", html: { hidden: !open }, data: { reply_target: "form" } do |form| %>
+  <%= form.hidden_field :parent_id, value: parent.id %>
+  <%= render "shared/form_errors", object: comment %>
+
+  <div class="field">
+    <%= form.label :body, "Your reply", for: dom_id(parent, :reply_body) %>
+    <%= form.textarea :body, id: dom_id(parent, :reply_body), required: true, maxlength: 2000,
+          class: "input", placeholder: "Write a reply…", data: { reply_target: "input" } %>
+  </div>
+
+  <div class="form-actions">
+    <%= form.submit "Post reply", class: "btn btn-primary btn-sm" %>
+    <button type="button" class="btn btn-ghost btn-sm" data-action="reply#cancel">Cancel</button>
+  </div>
+<% end %>

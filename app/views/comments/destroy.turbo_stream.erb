@@ -1,0 +1,3 @@
+<%# A reply is removed on its own; a top-level comment takes its whole thread with it. %>
+<%= turbo_stream.remove(@comment.reply? ? dom_id(@comment) : dom_id(@comment, :thread)) %>
+<%= turbo_stream.update "comments_count", @book.comments.count %>

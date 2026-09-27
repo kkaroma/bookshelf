@@ -1,5 +1,6 @@
 class Book < ApplicationRecord
   belongs_to :user
+  has_many :comments, dependent: :destroy
 
   # A review of only spaces is treated as "no review".
   normalizes :review, with: ->(review) { review.strip.presence }

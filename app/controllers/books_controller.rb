@@ -10,6 +10,7 @@ class BooksController < ApplicationController
 
   # GET /books/1 or /books/1.json
   def show
+    @comments = @book.comments.top_level.includes(:user, replies: :user).order(:created_at)
   end
 
   # GET /books/new

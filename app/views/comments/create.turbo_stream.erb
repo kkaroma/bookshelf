@@ -1,0 +1,10 @@
+<%# Small page updates sent back after a comment or reply is saved: %>
+<% if @comment.reply? %>
+  <%= turbo_stream.append dom_id(@comment.parent, :replies), partial: "comments/body", locals: { comment: @comment } %>
+  <%= turbo_stream.replace dom_id(@comment.parent, :reply_form), partial: "comments/reply_form",
+        locals: { parent: @comment.parent, comment: Comment.new, open: false } %>
+<% else %>
+  <%= turbo_stream.append "comments_list", @comment %>
+  <%= turbo_stream.replace "new_comment", partial: "comments/form", locals: { book: @book, comment: Comment.new } %>
+<% end %>
+<%= turbo_stream.update "comments_count", @book.comments.count %>

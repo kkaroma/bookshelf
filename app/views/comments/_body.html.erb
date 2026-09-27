@@ -1,0 +1,24 @@
+<article id="<%= dom_id comment %>" class="comment<%= " comment-reply" if comment.reply? %>">
+  <span class="avatar" style="--hue: <%= avatar_hue(comment.user) %>" aria-hidden="true"><%= initials(comment.user.name) %></span>
+
+  <div class="comment-main">
+    <header class="comment-meta">
+      <strong><%= comment.user.name %></strong>
+      <% if comment.user_id == comment.book.user_id %>
+        <span class="badge">Owner</span>
+      <% end %>
+      <time datetime="<%= comment.created_at.iso8601 %>"><%= time_ago_in_words(comment.created_at) %> ago</time>
+    </header>
+    <p class="comment-body"><%= comment.body %></p>
+
+    <div class="comment-actions">
+      <button type="button" class="link-button" data-action="reply#open"
+              <%= tag.attributes("data-reply-mention-param": comment.user.name) if comment.reply? %>>Reply</button>
+      <% if comment.deletable_by?(Current.user) %>
+        <%= button_to "Delete", book_comment_path(comment.book, comment), method: :delete,
+              class: "link-button link-button-danger",
+              form: { data: { turbo_confirm: comment.reply? ? "Delete this reply?" : "Delete this comment and its replies?" } } %>
+      <% end %>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+bob_on_hobbit:
+  user: two
+  book: hobbit
+  body: Loved your take on the riddles chapter!
+
+alice_on_dune:
+  user: one
+  book: dune
+  body: Did you read the sequels too?
+
+alice_reply_to_bob:
+  user: one
+  book: hobbit
+  parent: bob_on_hobbit
+  body: Thanks Bob, that chapter is my favourite too.

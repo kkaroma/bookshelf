@@ -1,0 +1,13 @@
+<%= form_with model: [ book, comment ], id: "new_comment", class: "form comment-form" do |form| %>
+  <%= render "shared/form_errors", object: comment %>
+
+  <div class="field">
+    <%= form.label :body, "Add a comment" %>
+    <%= form.textarea :body, required: true, maxlength: 2000, class: "input",
+          placeholder: "What do you think of this book or the review?" %>
+  </div>
+
+  <div class="form-actions">
+    <%= form.submit "Post comment", class: "btn btn-primary" %>
+  </div>
+<% end %>

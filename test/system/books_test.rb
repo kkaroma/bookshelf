@@ -78,4 +78,61 @@ class BooksTest < ApplicationSystemTestCase
     assert_selector ".book-review-text", text: "Smaug steals the show."
     assert_no_field "What did you think of it?"
   end
+
+  test "commenting on a book and deleting the comment" do
+    visit book_path(books(:dune))
+    assert_selector "#comments_count", text: "1"
+
+    fill_in "Add a comment", with: "One of my all-time favourites."
+    click_on "Post comment"
+
+    # Appears without a page reload, and the form is cleared
+    assert_selector ".comment", text: "One of my all-time favourites."
+    assert_selector "#comments_count", text: "2"
+    assert_field "Add a comment", with: ""
+
+    within ".comment", text: "One of my all-time favourites." do
+      accept_confirm { click_on "Delete" }
+    end
+    assert_no_text "One of my all-time favourites."
+    assert_selector "#comments_count", text: "1"
+  end
+
+  test "empty comment list shows a friendly message" do
+    visit book_path(books(:hobbit))
+    assert_no_text "No comments yet"
+
+    books(:hobbit).comments.destroy_all
+    visit book_path(books(:hobbit))
+    assert_text "No comments yet"
+  end
+
+  test "replying to a comment" do
+    visit book_path(books(:hobbit))
+    thread = find("#thread_comment_#{comments(:bob_on_hobbit).id}")
+
+    within thread do
+      assert_no_field "Your reply" # hidden until you click Reply
+
+      within(".comment", text: "Loved your take") { click_on "Reply" }
+      fill_in "Your reply", with: "The riddles are the best bit!"
+      click_on "Post reply"
+
+      assert_selector ".comment-reply", text: "The riddles are the best bit!"
+      assert_no_field "Your reply" # form closes again after posting
+    end
+    assert_selector "#comments_count", text: "3"
+  end
+
+  test "replying to a reply mentions that person, and cancel closes the form" do
+    visit book_path(books(:hobbit))
+
+    within ".comment-reply", text: "that chapter is my favourite" do
+      click_on "Reply"
+    end
+    assert_field "Your reply", with: "@Alice Reader "
+
+    click_on "Cancel"
+    assert_no_field "Your reply"
+  end
 end

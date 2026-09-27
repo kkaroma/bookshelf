@@ -37,5 +37,7 @@
               form: { data: { turbo_confirm: "Delete “#{@book.title}”? This can't be undone." } } %>
       </div>
     <% end %>
+
+    <%= render "comments/section", book: @book, comments: @comments %>
   </div>
 </article>
