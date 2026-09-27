@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_040824) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_043138) do
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
     t.string "author", null: false
@@ -21,6 +21,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_040824) do
     t.string "subtitle"
     t.text "review"
     t.integer "user_id", null: false
+    t.integer "ratings_count", default: 0, null: false
+    t.decimal "average_rating", precision: 2, scale: 1
     t.index ["user_id"], name: "index_books_on_user_id"
   end
 
@@ -34,6 +36,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_040824) do
     t.index ["book_id"], name: "index_comments_on_book_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "ratings", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "book_id", null: false
+    t.integer "score", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_ratings_on_book_id"
+    t.index ["user_id", "book_id"], name: "index_ratings_on_user_id_and_book_id", unique: true
+    t.index ["user_id"], name: "index_ratings_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -59,5 +72,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_040824) do
   add_foreign_key "comments", "books"
   add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "users"
+  add_foreign_key "ratings", "books"
+  add_foreign_key "ratings", "users"
   add_foreign_key "sessions", "users"
 end

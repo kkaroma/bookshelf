@@ -21,6 +21,8 @@
   --danger-soft: #fdecea;
   --success: #1f7a4d;
   --success-soft: #e6f4ec;
+  --star: #e0a526;
+  --star-empty: #ddd4c6;
 
   --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -48,6 +50,7 @@
     --danger-soft: #3b1f1c;
     --success: #7fd1a4;
     --success-soft: #1c3327;
+    --star-empty: #5a5047;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
     --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.4);
     color-scheme: dark;
@@ -531,6 +534,96 @@ textarea.input { min-height: 8rem; resize: vertical; }
   font-size: 0.9rem;
   color: var(--primary);
 }
+
+/* ---------- Ratings ---------- */
+.rating-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.rating-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.stars-display {
+  display: inline-flex;
+  gap: 0.05em;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.star-full  { color: var(--star); }
+.star-empty { color: var(--star-empty); }
+/* Half star: paint the glyph with a half-gold, half-grey background and
+   let that background show through the letter shape. */
+.star-half {
+  background: linear-gradient(90deg, var(--star) 50%, var(--star-empty) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rating-average { font-size: 1.1rem; }
+
+.rate {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
+.rate-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Stars are in the page as 5,4,3,2,1 and shown reversed (1..5), so
+   "this star and every star after it in the page" = "this star and the
+   ones to its left" on screen. */
+.star-input {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.star-form { margin: 0; }
+
+.star {
+  padding: 0 0.1rem;
+  border: 0;
+  background: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--star-empty);
+  cursor: pointer;
+  transition: color 0.1s, transform 0.1s;
+}
+.star-on { color: var(--star); }
+
+.star-input:hover .star { color: var(--star-empty); }
+.star-form:hover .star,
+.star-form:hover ~ .star-form .star { color: #f0b93a; }
+.star-form:hover .star { transform: scale(1.15); }
+.star:focus-visible { outline: 2px solid var(--primary); border-radius: 4px; }
+
+.remove-rating { margin: 0; }
+
+.rate-note { margin: 0; font-size: 0.9rem; }
+
+.book-card-rating {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.book-card-rating span[aria-hidden] { color: var(--star); }
 
 /* ---------- Comments ---------- */
 .comments {

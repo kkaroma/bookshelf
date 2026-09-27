@@ -19,6 +19,8 @@
       <span class="pill">Added by <%= @book.owned_by?(Current.user) ? "you" : @book.user.name %> <%= time_ago_in_words(@book.created_at) %> ago</span>
     </div>
 
+    <%= render "books/rating", book: @book, my_rating: @my_rating %>
+
     <% if @book.description.present? %>
       <p class="book-description"><%= @book.description %></p>
     <% else %>

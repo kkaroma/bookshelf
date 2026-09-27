@@ -1,0 +1,38 @@
+<%# Average rating, plus star buttons for rating it yourself.
+    Wrapped in a Turbo Frame so clicking a star only refreshes this box. %>
+<%= turbo_frame_tag dom_id(book, :rating), class: "rating-box" do %>
+  <div class="rating-summary">
+    <% if book.ratings_count > 0 %>
+      <%= star_rating(book.average_rating) %>
+      <strong class="rating-average"><%= book.average_rating %></strong>
+      <span class="muted">· <%= pluralize(book.ratings_count, "rating") %></span>
+    <% else %>
+      <span class="muted">No ratings yet</span>
+    <% end %>
+  </div>
+
+  <% if book.rateable_by?(Current.user) %>
+    <div class="rate">
+      <span class="rate-label"><%= my_rating ? "Your rating" : "Rate this book" %></span>
+
+      <%# Listed 5 → 1 and displayed reversed, so hovering a star can
+          highlight it and every star to its left using only CSS. %>
+      <div class="star-input">
+        <% Rating::SCORES.reverse_each do |score| %>
+          <%= button_to "★", book_rating_path(book), method: :put,
+                params: { rating: { score: score } },
+                class: [ "star", ("star-on" if my_rating && score <= my_rating.score) ],
+                form_class: "star-form",
+                title: pluralize(score, "star"),
+                aria: { label: "Rate #{pluralize(score, "star")}" } %>
+        <% end %>
+      </div>
+
+      <% if my_rating %>
+        <%= button_to "Remove", book_rating_path(book), method: :delete, class: "link-button", form_class: "remove-rating" %>
+      <% end %>
+    </div>
+  <% elsif book.owned_by?(Current.user) %>
+    <p class="rate-note muted">You can't rate your own book — share your thoughts in your review instead.</p>
+  <% end %>
+<% end %>

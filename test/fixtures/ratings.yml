@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# Fixtures skip model callbacks, so books.yml sets the matching
+# ratings_count / average_rating for The Hobbit by hand.
+
+bob_rates_hobbit:
+  user: two
+  book: hobbit
+  score: 5
+
+admin_rates_hobbit:
+  user: admin
+  book: hobbit
+  score: 4

@@ -7,6 +7,8 @@ hobbit:
   author: J.R.R. Tolkien
   description: A hobbit goes on an unexpected journey.
   published_year: 1937
+  ratings_count: 2
+  average_rating: 4.5
   review: A cosy adventure that still holds up. The riddles in the dark chapter are the best part.
 
 dune:

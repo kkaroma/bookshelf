@@ -25,6 +25,14 @@ class BookTest < ActiveSupport::TestCase
     assert_not book.editable_by?(nil)
   end
 
+  test "rateable_by? allows anyone signed in except the owner" do
+    book = books(:hobbit)
+    assert book.rateable_by?(users(:two))
+    assert book.rateable_by?(users(:admin))
+    assert_not book.rateable_by?(users(:one))
+    assert_not book.rateable_by?(nil)
+  end
+
   test "deleting a user deletes their books" do
     assert_difference("Book.count", -1) { users(:one).destroy }
   end

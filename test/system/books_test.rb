@@ -135,4 +135,28 @@ class BooksTest < ApplicationSystemTestCase
     click_on "Cancel"
     assert_no_field "Your reply"
   end
+
+  test "rating a book with stars" do
+    visit book_path(books(:dune)) # Bob's book, not yet rated
+    assert_text "No ratings yet"
+
+    click_on "Rate 4 stars"
+    assert_selector ".rating-average", text: "4.0"
+    assert_text "1 rating"
+    assert_selector ".star-on", count: 4
+    assert_current_path book_path(books(:dune)) # stayed on the page
+
+    click_on "Rate 2 stars" # change my mind
+    assert_selector ".rating-average", text: "2.0"
+    assert_text "1 rating"
+
+    click_on "Remove"
+    assert_text "No ratings yet"
+  end
+
+  test "you cannot rate your own book" do
+    visit book_path(books(:hobbit)) # Alice's own book
+    assert_text "You can't rate your own book"
+    assert_no_button "Rate 5 stars"
+  end
 end

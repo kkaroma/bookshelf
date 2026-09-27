@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :books do
     # The owner's review of a book: /books/:book_id/review/edit
     resource :review, only: %i[ edit update ], module: :books
+    resource :rating, only: %i[ update destroy ], module: :books
     resources :comments, only: %i[ create destroy ]
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

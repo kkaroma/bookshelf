@@ -8,6 +8,12 @@
     <p class="book-card-meta">
       <%= book.author %><%= " · #{book.published_year}" if book.published_year %>
     </p>
+    <% if book.ratings_count > 0 %>
+      <p class="book-card-rating" title="<%= pluralize(book.ratings_count, "rating") %>">
+        <span aria-hidden="true">★</span> <%= book.average_rating %>
+        <span class="muted">(<%= book.ratings_count %>)</span>
+      </p>
+    <% end %>
     <p class="book-card-owner">Added by <%= book.owned_by?(Current.user) ? "you" : book.user.name %></p>
   </div>
 <% end %>

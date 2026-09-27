@@ -15,6 +15,10 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # an assertion gives up, so a slow moment on the machine doesn't fail a test.
   Capybara.default_max_wait_time = 5
 
+  # Let tests find buttons by their accessible name (aria-label), e.g. the
+  # star buttons whose visible text is just "★".
+  Capybara.enable_aria_label = true
+
   # Signs in through the real sign-in form, like a person would.
   def sign_in_as(user, password: "password")
     visit new_session_path
