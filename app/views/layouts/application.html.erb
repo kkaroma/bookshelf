@@ -31,6 +31,13 @@
           Bookshelf
         <% end %>
 
+        <% if authenticated? %>
+          <div class="nav-main">
+            <%= link_to "Books", books_path, class: ["nav-link", ("active" if controller_name == "books")] %>
+            <%= link_to "Exchange shelf", exchanges_path, class: ["nav-link", ("active" if controller_name == "exchanges")] %>
+          </div>
+        <% end %>
+
         <div class="nav-links">
           <% if authenticated? %>
             <span class="nav-user">

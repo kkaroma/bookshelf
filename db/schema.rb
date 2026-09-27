@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_043138) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_045845) do
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
     t.string "author", null: false
@@ -23,6 +23,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_043138) do
     t.integer "user_id", null: false
     t.integer "ratings_count", default: 0, null: false
     t.decimal "average_rating", precision: 2, scale: 1
+    t.boolean "available_for_exchange", default: false, null: false
+    t.index ["available_for_exchange"], name: "index_books_on_available_for_exchange"
     t.index ["user_id"], name: "index_books_on_user_id"
   end
 

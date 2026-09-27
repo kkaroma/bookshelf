@@ -159,4 +159,23 @@ class BooksTest < ApplicationSystemTestCase
     assert_text "You can't rate your own book"
     assert_no_button "Rate 5 stars"
   end
+
+  test "offering a book for exchange puts it on the Exchange shelf" do
+    visit book_path(books(:hobbit)) # Alice's own book
+    click_on "Offer for exchange"
+    assert_text "is now on the Exchange shelf"
+    assert_text "Available for exchange"
+
+    click_on "Exchange shelf"
+    assert_selector "h1", text: "Exchange shelf"
+    assert_selector ".book-card", text: "The Hobbit"
+    assert_selector ".book-card", text: "Dune"
+
+    click_on "The Hobbit", match: :first
+    click_on "Remove from exchange"
+    assert_text "was removed from the Exchange shelf"
+
+    click_on "Exchange shelf"
+    assert_no_selector ".book-card", text: "The Hobbit"
+  end
 end

@@ -1,4 +1,7 @@
 <div class="book-cover" style="--hue: <%= book_cover_hue(book) %>" aria-hidden="true">
+  <% if book.available_for_exchange? %>
+    <span class="exchange-badge">For exchange</span>
+  <% end %>
   <span class="book-cover-title"><%= book.title %></span>
   <span class="book-cover-author"><%= book.author %></span>
 </div>

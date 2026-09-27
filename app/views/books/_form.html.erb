@@ -36,6 +36,14 @@
     <span class="field-hint">Optional — you can come back and write this after you've read the book.</span>
   </div>
 
+  <div class="field checkbox-field">
+    <%= form.check_box :available_for_exchange %>
+    <div>
+      <%= form.label :available_for_exchange, "Available for exchange" %>
+      <span class="field-hint">Show this book on the Exchange shelf so other members know you'd swap it.</span>
+    </div>
+  </div>
+
   <div class="form-actions">
     <%= form.submit class: "btn btn-primary" %>
     <%= link_to "Cancel", book.persisted? ? book : books_path, class: "btn btn-ghost" %>

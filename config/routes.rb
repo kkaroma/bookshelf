@@ -6,8 +6,13 @@ Rails.application.routes.draw do
     # The owner's review of a book: /books/:book_id/review/edit
     resource :review, only: %i[ edit update ], module: :books
     resource :rating, only: %i[ update destroy ], module: :books
+    # POST lists the book for exchange, DELETE takes it off the list.
+    resource :exchange_listing, only: %i[ create destroy ], module: :books
     resources :comments, only: %i[ create destroy ]
   end
+
+  # The exchange shelf: every book available for exchange.
+  resources :exchanges, only: :index
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

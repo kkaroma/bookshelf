@@ -16,6 +16,9 @@
       <% if @book.published_year %>
         <span class="pill">Published <%= @book.published_year %></span>
       <% end %>
+      <% if @book.available_for_exchange? %>
+        <span class="pill pill-exchange">⇄ Available for exchange</span>
+      <% end %>
       <span class="pill">Added by <%= @book.owned_by?(Current.user) ? "you" : @book.user.name %> <%= time_ago_in_words(@book.created_at) %> ago</span>
     </div>
 
@@ -35,6 +38,11 @@
           <p class="admin-note">You're an admin, so you can change this book even though it isn't yours.</p>
         <% end %>
         <%= link_to "Edit book", edit_book_path(@book), class: "btn btn-secondary" %>
+        <% if @book.available_for_exchange? %>
+          <%= button_to "Remove from exchange", book_exchange_listing_path(@book), method: :delete, class: "btn btn-secondary" %>
+        <% else %>
+          <%= button_to "Offer for exchange", book_exchange_listing_path(@book), class: "btn btn-secondary" %>
+        <% end %>
         <%= button_to "Delete book", @book, method: :delete, class: "btn btn-danger",
               form: { data: { turbo_confirm: "Delete “#{@book.title}”? This can't be undone." } } %>
       </div>

@@ -3,6 +3,9 @@ class Book < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
 
+  # Books whose owners are willing to swap them.
+  scope :for_exchange, -> { where(available_for_exchange: true) }
+
   # A review of only spaces is treated as "no review".
   normalizes :review, with: ->(review) { review.strip.presence }
 

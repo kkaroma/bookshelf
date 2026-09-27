@@ -85,6 +85,20 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Write your review", count: 0
   end
 
+  test "the book form can offer a book for exchange" do
+    patch book_url(@book), params: { book: { available_for_exchange: "1" } }
+    assert @book.reload.available_for_exchange?
+
+    patch book_url(@book), params: { book: { available_for_exchange: "0" } }
+    assert_not @book.reload.available_for_exchange?
+  end
+
+  test "books offered for exchange show a badge on their cover" do
+    get books_url
+    assert_select "#book_#{@someone_elses_book.id} .exchange-badge", "For exchange"
+    assert_select "#book_#{@book.id} .exchange-badge", count: 0
+  end
+
   test "should not create book without a title" do
     assert_no_difference("Book.count") do
       post books_url, params: { book: { title: "", author: "Someone" } }

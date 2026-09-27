@@ -17,3 +17,4 @@ dune:
   author: Frank Herbert
   description: Politics and sandworms on the desert planet Arrakis.
   published_year: 1965
+  available_for_exchange: true

@@ -33,6 +33,15 @@ class BookTest < ActiveSupport::TestCase
     assert_not book.rateable_by?(nil)
   end
 
+  test "new books are not offered for exchange" do
+    assert_not Book.new.available_for_exchange?
+  end
+
+  test "for_exchange lists only books offered for exchange" do
+    assert_includes Book.for_exchange, books(:dune)
+    assert_not_includes Book.for_exchange, books(:hobbit)
+  end
+
   test "deleting a user deletes their books" do
     assert_difference("Book.count", -1) { users(:one).destroy }
   end
