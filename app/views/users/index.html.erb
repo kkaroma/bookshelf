@@ -1,0 +1,12 @@
+<% content_for :title, "Members" %>
+
+<div class="page-header">
+  <div>
+    <h1>Members</h1>
+    <p class="muted"><%= pluralize(@users.size, "reader") %> on Bookshelf. Follow people to keep up with their books.</p>
+  </div>
+</div>
+
+<div class="member-list">
+  <%= render @users %>
+</div>

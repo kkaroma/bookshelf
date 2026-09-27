@@ -3,7 +3,7 @@
 
   <div class="comment-main">
     <header class="comment-meta">
-      <strong><%= comment.user.name %></strong>
+      <%= link_to comment.user.name, comment.user, class: "comment-author", data: { turbo_frame: "_top" } %>
       <% if comment.user_id == comment.book.user_id %>
         <span class="badge">Owner</span>
       <% end %>

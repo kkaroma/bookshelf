@@ -4,11 +4,15 @@ one:
   name: Alice Reader
   email_address: one@example.com
   password_digest: <%= password_digest %>
+  books_count: 1
+  followers_count: 1
 
 two:
   name: Bob Bookworm
   email_address: two@example.com
   password_digest: <%= password_digest %>
+  books_count: 1
+  following_count: 1
 
 admin:
   name: Ada Admin

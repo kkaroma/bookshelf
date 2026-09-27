@@ -1,0 +1,18 @@
+<% content_for :title, "#{title} · #{@user.name}" %>
+
+<%= link_to "← #{@user.name}", @user, class: "back-link" %>
+
+<div class="page-header">
+  <div>
+    <h1><%= title %></h1>
+    <p class="muted"><%= pluralize(@people.size, "person") %></p>
+  </div>
+</div>
+
+<% if @people.any? %>
+  <div class="member-list">
+    <%= render partial: "users/user", collection: @people %>
+  </div>
+<% else %>
+  <p class="muted"><%= empty %></p>
+<% end %>

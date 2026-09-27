@@ -19,7 +19,7 @@
       <% if @book.available_for_exchange? %>
         <span class="pill pill-exchange">⇄ Available for exchange</span>
       <% end %>
-      <span class="pill">Added by <%= @book.owned_by?(Current.user) ? "you" : @book.user.name %> <%= time_ago_in_words(@book.created_at) %> ago</span>
+      <span class="pill">Added by <%= @book.owned_by?(Current.user) ? "you" : link_to(@book.user.name, @book.user) %> <%= time_ago_in_words(@book.created_at) %> ago</span>
     </div>
 
     <%= render "books/rating", book: @book, my_rating: @my_rating %>

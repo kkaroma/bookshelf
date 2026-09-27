@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_045845) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_051322) do
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
     t.string "author", null: false
@@ -40,6 +40,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_045845) do
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
+  create_table "follows", force: :cascade do |t|
+    t.integer "follower_id", null: false
+    t.integer "followed_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["followed_id"], name: "index_follows_on_followed_id"
+    t.index ["follower_id", "followed_id"], name: "index_follows_on_follower_id_and_followed_id", unique: true
+    t.index ["follower_id"], name: "index_follows_on_follower_id"
+  end
+
   create_table "ratings", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "book_id", null: false
@@ -67,6 +77,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_045845) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role", default: 0, null: false
+    t.integer "books_count", default: 0, null: false
+    t.integer "followers_count", default: 0, null: false
+    t.integer "following_count", default: 0, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
@@ -74,6 +87,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_045845) do
   add_foreign_key "comments", "books"
   add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "users"
+  add_foreign_key "follows", "users", column: "followed_id"
+  add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "ratings", "books"
   add_foreign_key "ratings", "users"
   add_foreign_key "sessions", "users"

@@ -1,0 +1,5 @@
+# Bob follows Alice. Fixtures skip counter caches, so users.yml sets
+# the matching followers_count / following_count by hand.
+bob_follows_alice:
+  follower: two
+  followed: one

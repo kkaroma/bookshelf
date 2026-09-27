@@ -178,4 +178,36 @@ class BooksTest < ApplicationSystemTestCase
     click_on "Exchange shelf"
     assert_no_selector ".book-card", text: "The Hobbit"
   end
+
+  test "following and unfollowing a member" do
+    click_on "Members"
+    assert_selector "h1", text: "Members"
+
+    within "#user_#{users(:admin).id}" do
+      assert_text "0 followers"
+      click_on "Follow Ada Admin"
+      assert_text "1 follower"
+      assert_button "Unfollow Ada Admin"
+    end
+    assert_current_path users_path # stayed on the page
+
+    click_link "Ada Admin"
+    assert_selector "h1", text: "Ada Admin"
+    click_on "1 follower"
+    assert_selector "h1", text: "Followers"
+    assert_selector ".member", text: "Alice Reader"
+
+    click_on "Members"
+    within "#user_#{users(:admin).id}" do
+      click_on "Unfollow Ada Admin"
+      assert_text "0 followers"
+    end
+  end
+
+  test "clicking a comment author opens their profile" do
+    visit book_path(books(:hobbit))
+    click_on "Bob Bookworm", match: :first
+    assert_selector "h1", text: "Bob Bookworm"
+    assert_selector ".section-title", text: "Bob Bookworm's books"
+  end
 end

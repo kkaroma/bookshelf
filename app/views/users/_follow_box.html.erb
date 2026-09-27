@@ -1,0 +1,16 @@
+<%# Follower count + Follow/Unfollow button. A Turbo Frame, so following
+    someone refreshes just this box, wherever it appears. %>
+<%= turbo_frame_tag dom_id(user, :follow), class: "follow-box" do %>
+  <%= link_to pluralize(user.followers_count, "follower"), followers_user_path(user),
+        class: "follow-count", data: { turbo_frame: "_top" } %>
+
+  <% if user == Current.user %>
+    <span class="pill">You</span>
+  <% elsif Current.user.following?(user) %>
+    <%= button_to "Unfollow", user_follow_path(user), method: :delete,
+          class: "btn btn-secondary btn-sm", aria: { label: "Unfollow #{user.name}" } %>
+  <% else %>
+    <%= button_to "Follow", user_follow_path(user),
+          class: "btn btn-primary btn-sm", aria: { label: "Follow #{user.name}" } %>
+  <% end %>
+<% end %>

@@ -35,13 +35,14 @@
           <div class="nav-main">
             <%= link_to "Books", books_path, class: ["nav-link", ("active" if controller_name == "books")] %>
             <%= link_to "Exchange shelf", exchanges_path, class: ["nav-link", ("active" if controller_name == "exchanges")] %>
+            <%= link_to "Members", users_path, class: ["nav-link", ("active" if controller_name == "users")] %>
           </div>
         <% end %>
 
         <div class="nav-links">
           <% if authenticated? %>
             <span class="nav-user">
-              Signed in as <strong><%= Current.user.name %></strong>
+              Signed in as <%= link_to Current.user.name, Current.user, class: "nav-user-name" %>
               <% if Current.user.admin? %><span class="badge">Admin</span><% end %>
             </span>
             <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>

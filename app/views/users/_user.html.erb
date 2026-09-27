@@ -1,0 +1,12 @@
+<div id="<%= dom_id user %>" class="member">
+  <%= link_to user, class: "member-link" do %>
+    <span class="avatar" style="--hue: <%= avatar_hue(user) %>" aria-hidden="true"><%= initials(user.name) %></span>
+    <span>
+      <strong class="member-name"><%= user.name %></strong>
+      <% if user.admin? %><span class="badge">Admin</span><% end %>
+      <span class="member-meta"><%= pluralize(user.books_count, "book") %> · following <%= user.following_count %></span>
+    </span>
+  <% end %>
+
+  <%= render "users/follow_box", user: user %>
+</div>

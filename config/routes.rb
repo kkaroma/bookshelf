@@ -13,6 +13,16 @@ Rails.application.routes.draw do
 
   # The exchange shelf: every book available for exchange.
   resources :exchanges, only: :index
+
+  # Members and their profiles: /users, /users/:id, /users/:id/followers, /users/:id/following
+  resources :users, only: %i[ index show ] do
+    member do
+      get :followers
+      get :following
+    end
+    # POST follows this user, DELETE unfollows them.
+    resource :follow, only: %i[ create destroy ], module: :users
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
