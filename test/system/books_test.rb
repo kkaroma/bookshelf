@@ -210,4 +210,43 @@ class BooksTest < ApplicationSystemTestCase
     assert_selector "h1", text: "Bob Bookworm"
     assert_selector ".section-title", text: "Bob Bookworm's books"
   end
+
+  test "requesting a book and the owner accepting it" do
+    # Alice asks Bob for Dune, offering The Hobbit
+    visit book_path(books(:dune))
+    click_on "Request exchange"
+    select "The Hobbit", from: "Offer one of your books in return"
+    fill_in "Message", with: "Would you swap for The Hobbit?"
+    click_on "Send request"
+
+    assert_text "Request sent!"
+    assert_selector ".tab.active", text: "Sent"
+    assert_selector ".request", text: "You asked Bob Bookworm for Dune"
+    assert_selector ".status", text: "PENDING"
+
+    # Bob signs in, sees the badge, and accepts
+    click_on "Sign out"
+    assert_text "You have been signed out."
+    sign_in_as users(:two)
+    assert_selector ".nav-count", text: "2" # Alice's request and the admin's
+
+    click_on "Requests"
+    within ".request", text: "Alice Reader would like your book" do
+      accept_confirm { click_on "Accept" }
+    end
+
+    assert_text "You accepted Alice Reader's request"
+    within ".request", text: "Alice Reader would like your book" do
+      assert_selector ".status", text: "ACCEPTED"
+      assert_link "one@example.com"
+    end
+    # The other request for Dune was declined automatically
+    assert_selector ".request", text: "Ada Admin would like your book", visible: true
+    assert_selector ".request-declined .status", text: "DECLINED"
+    assert_no_selector ".nav-count"
+
+    # Dune is no longer on the Exchange shelf
+    click_on "Exchange shelf"
+    assert_no_selector ".book-card", text: "Dune"
+  end
 end

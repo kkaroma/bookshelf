@@ -23,6 +23,8 @@
     </div>
 
     <%= render "books/rating", book: @book, my_rating: @my_rating %>
+    <%= render "books/exchange_panel", book: @book, my_pending_request: @my_pending_request,
+               pending_requests_count: @pending_requests_count %>
 
     <% if @book.description.present? %>
       <p class="book-description"><%= @book.description %></p>

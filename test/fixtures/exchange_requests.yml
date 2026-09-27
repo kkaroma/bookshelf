@@ -1,0 +1,6 @@
+# The admin has asked Bob for Dune (which Bob offers for exchange).
+admin_wants_dune:
+  requester: admin
+  book: dune
+  message: I've always wanted to read this one!
+  status: pending

@@ -1,0 +1,73 @@
+<%# One request, seen by either the book's owner (received) or the requester (sent). %>
+<% received = exchange_request.owner == Current.user %>
+<% other_person = received ? exchange_request.requester : exchange_request.owner %>
+
+<article id="<%= dom_id exchange_request %>" class="request request-<%= exchange_request.status %>">
+  <div class="request-books">
+    <%= render "books/mini_cover", book: exchange_request.book %>
+    <span class="request-swap" aria-hidden="true">⇄</span>
+    <% if exchange_request.offered_book %>
+      <%= render "books/mini_cover", book: exchange_request.offered_book %>
+    <% else %>
+      <span class="mini-cover mini-cover-empty" title="No book offered">?</span>
+    <% end %>
+  </div>
+
+  <div class="request-main">
+    <p class="request-summary">
+      <% if received %>
+        <%= link_to other_person.name, other_person %> would like your book
+        <%= link_to exchange_request.book.title, exchange_request.book %>
+      <% else %>
+        You asked <%= link_to other_person.name, other_person %> for
+        <%= link_to exchange_request.book.title, exchange_request.book %>
+      <% end %>
+    </p>
+
+    <p class="request-offer muted">
+      <% if exchange_request.offered_book %>
+        Offered in return: <%= link_to exchange_request.offered_book.title, exchange_request.offered_book %>
+      <% else %>
+        No book offered in return
+      <% end %>
+    </p>
+
+    <% if exchange_request.message %>
+      <blockquote class="request-message"><%= exchange_request.message %></blockquote>
+    <% end %>
+
+    <div class="request-footer">
+      <span class="status status-<%= exchange_request.status %>"><%= exchange_request.status.humanize %></span>
+      <span class="muted">
+        <% if exchange_request.responded_at %>
+          <%= time_ago_in_words(exchange_request.responded_at) %> ago
+        <% else %>
+          sent <%= time_ago_in_words(exchange_request.created_at) %> ago
+        <% end %>
+      </span>
+
+      <% if exchange_request.pending? %>
+        <div class="request-actions">
+          <% if received %>
+            <%= button_to "Accept", accept_exchange_request_path(exchange_request), method: :patch,
+                  class: "btn btn-primary btn-sm",
+                  form: { data: { turbo_confirm: "Accept this request? “#{exchange_request.book.title}” will come off the Exchange shelf and any other requests for it will be declined." } } %>
+            <%= button_to "Decline", decline_exchange_request_path(exchange_request), method: :patch,
+                  class: "btn btn-secondary btn-sm" %>
+          <% else %>
+            <%= button_to "Cancel request", cancel_exchange_request_path(exchange_request), method: :patch,
+                  class: "btn btn-secondary btn-sm",
+                  form: { data: { turbo_confirm: "Cancel your request for “#{exchange_request.book.title}”?" } } %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if exchange_request.accepted? %>
+      <p class="request-contact">
+        Arrange the swap with <%= other_person.name %>:
+        <%= mail_to other_person.email_address %>
+      </p>
+    <% end %>
+  </div>
+</article>

@@ -14,6 +14,11 @@ class User < ApplicationRecord
   has_many :following, through: :active_follows,  source: :followed # people I follow
   has_many :followers, through: :passive_follows, source: :follower # people who follow me
 
+  # Exchange requests I've sent, and ones others sent me for my books.
+  has_many :sent_exchange_requests, class_name: "ExchangeRequest", foreign_key: :requester_id,
+           inverse_of: :requester, dependent: :destroy
+  has_many :received_exchange_requests, through: :books, source: :exchange_requests
+
   # Stored as a number in the database (0 or 1), used by name in code:
   # user.admin?, user.member?, user.admin!, User.admins
   enum :role, { member: 0, admin: 1 }, default: :member, validate: true

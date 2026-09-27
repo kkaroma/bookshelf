@@ -1,0 +1,4 @@
+<%= link_to book, class: "mini-cover", style: "--hue: #{book_cover_hue(book)}", title: book.title,
+      data: { turbo_frame: "_top" } do %>
+  <span><%= book.title %></span>
+<% end %>

@@ -1,0 +1,27 @@
+<%# Exchange status and actions for a book, shown on its page. %>
+<% if book.owned_by?(Current.user) %>
+  <% if pending_requests_count.to_i > 0 %>
+    <div class="exchange-panel">
+      <span><strong><%= pluralize(pending_requests_count, "person") %></strong> would like to swap for this book.</span>
+      <%= link_to "Review requests", exchange_requests_path, class: "btn btn-primary btn-sm" %>
+    </div>
+  <% elsif book.available_for_exchange? %>
+    <div class="exchange-panel">
+      <span class="muted">This book is on the Exchange shelf. No requests yet.</span>
+    </div>
+  <% end %>
+<% elsif my_pending_request %>
+  <div class="exchange-panel">
+    <span>You asked <%= book.user.name %> for this book <%= time_ago_in_words(my_pending_request.created_at) %> ago.</span>
+    <div class="exchange-panel-actions">
+      <%= link_to "View my requests", exchange_requests_path(box: "sent"), class: "btn btn-secondary btn-sm" %>
+      <%= button_to "Cancel request", cancel_exchange_request_path(my_pending_request), method: :patch,
+            class: "btn btn-ghost btn-sm" %>
+    </div>
+  </div>
+<% elsif book.requestable_by?(Current.user) %>
+  <div class="exchange-panel">
+    <span><%= book.user.name %> is happy to swap this book.</span>
+    <%= link_to "Request exchange", new_book_exchange_request_path(book), class: "btn btn-primary btn-sm" %>
+  </div>
+<% end %>

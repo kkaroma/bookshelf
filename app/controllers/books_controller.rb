@@ -11,6 +11,8 @@ class BooksController < ApplicationController
   # GET /books/1 or /books/1.json
   def show
     @my_rating = @book.ratings.find_by(user: Current.user)
+    @my_pending_request = @book.exchange_requests.pending.find_by(requester: Current.user)
+    @pending_requests_count = @book.exchange_requests.pending.count if @book.owned_by?(Current.user)
     @comments = @book.comments.top_level.includes(:user, replies: :user).order(:created_at)
   end
 

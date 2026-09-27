@@ -9,6 +9,17 @@ Rails.application.routes.draw do
     # POST lists the book for exchange, DELETE takes it off the list.
     resource :exchange_listing, only: %i[ create destroy ], module: :books
     resources :comments, only: %i[ create destroy ]
+    # Ask to swap for this book: /books/:book_id/exchange_requests/new
+    resources :exchange_requests, only: %i[ new create ]
+  end
+
+  # My exchange requests (received and sent), and answering them.
+  resources :exchange_requests, only: :index do
+    member do
+      patch :accept   # owner says yes
+      patch :decline  # owner says no
+      patch :cancel   # requester withdraws
+    end
   end
 
   # The exchange shelf: every book available for exchange.

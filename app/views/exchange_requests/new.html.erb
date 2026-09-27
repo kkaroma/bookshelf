@@ -1,0 +1,40 @@
+<% content_for :title, "Request “#{@book.title}”" %>
+
+<div class="form-page">
+  <%= link_to "← Back to book", @book, class: "back-link" %>
+
+  <div class="card">
+    <h1>Request an exchange</h1>
+
+    <div class="request-target">
+      <%= render "books/mini_cover", book: @book %>
+      <div>
+        <strong><%= @book.title %></strong>
+        <p class="muted">by <%= @book.author %> · offered by <%= @book.user.name %></p>
+      </div>
+    </div>
+
+    <%= form_with model: [ @book, @exchange_request ], class: "form" do |form| %>
+      <%= render "shared/form_errors", object: @exchange_request %>
+
+      <div class="field">
+        <%= form.label :offered_book_id, "Offer one of your books in return" %>
+        <%= form.collection_select :offered_book_id, Current.user.books.order(:title), :id, :title,
+              { include_blank: "Nothing for now — just asking" }, class: "input" %>
+        <span class="field-hint">Optional. <%= @book.user.name %> will see which book you're offering.</span>
+      </div>
+
+      <div class="field">
+        <%= form.label :message %>
+        <%= form.textarea :message, maxlength: 1000, class: "input",
+              placeholder: "Hi #{@book.user.name.split.first}! I'd love to read this — happy to meet up or post it." %>
+        <span class="field-hint">Optional</span>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit "Send request", class: "btn btn-primary" %>
+        <%= link_to "Cancel", @book, class: "btn btn-ghost" %>
+      </div>
+    <% end %>
+  </div>
+</div>

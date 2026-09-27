@@ -1,0 +1,38 @@
+<% content_for :title, "Exchange requests" %>
+
+<div class="page-header">
+  <div>
+    <h1>Exchange requests</h1>
+    <p class="muted">Swap books with other members.</p>
+  </div>
+</div>
+
+<nav class="tabs" aria-label="Request type">
+  <%= link_to exchange_requests_path, class: ["tab", ("active" if @box == "received")],
+        aria: { current: ("page" if @box == "received") } do %>
+    Received
+    <% if (waiting = ExchangeRequest.received_by(Current.user).pending.count) > 0 %>
+      <span class="count"><%= waiting %></span>
+    <% end %>
+  <% end %>
+  <%= link_to "Sent", exchange_requests_path(box: "sent"), class: ["tab", ("active" if @box == "sent")],
+        aria: { current: ("page" if @box == "sent") } %>
+</nav>
+
+<% if @exchange_requests.any? %>
+  <div class="request-list">
+    <%= render @exchange_requests %>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <% if @box == "sent" %>
+      <h2>You haven't asked for any books yet</h2>
+      <p class="muted">Browse the Exchange shelf and request a book you'd like to read.</p>
+      <%= link_to "Browse the Exchange shelf", exchanges_path, class: "btn btn-primary" %>
+    <% else %>
+      <h2>No requests yet</h2>
+      <p class="muted">When someone asks to swap for one of your books, it will show up here.</p>
+      <%= link_to "Offer a book for exchange", books_path, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+<% end %>

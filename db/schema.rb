@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_27_051322) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_27_060539) do
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
     t.string "author", null: false
@@ -38,6 +38,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_051322) do
     t.index ["book_id"], name: "index_comments_on_book_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "exchange_requests", force: :cascade do |t|
+    t.integer "requester_id", null: false
+    t.integer "book_id", null: false
+    t.integer "offered_book_id"
+    t.text "message"
+    t.integer "status", default: 0, null: false
+    t.datetime "responded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_exchange_requests_on_book_id"
+    t.index ["offered_book_id"], name: "index_exchange_requests_on_offered_book_id"
+    t.index ["requester_id", "book_id"], name: "index_exchange_requests_one_pending_per_book", unique: true, where: "status = 0"
+    t.index ["requester_id"], name: "index_exchange_requests_on_requester_id"
   end
 
   create_table "follows", force: :cascade do |t|
@@ -87,6 +102,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_27_051322) do
   add_foreign_key "comments", "books"
   add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "users"
+  add_foreign_key "exchange_requests", "books"
+  add_foreign_key "exchange_requests", "books", column: "offered_book_id"
+  add_foreign_key "exchange_requests", "users", column: "requester_id"
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "ratings", "books"

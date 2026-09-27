@@ -36,6 +36,12 @@
             <%= link_to "Books", books_path, class: ["nav-link", ("active" if controller_name == "books")] %>
             <%= link_to "Exchange shelf", exchanges_path, class: ["nav-link", ("active" if controller_name == "exchanges")] %>
             <%= link_to "Members", users_path, class: ["nav-link", ("active" if controller_name == "users")] %>
+            <%= link_to exchange_requests_path, class: ["nav-link", ("active" if controller_name == "exchange_requests")] do %>
+              Requests
+              <% if (waiting = Current.user.received_exchange_requests.pending.count) > 0 %>
+                <span class="nav-count" aria-label="<%= pluralize(waiting, "request") %> waiting for you"><%= waiting %></span>
+              <% end %>
+            <% end %>
           </div>
         <% end %>
 
