@@ -143,6 +143,20 @@ main.container {
 
 .nav-links form { margin: 0; }
 
+.badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
 @media (max-width: 600px) {
   .nav-user { display: none; }
   .nav { justify-content: center; padding-block: 0.5rem; }
@@ -495,6 +509,13 @@ textarea.input { min-height: 8rem; resize: vertical; }
   border-top: 1px solid var(--border);
 }
 .actions form { margin: 0; }
+
+.admin-note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--primary);
+}
 
 /* ---------- Empty state ---------- */
 .empty-state {

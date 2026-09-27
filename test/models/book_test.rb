@@ -17,6 +17,14 @@ class BookTest < ActiveSupport::TestCase
     assert_not books(:hobbit).owned_by?(nil)
   end
 
+  test "editable_by? allows the owner and admins only" do
+    book = books(:hobbit)
+    assert book.editable_by?(users(:one))
+    assert book.editable_by?(users(:admin))
+    assert_not book.editable_by?(users(:two))
+    assert_not book.editable_by?(nil)
+  end
+
   test "deleting a user deletes their books" do
     assert_difference("Book.count", -1) { users(:one).destroy }
   end

@@ -28,6 +28,16 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".nav-user", /Carol/
   end
 
+  test "cannot make yourself an admin when signing up" do
+    post registration_path, params: { user: {
+      name: "Mallory", email_address: "mallory@example.com",
+      password: "secret-password", password_confirmation: "secret-password",
+      role: "admin"
+    } }
+
+    assert User.find_by(email_address: "mallory@example.com").member?
+  end
+
   test "create with invalid details shows errors" do
     assert_no_difference("User.count") do
       post registration_path, params: { user: {

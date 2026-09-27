@@ -131,6 +131,48 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to book_url(@someone_elses_book)
   end
 
+  test "an admin can edit someone else's book" do
+    sign_out
+    sign_in_as users(:admin)
+
+    get edit_book_url(@someone_elses_book)
+    assert_response :success
+
+    patch book_url(@someone_elses_book), params: { book: { title: "Dune (Revised)" } }
+    assert_redirected_to book_url(@someone_elses_book)
+    assert_equal "Dune (Revised)", @someone_elses_book.reload.title
+  end
+
+  test "an admin can delete someone else's book" do
+    sign_out
+    sign_in_as users(:admin)
+
+    assert_difference("Book.count", -1) do
+      delete book_url(@someone_elses_book)
+    end
+  end
+
+  test "an admin sees edit controls and a note on someone else's book" do
+    sign_out
+    sign_in_as users(:admin)
+
+    get book_url(@someone_elses_book)
+    assert_select "a", "Edit book"
+    assert_select ".admin-note", /You're an admin/
+    assert_select ".book-review h2", "Bob Bookworm's review"
+    assert_select "a", text: "Write your review", count: 0
+  end
+
+  test "the admin badge shows only for admins" do
+    get books_url
+    assert_select ".badge", count: 0
+
+    sign_out
+    sign_in_as users(:admin)
+    get books_url
+    assert_select ".nav-user .badge", "Admin"
+  end
+
   test "should destroy book" do
     assert_difference("Book.count", -1) do
       delete book_url(@book)

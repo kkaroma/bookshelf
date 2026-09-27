@@ -10,4 +10,9 @@ class Book < ApplicationRecord
   def owned_by?(someone)
     someone.present? && user_id == someone.id
   end
+
+  # The owner can change their own book; admins can change any book.
+  def editable_by?(someone)
+    owned_by?(someone) || someone&.admin? || false
+  end
 end

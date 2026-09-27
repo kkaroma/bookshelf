@@ -33,7 +33,10 @@
 
         <div class="nav-links">
           <% if authenticated? %>
-            <span class="nav-user">Signed in as <strong><%= Current.user.name %></strong></span>
+            <span class="nav-user">
+              Signed in as <strong><%= Current.user.name %></strong>
+              <% if Current.user.admin? %><span class="badge">Admin</span><% end %>
+            </span>
             <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>
             <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-ghost" %>
           <% else %>

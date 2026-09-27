@@ -43,4 +43,20 @@ class UserTest < ActiveSupport::TestCase
   test "requires the password confirmation to match" do
     assert_not build_user(password_confirmation: "something-else").valid?
   end
+
+  test "new users are members by default" do
+    user = build_user
+    assert user.member?
+    assert_not user.admin?
+  end
+
+  test "a user can be made an admin" do
+    user = users(:one)
+    user.admin!
+    assert user.reload.admin?
+  end
+
+  test "rejects an unknown role" do
+    assert_not build_user(role: "superhero").valid?
+  end
 end

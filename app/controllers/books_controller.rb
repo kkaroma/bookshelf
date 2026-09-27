@@ -65,9 +65,9 @@ class BooksController < ApplicationController
       @book = Book.find(params.expect(:id))
     end
 
-    # Only the person who added a book may change it.
+    # The owner of a book, or an admin, may change it.
     def can_edit?(book)
-      book.owned_by?(Current.user)
+      book.editable_by?(Current.user)
     end
 
     def require_owner

@@ -9,3 +9,9 @@ two:
   name: Bob Bookworm
   email_address: two@example.com
   password_digest: <%= password_digest %>
+
+admin:
+  name: Ada Admin
+  email_address: admin@example.com
+  password_digest: <%= password_digest %>
+  role: admin

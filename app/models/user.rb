@@ -3,6 +3,10 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :books, dependent: :destroy
 
+  # Stored as a number in the database (0 or 1), used by name in code:
+  # user.admin?, user.member?, user.admin!, User.admins
+  enum :role, { member: 0, admin: 1 }, default: :member, validate: true
+
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(n) { n.strip }
 

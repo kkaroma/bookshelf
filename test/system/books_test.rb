@@ -38,4 +38,19 @@ class BooksTest < ApplicationSystemTestCase
     assert_no_link "Edit book"
     assert_no_button "Delete book"
   end
+
+  test "an admin can edit anyone's book" do
+    click_on "Sign out"
+    assert_text "You have been signed out."
+    sign_in_as users(:admin)
+    assert_text "Admin"
+
+    visit book_path(books(:dune))
+    assert_text "You're an admin"
+    click_on "Edit book"
+    fill_in "Title", with: "Dune (Revised)"
+    click_on "Update Book"
+
+    assert_selector "h1", text: "Dune (Revised)"
+  end
 end
