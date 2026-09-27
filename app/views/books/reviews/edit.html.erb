@@ -1,0 +1,26 @@
+<% content_for :title, "Review #{@book.title}" %>
+
+<div class="form-page">
+  <%= link_to "← Back to book", @book, class: "back-link" %>
+  <h1><%= @book.title %></h1>
+
+  <%# Only this frame is used when the page is opened from the book page. %>
+  <%= turbo_frame_tag dom_id(@book, :review), class: "book-review" do %>
+    <h2>My review</h2>
+
+    <%= form_with model: @book, url: book_review_path(@book), method: :patch, class: "form review-form" do |form| %>
+      <%= render "shared/form_errors", object: @book %>
+
+      <div class="field">
+        <%= form.label :review, "What did you think of it?" %>
+        <%= form.textarea :review, autofocus: true, class: "input",
+              placeholder: "The characters, the ending, whether you'd recommend it…" %>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit "Save review", class: "btn btn-primary" %>
+        <%= link_to "Cancel", @book, class: "btn btn-ghost" %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

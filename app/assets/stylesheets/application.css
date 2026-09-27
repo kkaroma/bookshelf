@@ -484,9 +484,21 @@ textarea.input { min-height: 8rem; resize: vertical; }
 }
 
 .book-review {
+  display: block; /* <turbo-frame> is inline by default */
   margin-top: 2rem;
   max-width: 65ch;
 }
+
+.book-review-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.book-review-header a { font-size: 0.9rem; font-weight: 500; }
+
+.review-form { margin-top: 0.75rem; }
+.review-form textarea.input { min-height: 10rem; }
 
 .book-review-text {
   margin: 0.75rem 0 0;

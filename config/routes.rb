@@ -2,7 +2,10 @@ Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
   resources :passwords, param: :token
-  resources :books
+  resources :books do
+    # The owner's review of a book: /books/:book_id/review/edit
+    resource :review, only: %i[ edit update ], module: :books
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

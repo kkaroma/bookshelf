@@ -18,9 +18,9 @@ class BooksTest < ApplicationSystemTestCase
     assert_selector ".book-subtitle", text: "A Novel"
     assert_text "No review yet"
 
-    click_on "Write your review"
-    fill_in "My review", with: "Strange, gentle and beautiful."
+    click_on "Edit book"
     fill_in "Title", with: "Piranesi (Hardback)"
+    fill_in "My review", with: "Strange, gentle and beautiful."
     click_on "Update Book"
     assert_selector "h1", text: "Piranesi (Hardback)"
     assert_selector ".book-review-text", text: "Strange, gentle and beautiful."
@@ -52,5 +52,30 @@ class BooksTest < ApplicationSystemTestCase
     click_on "Update Book"
 
     assert_selector "h1", text: "Dune (Revised)"
+  end
+
+  test "writing and editing a review from the book page" do
+    book = books(:hobbit)
+    book.update!(review: nil)
+    visit book_path(book)
+
+    click_on "Write your review"
+    # The form appears in place: we are still on the book page.
+    assert_current_path book_path(book)
+    fill_in "What did you think of it?", with: "A perfect comfort read."
+    click_on "Save review"
+
+    assert_selector ".book-review-text", text: "A perfect comfort read."
+    assert_current_path book_path(book)
+
+    click_on "Edit review"
+    fill_in "What did you think of it?", with: "A perfect comfort read. Smaug steals the show."
+    click_on "Save review"
+    assert_selector ".book-review-text", text: "Smaug steals the show."
+
+    click_on "Edit review"
+    click_on "Cancel"
+    assert_selector ".book-review-text", text: "Smaug steals the show."
+    assert_no_field "What did you think of it?"
   end
 end

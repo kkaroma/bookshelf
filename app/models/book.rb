@@ -1,6 +1,9 @@
 class Book < ApplicationRecord
   belongs_to :user
 
+  # A review of only spaces is treated as "no review".
+  normalizes :review, with: ->(review) { review.strip.presence }
+
   validates :title, :author, presence: true
   validates :subtitle, length: { maximum: 200 }
   validates :published_year,

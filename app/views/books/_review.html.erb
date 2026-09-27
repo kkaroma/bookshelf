@@ -1,0 +1,21 @@
+<%# The owner's review. Wrapped in a Turbo Frame so "Write your review" and
+    "Edit review" swap in the form right here instead of loading a new page. %>
+<%= turbo_frame_tag dom_id(book, :review), class: "book-review" do %>
+  <div class="book-review-header">
+    <h2><%= book.owned_by?(Current.user) ? "My review" : "#{book.user.name}'s review" %></h2>
+    <% if book.review.present? && book.owned_by?(Current.user) %>
+      <%= link_to "Edit review", edit_book_review_path(book) %>
+    <% end %>
+  </div>
+
+  <% if book.review.present? %>
+    <blockquote class="book-review-text"><%= book.review %></blockquote>
+  <% elsif book.owned_by?(Current.user) %>
+    <p class="muted">
+      No review yet. Finished the book?
+      <%= link_to "Write your review", edit_book_review_path(book) %>
+    </p>
+  <% else %>
+    <p class="muted"><%= book.user.name %> hasn't reviewed this book yet.</p>
+  <% end %>
+<% end %>

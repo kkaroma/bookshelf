@@ -45,6 +45,12 @@ class BookTest < ActiveSupport::TestCase
     assert Book.new(user: users(:one), title: "T", author: "A", subtitle: nil, review: nil).valid?
   end
 
+  test "a review of only spaces is saved as no review" do
+    book = books(:hobbit)
+    book.update!(review: "   ")
+    assert_nil book.review
+  end
+
   test "subtitle can be at most 200 characters" do
     assert Book.new(user: users(:one), title: "T", author: "A", subtitle: "x" * 200).valid?
     assert_not Book.new(user: users(:one), title: "T", author: "A", subtitle: "x" * 201).valid?

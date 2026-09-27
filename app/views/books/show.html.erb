@@ -25,19 +25,7 @@
       <p class="muted">No description yet.</p>
     <% end %>
 
-    <section class="book-review" id="review">
-      <h2><%= @book.owned_by?(Current.user) ? "My review" : "#{@book.user.name}'s review" %></h2>
-      <% if @book.review.present? %>
-        <blockquote class="book-review-text"><%= @book.review %></blockquote>
-      <% elsif @book.owned_by?(Current.user) %>
-        <p class="muted">
-          No review yet. Finished the book?
-          <%= link_to "Write your review", edit_book_path(@book, anchor: "book_review") %>
-        </p>
-      <% else %>
-        <p class="muted"><%= @book.user.name %> hasn't reviewed this book yet.</p>
-      <% end %>
-    </section>
+    <%= render "books/review", book: @book %>
 
     <% if can_edit?(@book) %>
       <div class="actions">
