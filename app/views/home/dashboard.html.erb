@@ -1,0 +1,65 @@
+<% content_for :title, "Home" %>
+
+<section class="welcome">
+  <div>
+    <h1>Welcome back, <%= Current.user.name.split.first %></h1>
+    <% if @waiting_requests_count > 0 %>
+      <p class="attention">
+        <%= link_to exchange_requests_path do %>
+          <strong><%= pluralize(@waiting_requests_count, "exchange request") %></strong> waiting for your answer →
+        <% end %>
+      </p>
+    <% else %>
+      <p class="muted">Here's what's happening on Bookshelf.</p>
+    <% end %>
+  </div>
+</section>
+
+<% unless @getting_started.complete? %>
+  <section class="checklist card" aria-labelledby="checklist-title">
+    <div class="checklist-header">
+      <h2 id="checklist-title">Getting started</h2>
+      <span class="muted"><%= @getting_started.done_count %> of <%= @getting_started.steps.size %> done</span>
+    </div>
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="<%= @getting_started.steps.size %>"
+         aria-valuenow="<%= @getting_started.done_count %>" aria-label="Getting started progress">
+      <span style="width: <%= (100 * @getting_started.done_count / @getting_started.steps.size) %>%"></span>
+    </div>
+
+    <ol class="checklist-steps">
+      <% @getting_started.steps.each do |step| %>
+        <% book = @getting_started.book_for(step.key) %>
+        <% path = case step.key
+                  when :add_book  then new_book_path
+                  when :add_cover then book ? edit_book_path(book) : new_book_path
+                  when :review    then book ? book_path(book, anchor: dom_id(book, :review)) : new_book_path
+                  when :follow    then users_path
+                  when :exchange  then book ? book_path(book) : new_book_path
+                  end %>
+        <li class="checklist-step <%= "done" if step.done %>">
+          <span class="check" aria-hidden="true"><%= step.done ? "✓" : "" %></span>
+          <div>
+            <% if step.done %>
+              <span class="step-label"><%= step.label %></span>
+              <span class="visually-hidden">(done)</span>
+            <% else %>
+              <%= link_to step.label, path, class: "step-label" %>
+              <span class="step-hint"><%= step.hint %></span>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  </section>
+<% end %>
+
+<%= render "home/shelf", id: "following", title: "From people you follow", books: @followed_books,
+      empty: safe_join([ "You're not following anyone with books yet. ", link_to("Find members to follow", users_path), "." ]) %>
+
+<%= render "home/shelf", id: "exchange", title: "New on the Exchange shelf", books: @exchange_books,
+      see_all_path: exchanges_path,
+      empty: "No one else is offering books for exchange right now. Check back soon!" %>
+
+<%= render "home/shelf", id: "my_books", title: "Your books", books: @my_books,
+      see_all_path: user_path(Current.user),
+      empty: safe_join([ "You haven't added any books yet. ", link_to("Add your first book", new_book_path), "." ]) %>

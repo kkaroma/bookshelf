@@ -3,9 +3,9 @@ require "application_system_test_case"
 class AuthenticationTest < ApplicationSystemTestCase
   test "signing up, signing out and signing back in" do
     visit root_path
-    assert_current_path new_session_path
+    assert_text "Keep track of the books you own"
 
-    click_on "Create an account"
+    click_on "Create your free account", match: :first
     fill_in "Name", with: "Carol"
     fill_in "Email address", with: "carol@example.com"
     fill_in "Password", with: "secret-password"
@@ -14,6 +14,10 @@ class AuthenticationTest < ApplicationSystemTestCase
 
     assert_text "Welcome to Bookshelf, Carol!"
     assert_text "Signed in as Carol"
+    # A new member lands on Home with the getting-started checklist
+    assert_selector "h1", text: "Welcome back, Carol"
+    assert_text "Getting started"
+    assert_text "0 of 5 done"
 
     click_on "Sign out"
     assert_text "You have been signed out."

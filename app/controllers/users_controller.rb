@@ -7,7 +7,7 @@ class UsersController < ApplicationController
   end
 
   def show
-    @books = @user.books.includes(:user).order(:title)
+    @books = @user.books.with_attached_cover.includes(:user).order(:title)
   end
 
   def followers

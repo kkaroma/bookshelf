@@ -1,0 +1,82 @@
+<% content_for :title, "Your books, shared" %>
+
+<section class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">A home for your books</p>
+    <h1>Keep track of the books you own, share what you think, and swap with other readers.</h1>
+    <p class="hero-lead">
+      Bookshelf is a small community of readers. Catalogue your collection,
+      review what you've read, and trade books you've finished for ones you haven't.
+    </p>
+    <div class="hero-actions">
+      <%= link_to "Create your free account", new_registration_path, class: "btn btn-primary btn-lg" %>
+      <span class="muted">Already a member? <%= link_to "Sign in", new_session_path %></span>
+    </div>
+  </div>
+
+  <% if @recent_books.any? %>
+    <div class="hero-covers" aria-hidden="true">
+      <% @recent_books.first(3).each do |book| %>
+        <%= render "books/cover", book: book %>
+      <% end %>
+    </div>
+  <% end %>
+</section>
+
+<section class="features" aria-label="What you can do">
+  <div class="feature">
+    <span class="feature-icon" aria-hidden="true">📚</span>
+    <h2>Catalogue your books</h2>
+    <p>Add the books you own, with covers found online or your own photos.</p>
+  </div>
+  <div class="feature">
+    <span class="feature-icon" aria-hidden="true">✍️</span>
+    <h2>Review &amp; rate</h2>
+    <p>Write what you thought after reading, rate books from 1 to 5, and discuss them.</p>
+  </div>
+  <div class="feature">
+    <span class="feature-icon" aria-hidden="true">⇄</span>
+    <h2>Swap books</h2>
+    <p>Put books on the Exchange shelf and trade with other members.</p>
+  </div>
+  <div class="feature">
+    <span class="feature-icon" aria-hidden="true">👥</span>
+    <h2>Follow readers</h2>
+    <p>Follow people whose taste you like and see what they add.</p>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <h2>How swapping works</h2>
+  <ol class="steps">
+    <li><strong>Add a book</strong> you've finished and are happy to pass on.</li>
+    <li><strong>Offer it for exchange</strong> so it appears on the Exchange shelf.</li>
+    <li><strong>Accept a request</strong> from another member, and arrange the swap.</li>
+  </ol>
+</section>
+
+<% if @recent_books.any? %>
+  <section class="recent">
+    <div class="section-heading">
+      <h2>Recently added on Bookshelf</h2>
+      <p class="muted"><%= pluralize(@book_count, "book") %> shared by <%= pluralize(@reader_count, "reader") %></p>
+    </div>
+    <div class="book-grid recent-grid">
+      <% @recent_books.each do |book| %>
+        <div class="book-card book-card-static">
+          <%= render "books/cover", book: book %>
+          <div>
+            <h3 class="book-card-title"><%= book.title %></h3>
+            <p class="book-card-meta"><%= book.author %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<section class="cta">
+  <h2>Ready to start your shelf?</h2>
+  <p class="muted">It's free, and takes less than a minute.</p>
+  <%= link_to "Create your free account", new_registration_path, class: "btn btn-primary btn-lg" %>
+</section>

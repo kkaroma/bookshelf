@@ -1,0 +1,17 @@
+<%# One row of books on the Home page, with a heading and a "see all" link. %>
+<section class="home-section" id="<%= id %>">
+  <div class="section-heading">
+    <h2><%= title %></h2>
+    <% if local_assigns[:see_all_path] && books.any? %>
+      <%= link_to "See all →", see_all_path %>
+    <% end %>
+  </div>
+
+  <% if books.any? %>
+    <div class="book-grid">
+      <%= render books %>
+    </div>
+  <% else %>
+    <p class="home-empty muted"><%= empty %></p>
+  <% end %>
+</section>
