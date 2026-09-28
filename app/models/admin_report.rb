@@ -56,12 +56,16 @@ class AdminReport
 
   # Activity = books added + comments written + ratings given.
   def most_active_members
-    User.select(<<~SQL)
+    # The totals are worked out in an inner query first, because PostgreSQL
+    # can't sort by a sum of columns calculated in the same SELECT.
+    with_totals = User.select(<<~SQL)
       users.*,
       (SELECT COUNT(*) FROM comments WHERE comments.user_id = users.id) AS comments_total,
       (SELECT COUNT(*) FROM ratings  WHERE ratings.user_id  = users.id) AS ratings_total
     SQL
-        .order(Arel.sql("books_count + comments_total + ratings_total DESC"), :name)
+
+    User.from(with_totals, :users)
+        .order(Arel.sql("users.books_count + users.comments_total + users.ratings_total DESC"), :name)
         .limit(TOP)
         .select { |user| user.books_count + user.comments_total + user.ratings_total > 0 }
   end
