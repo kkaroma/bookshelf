@@ -31,6 +31,6 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fill_in "Email address", with: user.email_address
     fill_in "Password", with: password
     click_button "Sign in"
-    assert_text "Signed in as #{user.name}"
+    assert_selector ".nav-user-name", text: user.name
   end
 end

@@ -1,0 +1,170 @@
+<% content_for :title, "Reports" %>
+<% report = @report %>
+
+<div class="page-header">
+  <div>
+    <h1>Reports</h1>
+    <p class="muted">Figures as of <%= report.now.strftime("%-d %B %Y, %H:%M") %>. Only admins can see this page.</p>
+  </div>
+</div>
+
+<%# ---------- 1. Overview ---------- %>
+<section class="report-section" aria-labelledby="overview_title">
+  <h2 id="overview_title">Overview</h2>
+  <% requests = report.requests_by_status %>
+  <div class="stat-grid">
+    <%= render "admin/reports/stat", label: "Members", value: report.members_count,
+          detail: "#{report.members_this_month} joined this month" %>
+    <%= render "admin/reports/stat", label: "Books", value: report.books_count,
+          detail: "#{report.percent(report.books_with_cover, report.books_count)}% with a cover · " \
+                  "#{report.percent(report.books_with_isbn, report.books_count)}% with an ISBN" %>
+    <%= render "admin/reports/stat", label: "Reviews", value: report.reviews_count,
+          detail: "on #{report.percent(report.reviews_count, report.books_count)}% of books" %>
+    <%= render "admin/reports/stat", label: "Comments", value: report.comments_count %>
+    <%= render "admin/reports/stat", label: "Ratings", value: report.ratings_count %>
+    <%= render "admin/reports/stat", label: "On the Exchange shelf", value: report.exchange_shelf_count %>
+    <%= render "admin/reports/stat", label: "Exchange requests", value: requests.values.sum,
+          detail: requests.map { |status, count| "#{count} #{status}" }.join(" · ") %>
+  </div>
+</section>
+
+<%# ---------- 2. Activity over time ---------- %>
+<section class="report-section" aria-labelledby="activity_title">
+  <h2 id="activity_title">Activity over the last <%= AdminReport::WEEKS %> weeks</h2>
+  <div class="chart-grid">
+    <%= render "admin/reports/weekly_chart", id: "members_chart", title: "New members per week",
+          noun: "new member", weeks: report.new_members_by_week %>
+    <%= render "admin/reports/weekly_chart", id: "books_chart", title: "New books per week",
+          noun: "new book", weeks: report.new_books_by_week %>
+  </div>
+</section>
+
+<%# ---------- 3. Popular and active ---------- %>
+<section class="report-section" aria-labelledby="popular_title">
+  <h2 id="popular_title">Popular and active</h2>
+  <div class="report-grid">
+    <div class="report-card" id="top_rated">
+      <h3>Top-rated books</h3>
+      <% books = report.top_rated_books %>
+      <% if books.any? %>
+        <ol class="report-list">
+          <% books.each do |book| %>
+            <li>
+              <%= link_to book.title, book %>
+              <span class="muted">★ <%= book.average_rating %> · <%= pluralize(book.ratings_count, "rating") %></span>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="muted">No book has 2 or more ratings yet.</p>
+      <% end %>
+    </div>
+
+    <div class="report-card" id="most_requested">
+      <h3>Most-requested books</h3>
+      <% books = report.most_requested_books %>
+      <% if books.any? %>
+        <ol class="report-list">
+          <% books.each do |book| %>
+            <li>
+              <%= link_to book.title, book %>
+              <span class="muted"><%= pluralize(book.requests_total, "request") %> · <%= book.user.name %></span>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="muted">No exchange requests yet.</p>
+      <% end %>
+    </div>
+
+    <div class="report-card" id="most_active">
+      <h3>Most active members</h3>
+      <% members = report.most_active_members %>
+      <% if members.any? %>
+        <ol class="report-list">
+          <% members.each do |member| %>
+            <li>
+              <%= link_to member.name, member %>
+              <span class="muted">
+                <%= pluralize(member.books_count, "book") %> ·
+                <%= pluralize(member.comments_total, "comment") %> ·
+                <%= pluralize(member.ratings_total, "rating") %>
+              </span>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="muted">No activity yet.</p>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# ---------- 4. Needs attention ---------- %>
+<section class="report-section" aria-labelledby="attention_title">
+  <h2 id="attention_title">Needs attention</h2>
+  <div class="report-grid">
+    <div class="report-card" id="stale_requests">
+      <h3>Requests waiting over <%= AdminReport::STALE_AFTER.inspect %></h3>
+      <% stale = report.stale_requests %>
+      <% if stale.any? %>
+        <ul class="report-list">
+          <% stale.each do |request| %>
+            <li>
+              <%= link_to request.requester.name, request.requester %> asked
+              <%= link_to request.book.user.name, request.book.user %> for
+              <%= link_to request.book.title, request.book %>
+              <span class="muted">waiting <%= time_ago_in_words(request.created_at) %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="muted">✓ Nothing waiting that long.</p>
+      <% end %>
+    </div>
+
+    <div class="report-card report-card-wide" id="recent_comments">
+      <h3>Latest comments</h3>
+      <% comments = report.recent_comments %>
+      <% if comments.any? %>
+        <ul class="report-list">
+          <% comments.each do |comment| %>
+            <li>
+              <span>
+                <%= link_to comment.user.name, comment.user %> on
+                <%= link_to comment.book.title, book_path(comment.book, anchor: "comments") %>:
+              </span>
+              <q><%= truncate(comment.body, length: 140) %></q>
+              <span class="muted"><%= time_ago_in_words(comment.created_at) %> ago</span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="muted">No comments yet.</p>
+      <% end %>
+    </div>
+
+    <div class="report-card" id="missing_details">
+      <h3>Books missing a cover or ISBN</h3>
+      <% missing = report.books_missing_details %>
+      <% if missing.any? %>
+        <p class="muted report-card-note">
+          <%= pluralize(report.books_missing_details_count, "book") %><%= " — showing the first #{missing.size}" if report.books_missing_details_count > missing.size %>
+        </p>
+        <ul class="report-list">
+          <% missing.each do |book| %>
+            <li>
+              <%= link_to book.title, edit_book_path(book) %>
+              <span class="tags">
+                <% unless book.cover_ready? %><span class="tag">No cover</span><% end %>
+                <% if book.isbn.blank? %><span class="tag">No ISBN</span><% end %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="muted">✓ Every book has a cover and an ISBN.</p>
+      <% end %>
+    </div>
+  </div>
+</section>

@@ -286,4 +286,23 @@ class BooksTest < ApplicationSystemTestCase
     visit books_path
     assert_selector "#book_#{books(:hobbit).id} .book-cover-image img"
   end
+
+  test "an admin opens the reports and reads a chart value" do
+    click_on "Sign out"
+    assert_text "You have been signed out."
+    sign_in_as users(:admin)
+
+    click_on "Reports"
+    assert_selector "h1", text: "Reports"
+
+    this_week = Time.current.beginning_of_week.strftime("%-d %b")
+    column = find("figure[aria-labelledby=books_chart_title] .chart-col[aria-label='Week of #{this_week}: 2 new books']")
+    column.hover
+    within(column) { assert_selector ".chart-tip", text: "2 new books", visible: true }
+
+    within("figure[aria-labelledby=books_chart_title]") do
+      find("summary", text: "Show as table").click
+      assert_selector "td", text: "2"
+    end
+  end
 end

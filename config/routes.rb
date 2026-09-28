@@ -25,6 +25,11 @@ Rails.application.routes.draw do
   # "Find cover online" in the book form: /cover_search?title=...&author=...&isbn=...
   resource :cover_search, only: :show
 
+  # Admin-only pages live under /admin (controllers in app/controllers/admin/).
+  namespace :admin do
+    resource :reports, only: :show # /admin/reports
+  end
+
   # The exchange shelf: every book available for exchange.
   resources :exchanges, only: :index
 

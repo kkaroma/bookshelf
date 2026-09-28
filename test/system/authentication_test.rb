@@ -13,7 +13,7 @@ class AuthenticationTest < ApplicationSystemTestCase
     click_on "Create account"
 
     assert_text "Welcome to Bookshelf, Carol!"
-    assert_text "Signed in as Carol"
+    assert_selector ".nav-user-name", text: "Carol"
     # A new member lands on Home with the getting-started checklist
     assert_selector "h1", text: "Welcome back, Carol"
     assert_text "Getting started"

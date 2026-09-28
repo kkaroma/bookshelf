@@ -42,13 +42,16 @@
                 <span class="nav-count" aria-label="<%= pluralize(waiting, "request") %> waiting for you"><%= waiting %></span>
               <% end %>
             <% end %>
+            <% if Current.user.admin? %>
+              <%= link_to "Reports", admin_reports_path, class: ["nav-link", ("active" if controller_path == "admin/reports")] %>
+            <% end %>
           </div>
         <% end %>
 
         <div class="nav-links">
           <% if authenticated? %>
             <span class="nav-user">
-              Signed in as <%= link_to Current.user.name, Current.user, class: "nav-user-name" %>
+              <%= link_to Current.user.name, Current.user, class: "nav-user-name", title: "Signed in as #{Current.user.name} — your profile" %>
               <% if Current.user.admin? %><span class="badge">Admin</span><% end %>
             </span>
             <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>

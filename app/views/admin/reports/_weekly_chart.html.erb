@@ -1,0 +1,56 @@
+<%# A small column chart: one series, new records per week.
+    Each column shows its exact value on hover or keyboard focus, the busiest
+    week is labelled on its cap, and "Show as table" lists every value. %>
+<% total = weeks.sum(&:count) %>
+<% max = weeks.map(&:count).max %>
+<% top = [ max, 1 ].max %>
+<% busiest = weeks.find { |week| week.count == max && max > 0 } %>
+
+<figure class="chart" aria-labelledby="<%= id %>_title">
+  <figcaption class="chart-header">
+    <h3 id="<%= id %>_title"><%= title %></h3>
+    <span class="muted"><strong class="chart-total"><%= total %></strong> in <%= weeks.size %> weeks</span>
+  </figcaption>
+
+  <div class="chart-plot">
+    <div class="chart-axis-y" aria-hidden="true">
+      <span><%= top %></span>
+      <span>0</span>
+    </div>
+
+    <div class="chart-area">
+      <% weeks.each do |week| %>
+        <% label = "Week of #{week.starts_on.strftime("%-d %b")}: #{pluralize(week.count, noun)}" %>
+        <div class="chart-col" tabindex="0" aria-label="<%= label %>">
+          <% if week.count > 0 %>
+            <span class="chart-bar" style="height: <%= (100.0 * week.count / top).round(1) %>%">
+              <% if week == busiest %><span class="chart-cap" aria-hidden="true"><%= week.count %></span><% end %>
+            </span>
+          <% end %>
+          <span class="chart-tip" aria-hidden="true">
+            <strong><%= week.count %></strong> <%= noun.pluralize(week.count) %>
+            <span>Week of <%= week.starts_on.strftime("%-d %b") %></span>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="chart-axis-x" aria-hidden="true">
+    <% weeks.each do |week| %>
+      <span><%= week.starts_on.strftime("%-d %b") %></span>
+    <% end %>
+  </div>
+
+  <details class="chart-table">
+    <summary>Show as table</summary>
+    <table>
+      <thead><tr><th scope="col">Week starting</th><th scope="col"><%= noun.pluralize.capitalize %></th></tr></thead>
+      <tbody>
+        <% weeks.each do |week| %>
+          <tr><td><%= week.starts_on.strftime("%-d %B %Y") %></td><td><%= week.count %></td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </details>
+</figure>
