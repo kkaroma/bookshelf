@@ -1,0 +1,39 @@
+# Fly.io configuration for Bookshelf.
+# Docs: https://fly.io/docs/reference/configuration/
+
+app = "kkaroma-bookshelf"
+primary_region = "fra"          # Frankfurt - next to the Neon database
+console_command = "/rails/bin/rails console"
+
+[build]
+  # Uses the Dockerfile in this folder.
+
+[env]
+  # Run Solid Queue (background jobs) inside the web server - no separate worker needed.
+  SOLID_QUEUE_IN_PUMA = "true"
+  APP_HOST = "kkaroma-bookshelf.fly.dev"
+  # Thruster (the web front door) listens on 8080: the app runs as a normal
+  # user, and on Fly only root may use ports below 1024 such as 80.
+  HTTP_PORT = "8080"
+
+[http_service]
+  internal_port = 8080          # matches HTTP_PORT above
+  force_https = true
+  # Sleep when nobody is using the site, and wake on the next visit. This keeps
+  # the Fly bill low and lets the Neon database sleep too (free compute hours).
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "30s"        # time to boot and run database migrations
+    interval = "30s"
+    method = "GET"
+    path = "/up"
+    timeout = "5s"
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
