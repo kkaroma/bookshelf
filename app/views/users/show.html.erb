@@ -20,12 +20,13 @@
   </div>
 </section>
 
-<h2 class="section-title"><%= @user == Current.user ? "My books" : "#{@user.name}'s books" %></h2>
+<% mine = @user == Current.user %>
+<h2 class="section-title"><%= mine ? "My books" : "#{@user.name}'s books" %></h2>
 
-<% if @books.any? %>
-  <div id="books" class="book-grid">
-    <%= render @books %>
-  </div>
-<% else %>
-  <p class="muted"><%= @user == Current.user ? "You haven't added any books yet." : "#{@user.name} hasn't added any books yet." %></p>
+<%= render layout: "books/search", locals: {
+      url: user_path(@user), query: @query, books: @books,
+      label: mine ? "Search my books" : "Search #{@user.name}'s books",
+      placeholder: mine ? "Search my books by title, author or ISBN…" : "Search #{@user.name.split.first}'s books…",
+      total_label: pluralize(@books.size, "book") } do %>
+  <p class="muted"><%= mine ? "You haven't added any books yet." : "#{@user.name} hasn't added any books yet." %></p>
 <% end %>

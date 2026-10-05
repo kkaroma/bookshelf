@@ -35,6 +35,39 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select ".follow-box .pill", "You"
   end
 
+  # --- Searching a profile's books ---
+
+  test "your profile has a search box for your own books" do
+    get user_url(@alice)
+    assert_select "form[role=search][action=?]", user_path(@alice)
+    assert_select "label", "Search my books"
+    assert_select "#books_results .book-card", 1
+  end
+
+  test "someone else's profile searches their books" do
+    get user_url(@bob)
+    assert_select "label", "Search Bob Bookworm's books"
+  end
+
+  test "profile search only looks at that person's books" do
+    get user_url(@alice, q: "hobbit")
+    assert_select "#book_#{books(:hobbit).id}"
+    assert_select ".search-summary", /1 book\s+matching “hobbit”/
+    assert_select ".search-summary a[href=?]", user_path(@alice), text: "Clear search"
+
+    get user_url(@alice, q: "dune") # Dune exists, but it's Bob's
+    assert_select ".book-card", count: 0
+    assert_select ".empty-state h2", "No books match “dune”"
+    assert_select ".empty-state a[href=?]", user_path(@alice), text: "Show all books"
+  end
+
+  test "a profile with no books says so, without a search summary" do
+    newbie = User.create!(name: "Nora New", email_address: "nora@example.com", password: "password123")
+    get user_url(newbie)
+    assert_select "p.muted", "Nora New hasn't added any books yet."
+    assert_select ".search-summary", count: 0
+  end
+
   test "followers page lists the people who follow someone" do
     get followers_user_url(@alice)
 

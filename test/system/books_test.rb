@@ -338,4 +338,22 @@ class BooksTest < ApplicationSystemTestCase
     go_back # one step back leaves the Books page, instead of returning to "herb"
     assert_current_path root_path
   end
+
+  test "searching my books on my profile" do
+    Book.create!(user: users(:one), title: "Emma", author: "Jane Austen")
+    visit user_path(users(:one))
+    assert_selector "h2", text: "My books"
+    assert_selector ".book-card", count: 2
+
+    fill_in "Search my books", with: "austen"
+    assert_selector ".search-summary", text: "1 book matching “austen”"
+    assert_selector ".book-card", count: 1, text: "Emma"
+    assert_current_path user_path(users(:one), q: "austen")
+
+    fill_in "Search my books", with: "dune" # someone else's book
+    assert_text "No books match “dune”"
+
+    click_on "Show all books"
+    assert_selector ".book-card", count: 2
+  end
 end
