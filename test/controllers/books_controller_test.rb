@@ -190,6 +190,35 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_no_match "<script>alert(1)</script>", response.body
   end
 
+  # --- Pages ---
+
+  test "long lists are split into pages of 24" do
+    30.times { |i| Book.create!(user: users(:two), title: format("Zed %02d", i), author: "A") } # 32 books in all
+
+    get books_url
+    assert_select "#books .book-card", 24
+    assert_select ".search-summary", /32 books on the shelf/
+    assert_select ".pagination", /Page 1 of 2/
+    assert_select ".pagination a[rel=next][href=?]", books_path(page: 2)
+
+    get books_url(page: 2)
+    assert_select "#books .book-card", 8
+    assert_select ".pagination a[rel=prev][href=?]", books_path # page 1 has no ?page=
+  end
+
+  test "page links keep the search" do
+    30.times { |i| Book.create!(user: users(:two), title: format("Zed %02d", i), author: "A") }
+
+    get books_url(q: "zed")
+    assert_select ".search-summary", /30 books\s+matching “zed”/
+    assert_select ".pagination a[rel=next][href=?]", books_path(q: "zed", page: 2)
+  end
+
+  test "short lists have no page links" do
+    get books_url
+    assert_select ".pagination", count: 0
+  end
+
   test "should not create book without a title" do
     assert_no_difference("Book.count") do
       post books_url, params: { book: { title: "", author: "Someone" } }

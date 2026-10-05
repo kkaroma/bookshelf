@@ -1,6 +1,9 @@
-<p>
-  You can reset your password on
-  <%= link_to "this password reset page", edit_password_url(@user.password_reset_token) %>.
+<p style="margin-top:0;">Hi <%= @user.name %>,</p>
+<p>Someone (hopefully you) asked to reset your Bookshelf password. Click the button to choose a new one:</p>
 
-  This link will expire in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+<%= render "shared/email_button", text: "Choose a new password", url: edit_password_url(@user.password_reset_token) %>
+
+<p style="color:#6b6258; font-size:14px;">
+  This link expires in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+  If you didn't ask for this, you can ignore this email — your password won't change.
 </p>

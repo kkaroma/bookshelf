@@ -33,6 +33,16 @@ Rails.application.routes.draw do
   # The exchange shelf: every book available for exchange.
   resources :exchanges, only: :index
 
+  # Account settings: /settings/profile/edit, /settings/password/edit,
+  # /settings/notifications/edit and /settings/account (delete account).
+  namespace :settings do
+    resource :profile, only: %i[ edit update ]
+    resource :password, only: %i[ edit update ]
+    resource :notifications, only: %i[ edit update ]
+    resource :account, only: %i[ show destroy ]
+  end
+  get "settings", to: redirect("/settings/profile/edit"), as: :settings
+
   # Members and their profiles: /users, /users/:id, /users/:id/followers, /users/:id/following
   resources :users, only: %i[ index show ] do
     member do

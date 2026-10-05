@@ -2,8 +2,9 @@
     Rendered as a layout partial: the block passed in is shown when the list
     has no books at all (before any searching).
 
-    Locals: url (where the form submits), query, books, label (for the box),
-    placeholder, total_label (e.g. "12 books on the shelf").
+    Locals: url (where the form submits), query, books (this page's books),
+    pagination, label (for the box), placeholder, total_label (e.g. "12 books
+    on the shelf").
 
     Typing submits the form (after a short pause) into the books_results frame,
     so only the results change and the box keeps focus. Without JavaScript it's
@@ -22,7 +23,7 @@
 <%= turbo_frame_tag "books_results", target: "_top" do %>
   <% if query.present? %>
     <p class="search-summary" aria-live="polite">
-      <%= pluralize(books.size, "book") %> matching “<strong><%= query %></strong>”
+      <%= pluralize(pagination.total_count, "book") %> matching “<strong><%= query %></strong>”
       · <%= link_to "Clear search", url %>
     </p>
   <% elsif books.any? %>
@@ -33,6 +34,7 @@
     <div id="books" class="book-grid">
       <%= render books %>
     </div>
+    <%= render "shared/pagination", pagination: pagination %>
   <% elsif query.present? %>
     <div class="empty-state">
       <h2>No books match “<%= query %>”</h2>

@@ -1,0 +1,7 @@
+Hi <%= @followed.name %>,
+
+<%= @follower.name %> is now following you on Bookshelf. They have <%= pluralize(@follower.books_count, "book") %> on their shelf.
+
+See their profile: <%= user_url(@follower) %>
+
+You're getting this because "New followers" is switched on in your email settings: <%= edit_settings_notifications_url %>

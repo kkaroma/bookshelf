@@ -1,0 +1,9 @@
+Hi <%= @recipient.name %>,
+
+<%= @comment.user.name %> <%= @reply_to_you ? "replied to your comment on" : "commented on" %> "<%= @comment.book.title %>":
+
+<%= @comment.body %>
+
+Reply: <%= book_url(@comment.book, anchor: "comments") %>
+
+You're getting this because "Comments" is switched on in your email settings: <%= edit_settings_notifications_url %>

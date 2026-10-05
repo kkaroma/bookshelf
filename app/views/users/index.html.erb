@@ -3,10 +3,11 @@
 <div class="page-header">
   <div>
     <h1>Members</h1>
-    <p class="muted"><%= pluralize(@users.size, "reader") %> on Bookshelf. Follow people to keep up with their books.</p>
+    <p class="muted"><%= pluralize(@pagination.total_count, "reader") %> on Bookshelf. Follow people to keep up with their books.</p>
   </div>
 </div>
 
 <div class="member-list">
   <%= render @users %>
 </div>
+<%= render "shared/pagination", pagination: @pagination %>

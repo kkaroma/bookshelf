@@ -21,6 +21,15 @@ class ExchangesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".page-header p", /One of them is yours/
   end
 
+  test "the exchange shelf is split into pages" do
+    25.times { |i| Book.create!(user: users(:two), title: "Swap #{i}", author: "A", available_for_exchange: true) }
+
+    get exchanges_url
+    assert_select "#books .book-card", 24
+    assert_select ".page-header p", /26 books members are happy to swap/
+    assert_select ".pagination", /Page 1 of 2/
+  end
+
   test "shows a friendly message when the shelf is empty" do
     Book.update_all(available_for_exchange: false)
     get exchanges_url

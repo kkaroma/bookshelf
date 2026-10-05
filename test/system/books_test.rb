@@ -356,4 +356,33 @@ class BooksTest < ApplicationSystemTestCase
     click_on "Show all books"
     assert_selector ".book-card", count: 2
   end
+
+  test "changing my name, password and email settings" do
+    visit root_path
+    click_on "Account settings"
+    assert_selector "h1", text: "Settings"
+
+    fill_in "Name", with: "Alice Wonder"
+    click_on "Save profile"
+    assert_text "Your profile was saved."
+    assert_selector ".nav-user-name", text: "Alice Wonder"
+
+    click_on "Password"
+    # Wait for the Password page itself: the Profile page also has a
+    # "Current password" box, and it stays on screen until the new page arrives.
+    assert_selector "h2", text: "Change password"
+    fill_in "Current password", with: "password"
+    fill_in "New password", with: "a-better-password"
+    fill_in "Confirm new password", with: "a-better-password"
+    click_on "Change password"
+    assert_text "Password changed."
+
+    click_on "Notifications"
+    assert_selector "h2", text: "Email notifications"
+    uncheck "New followers"
+    click_on "Save preferences"
+    assert_text "Your email preferences were saved."
+    assert_no_checked_field "New followers"
+    assert_not users(:one).reload.notify_followers?
+  end
 end

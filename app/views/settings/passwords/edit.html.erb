@@ -1,0 +1,27 @@
+<% content_for :title, "Change password" %>
+<%= render layout: "settings/layout" do %>
+  <h2>Change password</h2>
+  <%= form_with model: @user, url: settings_password_path, method: :patch, class: "form" do |form| %>
+    <%= render "shared/form_errors", object: @user %>
+
+    <div class="field">
+      <%= label_tag :current_password, "Current password" %>
+      <%= password_field_tag :current_password, nil, required: true, autocomplete: "current-password", class: "input" %>
+    </div>
+
+    <div class="field">
+      <%= form.label :password, "New password" %>
+      <%= form.password_field :password, required: true, minlength: 8, maxlength: 72, autocomplete: "new-password", class: "input" %>
+      <span class="field-hint">At least 8 characters.</span>
+    </div>
+
+    <div class="field">
+      <%= form.label :password_confirmation, "Confirm new password" %>
+      <%= form.password_field :password_confirmation, required: true, maxlength: 72, autocomplete: "new-password", class: "input" %>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "Change password", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+<% end %>

@@ -1,0 +1,23 @@
+<%# Shared frame for every Settings page: heading, tabs, then the page itself. %>
+<div class="settings">
+  <div class="page-header">
+    <div>
+      <h1>Settings</h1>
+      <p class="muted">Manage your account, <%= Current.user.name.split.first %>.</p>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Settings sections">
+    <% [ [ "Profile", edit_settings_profile_path ],
+         [ "Password", edit_settings_password_path ],
+         [ "Notifications", edit_settings_notifications_path ],
+         [ "Delete account", settings_account_path ] ].each do |label, path| %>
+      <%= link_to label, path, class: [ "tab", ("active" if current_page?(path)) ],
+            aria: { current: ("page" if current_page?(path)) } %>
+    <% end %>
+  </nav>
+
+  <div class="card settings-card">
+    <%= yield %>
+  </div>
+</div>

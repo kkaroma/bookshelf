@@ -1,0 +1,25 @@
+<% content_for :title, "Email notifications" %>
+<%= render layout: "settings/layout" do %>
+  <h2>Email notifications</h2>
+  <p class="muted">Choose which emails Bookshelf sends to <strong><%= @user.email_address %></strong>.</p>
+
+  <%= form_with model: @user, url: settings_notifications_path, method: :patch, class: "form" do |form| %>
+    <% [ [ :notify_exchange_requests, "Exchange requests", "When someone asks to swap for your book, and when your own requests are accepted or declined." ],
+         [ :notify_comments, "Comments", "When someone comments on your book, or replies to your comment." ],
+         [ :notify_followers, "New followers", "When someone starts following you." ] ].each do |field, label, hint| %>
+      <div class="field checkbox-field">
+        <%= form.check_box field %>
+        <div>
+          <%= form.label field, label %>
+          <span class="field-hint"><%= hint %></span>
+        </div>
+      </div>
+    <% end %>
+
+    <p class="field-hint">Password reset emails are always sent — they're needed to get back into your account.</p>
+
+    <div class="form-actions">
+      <%= form.submit "Save preferences", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+<% end %>

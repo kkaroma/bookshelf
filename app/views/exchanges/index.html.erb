@@ -4,7 +4,7 @@
   <div>
     <h1>Exchange shelf</h1>
     <p class="muted">
-      <%= pluralize(@books.size, "book") %> members are happy to swap.
+      <%= pluralize(@pagination.total_count, "book") %> members are happy to swap.
       <% if @my_count > 0 %>
         <%= @my_count == 1 ? "One of them is" : "#{@my_count} of them are" %> yours.
       <% end %>
@@ -16,6 +16,7 @@
   <div id="books" class="book-grid">
     <%= render @books %>
   </div>
+  <%= render "shared/pagination", pagination: @pagination %>
 <% else %>
   <div class="empty-state">
     <%= render "shared/book_icon", size: 48 %>

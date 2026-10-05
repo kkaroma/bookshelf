@@ -8,9 +8,9 @@
 </div>
 
 <%= render layout: "books/search", locals: {
-      url: books_path, query: @query, books: @books,
+      url: books_path, query: @query, books: @books, pagination: @pagination,
       label: "Search books", placeholder: "Search by title, author or ISBN…",
-      total_label: "#{pluralize(@books.size, "book")} on the shelf" } do %>
+      total_label: "#{pluralize(@pagination.total_count, "book")} on the shelf" } do %>
   <div class="empty-state">
     <%= render "shared/book_icon", size: 48 %>
     <h2>Your shelf is empty</h2>

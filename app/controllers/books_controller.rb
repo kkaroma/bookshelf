@@ -7,8 +7,10 @@ class BooksController < ApplicationController
   # /books?q=hobbit searches; without q it lists every book.
   def index
     @query = params[:q].to_s.squish
-    @books = Book.with_attached_cover.includes(:user).order(:title)
-    @books = @books.search(@query) if @query.present?
+    books = Book.with_attached_cover.includes(:user).order(:title)
+    books = books.search(@query) if @query.present?
+    @pagination = Pagination.new(books, page: params[:page], per_page: 24)
+    @books = @pagination.records
   end
 
   # GET /books/1 or /books/1.json

@@ -20,6 +20,10 @@ class ExchangeRequest < ApplicationRecord
   validate :not_your_own_book, on: :create
   validate :offered_book_is_yours
 
+  # Emails (each only if the recipient has "Exchange requests" switched on).
+  after_create_commit :email_owner
+  after_update_commit :email_requester, if: -> { saved_change_to_status? && (accepted? || declined?) }
+
   # Requests people have sent me, i.e. for books I own.
   scope :received_by, ->(user) { joins(:book).where(books: { user_id: user.id }) }
   scope :sent_by,     ->(user) { where(requester: user) }
@@ -55,6 +59,14 @@ class ExchangeRequest < ApplicationRecord
         update!(status: new_status, responded_at: Time.current)
         yield if block_given?
       end
+    end
+
+    def email_owner
+      NotificationsMailer.exchange_request_received(self).deliver_later if owner.notify_exchange_requests?
+    end
+
+    def email_requester
+      NotificationsMailer.exchange_request_answered(self).deliver_later if requester.notify_exchange_requests?
     end
 
     def book_is_available

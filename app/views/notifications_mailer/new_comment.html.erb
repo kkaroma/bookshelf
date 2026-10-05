@@ -1,0 +1,10 @@
+<p style="margin-top:0;">Hi <%= @recipient.name %>,</p>
+<p>
+  <strong><%= @comment.user.name %></strong>
+  <%= @reply_to_you ? "replied to your comment on" : "commented on" %>
+  <strong><%= @comment.book.title %></strong>:
+</p>
+<p style="margin:0; padding:12px 16px; background:#f1ede5; border-left:3px solid #e4ddd1; border-radius:0 8px 8px 0; white-space:pre-line;"><%= @comment.body %></p>
+
+<%= render "shared/email_button", text: "Reply", url: book_url(@comment.book, anchor: "comments") %>
+<%= render "notifications_mailer/footer", what: "“Comments”" %>

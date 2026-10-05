@@ -1,0 +1,27 @@
+<% content_for :title, "Delete account" %>
+<%= render layout: "settings/layout" do %>
+  <h2>Delete your account</h2>
+  <p>This permanently deletes your account and everything you've added:</p>
+  <ul class="danger-list">
+    <li>your <%= pluralize(@user.books_count, "book") %>, with <%= @user.books_count == 1 ? "its cover and review" : "their covers and reviews" %></li>
+    <li>your comments and ratings, and comments others left on your books</li>
+    <li>your follows and exchange requests</li>
+  </ul>
+  <p><strong>This can't be undone.</strong></p>
+
+  <% if @user.last_admin? %>
+    <p class="flash flash-alert">You're the only admin, so your account can't be deleted. Make someone else an admin first.</p>
+  <% else %>
+    <%= form_with url: settings_account_path, method: :delete, class: "form",
+          data: { turbo_confirm: "Delete your account and everything in it? This can't be undone." } do |form| %>
+      <%= render "shared/form_errors", object: @user %>
+      <div class="field">
+        <%= form.label :password, "Enter your password to confirm" %>
+        <%= form.password_field :password, required: true, autocomplete: "current-password", class: "input" %>
+      </div>
+      <div class="form-actions">
+        <%= form.submit "Delete my account", class: "btn btn-danger" %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

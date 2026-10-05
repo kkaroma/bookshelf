@@ -1,0 +1,11 @@
+Hi <%= @owner.name %>,
+
+<%= @request.requester.name %> would like your book "<%= @request.book.title %>".
+<% if @request.offered_book %>They're offering "<%= @request.offered_book.title %>" in return.<% else %>They haven't offered a book in return.<% end %>
+<% if @request.message %>
+Their message:
+<%= @request.message %>
+<% end %>
+Review the request: <%= exchange_requests_url %>
+
+You're getting this because "Exchange requests" is switched on in your email settings: <%= edit_settings_notifications_url %>

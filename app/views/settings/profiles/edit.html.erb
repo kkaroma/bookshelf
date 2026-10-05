@@ -1,0 +1,27 @@
+<% content_for :title, "Profile settings" %>
+<%= render layout: "settings/layout" do %>
+  <h2>Profile</h2>
+  <%= form_with model: @user, url: settings_profile_path, method: :patch, class: "form" do |form| %>
+    <%= render "shared/form_errors", object: @user %>
+
+    <div class="field">
+      <%= form.label :name %>
+      <%= form.text_field :name, required: true, autocomplete: "name", class: "input" %>
+    </div>
+
+    <div class="field">
+      <%= form.label :email_address, "Email address" %>
+      <%= form.email_field :email_address, required: true, autocomplete: "username", class: "input" %>
+    </div>
+
+    <div class="field">
+      <%= label_tag :current_password, "Current password" %>
+      <%= password_field_tag :current_password, nil, autocomplete: "current-password", class: "input" %>
+      <span class="field-hint">Only needed if you change your email address.</span>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "Save profile", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+<% end %>

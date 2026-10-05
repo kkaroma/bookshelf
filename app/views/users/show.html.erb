@@ -8,7 +8,10 @@
       <%= @user.name %>
       <% if @user.admin? %><span class="badge">Admin</span><% end %>
     </h1>
-    <p class="muted">Member since <%= @user.created_at.strftime("%B %Y") %></p>
+    <p class="muted">
+      Member since <%= @user.created_at.strftime("%B %Y") %>
+      <% if @user == Current.user %> · <%= link_to "Settings", settings_path %><% end %>
+    </p>
 
     <div class="profile-stats">
       <span><strong><%= @user.books_count %></strong> <%= "book".pluralize(@user.books_count) %></span>
@@ -24,9 +27,9 @@
 <h2 class="section-title"><%= mine ? "My books" : "#{@user.name}'s books" %></h2>
 
 <%= render layout: "books/search", locals: {
-      url: user_path(@user), query: @query, books: @books,
+      url: user_path(@user), query: @query, books: @books, pagination: @pagination,
       label: mine ? "Search my books" : "Search #{@user.name}'s books",
       placeholder: mine ? "Search my books by title, author or ISBN…" : "Search #{@user.name.split.first}'s books…",
-      total_label: pluralize(@books.size, "book") } do %>
+      total_label: pluralize(@pagination.total_count, "book") } do %>
   <p class="muted"><%= mine ? "You haven't added any books yet." : "#{@user.name} hasn't added any books yet." %></p>
 <% end %>

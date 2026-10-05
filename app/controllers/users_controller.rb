@@ -3,14 +3,17 @@ class UsersController < ApplicationController
   before_action :set_user, only: %i[ show followers following ]
 
   def index
-    @users = User.order(:name)
+    @pagination = Pagination.new(User.order(:name), page: params[:page], per_page: 30)
+    @users = @pagination.records
   end
 
   # /users/:id?q=hobbit searches this person's books only.
   def show
     @query = params[:q].to_s.squish
-    @books = @user.books.with_attached_cover.includes(:user).order(:title)
-    @books = @books.search(@query) if @query.present?
+    books = @user.books.with_attached_cover.includes(:user).order(:title)
+    books = books.search(@query) if @query.present?
+    @pagination = Pagination.new(books, page: params[:page], per_page: 24)
+    @books = @pagination.records
   end
 
   def followers

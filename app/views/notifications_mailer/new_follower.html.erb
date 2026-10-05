@@ -1,0 +1,8 @@
+<p style="margin-top:0;">Hi <%= @followed.name %>,</p>
+<p>
+  <strong><%= @follower.name %></strong> is now following you on Bookshelf.
+  They have <%= pluralize(@follower.books_count, "book") %> on their shelf.
+</p>
+
+<%= render "shared/email_button", text: "See #{@follower.name.split.first}'s profile", url: user_url(@follower) %>
+<%= render "notifications_mailer/footer", what: "“New followers”" %>

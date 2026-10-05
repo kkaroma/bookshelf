@@ -56,6 +56,14 @@ class UserTest < ActiveSupport::TestCase
     assert user.reload.admin?
   end
 
+  test "last_admin? is true only for the site's only admin" do
+    assert users(:admin).last_admin?
+    assert_not users(:one).last_admin?
+
+    users(:one).admin!
+    assert_not users(:admin).last_admin?
+  end
+
   test "rejects an unknown role" do
     assert_not build_user(role: "superhero").valid?
   end

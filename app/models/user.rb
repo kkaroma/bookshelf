@@ -32,6 +32,11 @@ class User < ApplicationRecord
                             format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 8 }, allow_nil: true
 
+  # The site must always have at least one admin.
+  def last_admin?
+    admin? && User.admin.count == 1
+  end
+
   def follow(other)
     active_follows.create!(followed: other)
   ensure

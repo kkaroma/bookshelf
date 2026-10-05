@@ -14,6 +14,7 @@ class Comment < ApplicationRecord
   normalizes :body, with: ->(body) { body.strip }
 
   before_validation :join_parent_thread
+  after_create_commit :email_people_involved
 
   validates :body, presence: true, length: { maximum: 2000 }
   validate :parent_is_on_the_same_book
@@ -32,7 +33,21 @@ class Comment < ApplicationRecord
     someone.present? && (user_id == someone.id || someone.admin?)
   end
 
+  # Who should hear about this comment: the book's owner, and (for a reply)
+  # the person replied to - never the comment's own author.
+  def people_to_notify
+    people = [ book.user ]
+    people << parent.user if reply?
+    people.uniq.reject { |person| person.id == user_id }
+  end
+
   private
+    def email_people_involved
+      people_to_notify.select(&:notify_comments?).each do |person|
+        NotificationsMailer.new_comment(self, person).deliver_later
+      end
+    end
+
     def join_parent_thread
       self.parent = parent.parent if parent&.parent
     end

@@ -2,12 +2,33 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <style>
-      /* Email styles need to be inline */
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
-
-  <body>
-    <%= yield %>
+  <%# Email programs ignore most CSS, so styles are written inline. %>
+  <body style="margin:0; padding:0; background:#f7f4ee; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#1f1b16;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee; padding:24px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+            <tr>
+              <td style="padding:0 4px 16px; font-family:Georgia, 'Times New Roman', serif; font-size:22px; font-weight:bold; color:#1f1b16;">
+                📚 Bookshelf
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#ffffff; border:1px solid #e4ddd1; border-radius:12px; padding:28px; font-size:16px; line-height:1.55;">
+                <%= yield %>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 4px; font-size:13px; line-height:1.5; color:#6b6258;">
+                <%= yield :footer %>
+                <br>Bookshelf — a home for your books
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

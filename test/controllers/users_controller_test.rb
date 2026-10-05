@@ -68,6 +68,15 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select ".search-summary", count: 0
   end
 
+  test "the members list is split into pages of 30" do
+    31.times { |i| User.create!(name: format("Reader %02d", i), email_address: "r#{i}@example.com", password: "password123") }
+
+    get users_url
+    assert_select ".member", 30
+    assert_select ".page-header p", /34 readers/
+    assert_select ".pagination a[rel=next][href=?]", users_path(page: 2)
+  end
+
   test "followers page lists the people who follow someone" do
     get followers_user_url(@alice)
 

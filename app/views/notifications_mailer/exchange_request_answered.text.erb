@@ -1,0 +1,8 @@
+Hi <%= @requester.name %>,
+
+<% if @request.accepted? %>Good news! <%= @request.owner.name %> accepted your request for "<%= @request.book.title %>".
+Get in touch to arrange the swap: <%= @request.owner.email_address %><% else %>Your request for "<%= @request.book.title %>" was declined - the book may already have gone to someone else. There are plenty more on the Exchange shelf.<% end %>
+
+See your requests: <%= exchange_requests_url(box: "sent") %>
+
+You're getting this because "Exchange requests" is switched on in your email settings: <%= edit_settings_notifications_url %>

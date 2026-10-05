@@ -1,0 +1,16 @@
+<p style="margin-top:0;">Hi <%= @owner.name %>,</p>
+<p>
+  <strong><%= @request.requester.name %></strong> would like your book
+  <strong><%= @request.book.title %></strong>.
+  <% if @request.offered_book %>
+    They're offering <strong><%= @request.offered_book.title %></strong> in return.
+  <% else %>
+    They haven't offered a book in return.
+  <% end %>
+</p>
+<% if @request.message %>
+  <p style="margin:0; padding:12px 16px; background:#f1ede5; border-left:3px solid #e4ddd1; border-radius:0 8px 8px 0; white-space:pre-line;"><%= @request.message %></p>
+<% end %>
+
+<%= render "shared/email_button", text: "Review the request", url: exchange_requests_url %>
+<%= render "notifications_mailer/footer", what: "“Exchange requests”" %>

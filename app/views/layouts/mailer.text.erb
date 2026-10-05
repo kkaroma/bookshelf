@@ -1,1 +1,5 @@
 <%= yield %>
+
+--
+<% if content_for?(:footer) %><%= strip_tags(yield(:footer)) %>
+<% end %>Bookshelf - a home for your books

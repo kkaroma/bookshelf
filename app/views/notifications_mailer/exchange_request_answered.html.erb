@@ -1,0 +1,16 @@
+<p style="margin-top:0;">Hi <%= @requester.name %>,</p>
+<% if @request.accepted? %>
+  <p>
+    Good news! <strong><%= @request.owner.name %></strong> accepted your request for
+    <strong><%= @request.book.title %></strong>.
+  </p>
+  <p>Get in touch to arrange the swap: <a href="mailto:<%= @request.owner.email_address %>" style="color:#7a3e1d;"><%= @request.owner.email_address %></a></p>
+<% else %>
+  <p>
+    Your request for <strong><%= @request.book.title %></strong> was declined — the book may
+    already have gone to someone else. There are plenty more on the Exchange shelf.
+  </p>
+<% end %>
+
+<%= render "shared/email_button", text: "See your requests", url: exchange_requests_url(box: "sent") %>
+<%= render "notifications_mailer/footer", what: "“Exchange requests”" %>
