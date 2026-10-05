@@ -161,6 +161,35 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_not @book.reload.cover.attached?
   end
 
+  test "the books page has a search box" do
+    get books_url
+    assert_select "form[role=search] input[type=search][name=q]"
+    assert_select "turbo-frame#books_results[target=_top]"
+    assert_select ".search-summary", /2 books on the shelf/
+  end
+
+  test "searching shows only matching books" do
+    get books_url(q: "dune")
+
+    assert_select "#book_#{@someone_elses_book.id}"
+    assert_select "#book_#{@book.id}", count: 0
+    assert_select ".search-summary", /1 book\s+matching “dune”/
+    assert_select ".search-summary a[href=?]", books_path, text: "Clear search"
+    assert_select "input[name=q][value=?]", "dune" # the box keeps what you typed
+  end
+
+  test "a search with no results says so" do
+    get books_url(q: "zzzz")
+
+    assert_select ".empty-state h2", "No books match “zzzz”"
+    assert_select ".empty-state a[href=?]", books_path, text: "Show all books"
+  end
+
+  test "search text is shown safely" do
+    get books_url(q: "<script>alert(1)</script>")
+    assert_no_match "<script>alert(1)</script>", response.body
+  end
+
   test "should not create book without a title" do
     assert_no_difference("Book.count") do
       post books_url, params: { book: { title: "", author: "Someone" } }

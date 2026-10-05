@@ -8,6 +8,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%# When following a link to a page visited before, don't show Turbo's saved
+        (possibly out-of-date) copy first: clicks on that copy get lost when the
+        fresh page arrives. Back/Forward still restore instantly. %>
+    <meta name="turbo-cache-control" content="no-preview">
 
     <%= yield :head %>
 

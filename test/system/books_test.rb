@@ -305,4 +305,37 @@ class BooksTest < ApplicationSystemTestCase
       assert_selector "td", text: "2"
     end
   end
+
+  test "searching books updates the results as you type" do
+    visit books_path
+    assert_selector ".book-card", count: 2
+
+    fill_in "Search books", with: "herb"
+    # No Enter or button press needed: results update after a short pause
+    assert_selector ".search-summary", text: "1 book matching “herb”"
+    assert_selector ".book-card", count: 1, text: "Dune"
+    assert_current_path books_path(q: "herb") # the address updates, so Back works
+
+    fill_in "Search books", with: "nothing like this"
+    assert_text "No books match “nothing like this”"
+
+    click_on "Show all books"
+    assert_selector ".book-card", count: 2
+    assert_field "Search books", with: ""
+  end
+
+  test "searching doesn't fill the Back button with every search" do
+    visit root_path
+    click_on "Books"
+    assert_selector "h1", text: "Books"
+
+    fill_in "Search books", with: "herb"
+    assert_selector ".search-summary", text: "matching “herb”"
+    fill_in "Search books", with: "hobbit"
+    assert_selector ".search-summary", text: "matching “hobbit”"
+    assert_current_path books_path(q: "hobbit")
+
+    go_back # one step back leaves the Books page, instead of returning to "herb"
+    assert_current_path root_path
+  end
 end

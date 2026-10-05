@@ -12,6 +12,21 @@ class Book < ApplicationRecord
   after_update :decline_pending_exchange_requests,
                if: -> { saved_change_to_available_for_exchange?(to: false) }
 
+  # Search by title, subtitle, author or ISBN. Every word must match one of
+  # those (so "tolkien hobbit" finds The Hobbit), ignoring upper/lower case.
+  #   Book.search("hobbit")             Book.search("978-0-547-92822-7")
+  scope :search, ->(query) {
+    query.to_s.squish.split.first(MAX_SEARCH_WORDS).reduce(all) do |books, word|
+      pattern = "%#{sanitize_sql_like(word)}%"
+      isbn_digits = word.upcase.gsub(/[^0-9X]/, "")
+
+      matches = where("books.title ILIKE :pattern OR books.subtitle ILIKE :pattern OR books.author ILIKE :pattern", pattern:)
+      matches = matches.or(where("books.isbn LIKE ?", "%#{isbn_digits}%")) if isbn_digits.length >= 3
+      books.merge(matches)
+    end
+  }
+  MAX_SEARCH_WORDS = 5
+
   # Books whose owners are willing to swap them.
   scope :for_exchange, -> { where(available_for_exchange: true) }
 

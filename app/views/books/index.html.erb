@@ -1,21 +1,52 @@
-<% content_for :title, "Books" %>
+<% content_for :title, @query.present? ? "Search: #{@query}" : "Books" %>
 
 <div class="page-header">
   <div>
     <h1>Books</h1>
-    <p class="muted"><%= pluralize(@books.size, "book") %> on the shelf</p>
+    <p class="muted">Search by title, author or ISBN.</p>
   </div>
 </div>
 
-<% if @books.any? %>
-  <div id="books" class="book-grid">
-    <%= render @books %>
-  </div>
-<% else %>
-  <div class="empty-state">
-    <%= render "shared/book_icon", size: 48 %>
-    <h2>Your shelf is empty</h2>
-    <p class="muted">Add your first book to start building your collection.</p>
-    <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>
-  </div>
+<%# Typing in the box submits the form (after a short pause) into the
+    books_results frame below, so only the results change and the box keeps
+    focus. Without JavaScript it's an ordinary search form. %>
+<%= form_with url: books_path, method: :get, class: "search-form", html: { role: "search" },
+      data: { controller: "search", turbo_frame: "books_results" } do |form| %>
+  <%= form.label :q, "Search books", class: "visually-hidden" %>
+  <%= form.search_field :q, value: @query, class: "input search-input", autocomplete: "off",
+        placeholder: "Search by title, author or ISBN…",
+        data: { action: "input->search#queue search->search#submitNow" } %>
+  <%= form.submit "Search", name: nil, class: "btn btn-secondary" %>
+<% end %>
+
+<%# target: "_top" makes links inside the frame (book cards, "Clear search") load
+    the whole page, so "Clear search" also empties the search box. %>
+<%= turbo_frame_tag "books_results", target: "_top" do %>
+  <% if @query.present? %>
+    <p class="search-summary" aria-live="polite">
+      <%= pluralize(@books.size, "book") %> matching “<strong><%= @query %></strong>”
+      · <%= link_to "Clear search", books_path %>
+    </p>
+  <% else %>
+    <p class="search-summary muted"><%= pluralize(@books.size, "book") %> on the shelf</p>
+  <% end %>
+
+  <% if @books.any? %>
+    <div id="books" class="book-grid">
+      <%= render @books %>
+    </div>
+  <% elsif @query.present? %>
+    <div class="empty-state">
+      <h2>No books match “<%= @query %>”</h2>
+      <p class="muted">Check the spelling, try fewer words, or search by the author's surname.</p>
+      <%= link_to "Show all books", books_path, class: "btn btn-secondary" %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <%= render "shared/book_icon", size: 48 %>
+      <h2>Your shelf is empty</h2>
+      <p class="muted">Add your first book to start building your collection.</p>
+      <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
 <% end %>

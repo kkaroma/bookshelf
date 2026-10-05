@@ -22,6 +22,16 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # star buttons whose visible text is just "★".
   Capybara.enable_aria_label = true
 
+  # Headless Chrome (since v154 on macOS) occasionally crashes mid-test. Without
+  # this, every later test fails on the dead browser ("invalid session id").
+  # Throwing it away makes Capybara start a fresh Chrome for the next test, so a
+  # crash costs one test instead of the whole run.
+  def before_teardown
+    Capybara.current_session.driver.quit if chrome_crashed?
+  ensure
+    super
+  end
+
   # Signs in through the real sign-in form, like a person would.
   def sign_in_as(user, password: "password")
     visit new_session_path
@@ -33,4 +43,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     click_button "Sign in"
     assert_selector ".nav-user-name", text: user.name
   end
+
+  private
+    def chrome_crashed?
+      failures.any? do |failure|
+        failure.respond_to?(:error) && failure.error.is_a?(Selenium::WebDriver::Error::InvalidSessionIdError)
+      end
+    end
 end

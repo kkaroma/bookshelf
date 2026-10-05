@@ -149,6 +149,38 @@ class BookTest < ActiveSupport::TestCase
     assert_not book.reload.cover.attached?
   end
 
+  # --- Search ---
+
+  test "search finds books by title, ignoring case and partial words" do
+    assert_equal [ books(:hobbit) ], Book.search("hobbit").to_a
+    assert_equal [ books(:hobbit) ], Book.search("HOBB").to_a
+  end
+
+  test "search looks at the subtitle and the author" do
+    assert_equal [ books(:hobbit) ], Book.search("there and back").to_a
+    assert_equal [ books(:dune) ], Book.search("herbert").to_a
+  end
+
+  test "every word must match somewhere in the book" do
+    assert_equal [ books(:hobbit) ], Book.search("tolkien hobbit").to_a
+    assert_empty Book.search("tolkien dune")
+  end
+
+  test "search finds a book by ISBN, with or without dashes" do
+    books(:hobbit).update!(isbn: "9780547928227")
+    assert_equal [ books(:hobbit) ], Book.search("978-0-547-92822-7").to_a
+    assert_equal [ books(:hobbit) ], Book.search("92822").to_a
+  end
+
+  test "search treats % and _ as ordinary characters" do
+    assert_empty Book.search("%")
+    assert_empty Book.search("_")
+  end
+
+  test "an empty search returns every book" do
+    assert_equal Book.count, Book.search("   ").count
+  end
+
   test "deleting a user deletes their books" do
     assert_difference("Book.count", -1) { users(:one).destroy }
   end

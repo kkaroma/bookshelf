@@ -4,8 +4,11 @@ class BooksController < ApplicationController
   helper_method :can_edit?
 
   # GET /books or /books.json
+  # /books?q=hobbit searches; without q it lists every book.
   def index
+    @query = params[:q].to_s.squish
     @books = Book.with_attached_cover.includes(:user).order(:title)
+    @books = @books.search(@query) if @query.present?
   end
 
   # GET /books/1 or /books/1.json
