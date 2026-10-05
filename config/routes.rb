@@ -1,4 +1,17 @@
 Rails.application.routes.draw do
+  # One main address: when CANONICAL_HOST is set (e.g. "bookshelf.co.tz"), any
+  # other address (www., the old .fly.dev one) redirects there permanently,
+  # keeping the page and its query string. /up is left alone because Fly's
+  # health check calls it by the machine's internal address.
+  constraints ->(request) {
+    canonical = ENV["CANONICAL_HOST"].presence
+    canonical && request.host != canonical && request.path != "/up"
+  } do
+    match "(*path)", via: :all, to: redirect(status: 301) { |_params, request|
+      "https://#{ENV["CANONICAL_HOST"]}#{request.fullpath}"
+    }
+  end
+
   resource :session
   resource :registration, only: %i[ new create ]
   resources :passwords, param: :token

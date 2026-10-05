@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Bookshelf: a multi-user app for cataloguing the books you own, reviewing, rating and discussing them, following other readers, and swapping books. Stack: Ruby 3.4.4, Rails 8.1.4, PostgreSQL, Hotwire (Turbo + Stimulus), importmap (no Node), Propshaft, Minitest. Live at https://kkaroma-bookshelf.fly.dev.
+Bookshelf: a multi-user app for cataloguing the books you own, reviewing, rating and discussing them, following other readers, and swapping books. Stack: Ruby 3.4.4, Rails 8.1.4, PostgreSQL, Hotwire (Turbo + Stimulus), importmap (no Node), Propshaft, Minitest. Live at https://bookshelf.co.tz (the Fly app is also reachable at kkaroma-bookshelf.fly.dev, which redirects).
 
 ## Working with the owner
 
@@ -62,6 +62,7 @@ Hand-written CSS in `app/assets/stylesheets/application.css` (no Tailwind/build 
 
 - **Database**: PostgreSQL everywhere (`bookshelf_development` / `bookshelf_test` on the local Homebrew server; production reads `DATABASE_URL`). Production uses ONE database for everything: Solid Cache, Solid Queue and Solid Cable tables come from ordinary migrations (`create_solid_*_tables`) and their config has no `connects_to`/`database:` — don't reintroduce separate cache/queue/cable databases, since a `url:` overrides any `database:` name.
 - **Background jobs**: Solid Queue, run inside Puma in production (`SOLID_QUEUE_IN_PUMA=true`); `bin/jobs` runs it standalone; recurring jobs go in `config/recurring.yml`.
+- **Domain**: `bookshelf.co.tz` (registrar KiliHost, DNS on `ns1/ns2.mysitehosted.com`): A/AAAA to the app's Fly IPs, `www` CNAME to the apex, and `_acme-challenge` CNAMEs to `*.flydns.net` for Fly's Let's Encrypt certificates (`fly certs list`). `CANONICAL_HOST` (in `fly.toml`) makes `config/routes.rb` 301-redirect every other host to it, except `/up`, which Fly health-checks by internal address; `APP_HOST` sets mailer link hosts.
 - **Deployment**: Fly.io app `kkaroma-bookshelf` in `fra`, configured in `fly.toml`: one machine that auto-stops when idle and auto-starts on the next request (cold start ~10s). The database is Neon Postgres (Frankfurt, free tier, direct/non-pooled URL); letting the app sleep is what keeps Neon inside its free compute hours. Covers use the `tigris` Active Storage service (private bucket `kkaroma-bookshelf-covers`). Secrets: `DATABASE_URL`, `RAILS_MASTER_KEY`, `ADMIN_PASSWORD`, and the `AWS_*`/`BUCKET_NAME` set by `fly storage create`. `bin/docker-entrypoint` runs `db:prepare` on every boot (which also seeds an empty database). The generated Kamal files (`config/deploy.yml`, `.kamal/`) are unused. Email sending in production needs the SMTP secrets above.
 
 ## Gotchas

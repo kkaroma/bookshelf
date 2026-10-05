@@ -11,7 +11,10 @@ console_command = "/rails/bin/rails console"
 [env]
   # Run Solid Queue (background jobs) inside the web server - no separate worker needed.
   SOLID_QUEUE_IN_PUMA = "true"
-  APP_HOST = "kkaroma-bookshelf.fly.dev"
+  # The site's main address: links in emails use it, and every other address
+  # (www., kkaroma-bookshelf.fly.dev) redirects to it (see config/routes.rb).
+  APP_HOST = "bookshelf.co.tz"
+  CANONICAL_HOST = "bookshelf.co.tz"
   # Thruster (the web front door) listens on 8080: the app runs as a normal
   # user, and on Fly only root may use ports below 1024 such as 80.
   HTTP_PORT = "8080"

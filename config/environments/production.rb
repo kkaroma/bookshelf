@@ -59,7 +59,7 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "kkaroma-bookshelf.fly.dev"), protocol: "https" }
+  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "bookshelf.co.tz"), protocol: "https" }
 
   # Outgoing email goes through any SMTP email service (Brevo, Postmark,
   # Resend, ...). Its details are Fly secrets: SMTP_ADDRESS, SMTP_PORT,
