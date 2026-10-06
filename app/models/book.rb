@@ -2,6 +2,7 @@ class Book < ApplicationRecord
   belongs_to :user, counter_cache: true # keeps users.books_count up to date
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
+  has_many :loans, -> { order(lent_on: :desc, id: :desc) }, dependent: :destroy
   has_many :exchange_requests, dependent: :destroy
   # Requests where this book was offered in return; if it's deleted they just lose the offer.
   has_many :offered_in_exchange_requests, class_name: "ExchangeRequest",
@@ -30,6 +31,18 @@ class Book < ApplicationRecord
   # Books whose owners are willing to swap them.
   scope :for_exchange, -> { where(available_for_exchange: true) }
 
+  GENRES = [
+    "Fiction", "Fantasy", "Science fiction", "Mystery & thriller", "Romance",
+    "Historical fiction", "Children's", "Young adult", "Poetry",
+    "Non-fiction", "Biography & memoir", "History", "Science & nature",
+    "Business & money", "Self-help", "Religion & spirituality", "Cookery",
+    "Art & design", "Other"
+  ].freeze
+
+  # The owner's reading of their copy. nil means "not set".
+  enum :reading_status, { want_to_read: 0, reading: 1, read: 2 }, validate: { allow_nil: true }
+  READING_STATUS_LABELS = { "want_to_read" => "Want to read", "reading" => "Reading", "read" => "Read" }.freeze
+
   COVER_TYPES = %w[ image/jpeg image/png image/webp ].freeze
   MAX_COVER_SIZE = 5.megabytes
 
@@ -45,6 +58,8 @@ class Book < ApplicationRecord
   attribute :remove_cover, :boolean, default: false   # "Remove current cover" checkbox
   attribute :open_library_cover_id, :integer          # the cover picked from "Find cover online"
 
+  normalizes :genre, with: ->(genre) { genre.strip.presence }
+
   # "978-0-547-92822-7" -> "9780547928227"
   normalizes :isbn, with: ->(isbn) { isbn.upcase.gsub(/[^0-9X]/, "").presence }
 
@@ -54,6 +69,8 @@ class Book < ApplicationRecord
   validates :title, :author, presence: true
   validates :subtitle, length: { maximum: 200 }
   validate :isbn_is_valid, if: -> { isbn.present? }
+  validates :genre, inclusion: { in: GENRES, message: "isn't one of the listed genres" }, allow_nil: true
+  validate :reading_dates_make_sense
   validate :attach_open_library_cover, if: -> { open_library_cover_id.present? }
   validate :cover_is_a_reasonable_image
 
@@ -85,6 +102,29 @@ class Book < ApplicationRecord
   # A cover that's saved and ready to show (not a just-uploaded file that failed validation).
   def cover_ready?
     cover.attached? && cover.blob.persisted?
+  end
+
+  # The loan that hasn't come back yet, if the book is lent out.
+  def current_loan
+    loans.outstanding.first
+  end
+
+  def reading_status_label
+    READING_STATUS_LABELS[reading_status]
+  end
+
+  # Changes the reading status and fills in the dates that go with it:
+  # starting to read records today as the start date, finishing records
+  # today as the finish date. Dates already filled in are kept.
+  def update_reading_status!(status)
+    today = Date.current
+    case status.presence
+    when "want_to_read" then update!(reading_status: status, started_on: nil, finished_on: nil)
+    when "reading"      then update!(reading_status: status, started_on: started_on || today, finished_on: nil)
+    when "read"         then update!(reading_status: status, finished_on: finished_on || today)
+    when nil            then update!(reading_status: nil, started_on: nil, finished_on: nil)
+    else raise ArgumentError, "Unknown reading status: #{status}"
+    end
   end
 
   # Anyone signed in can rate a book, except the person who added it.
@@ -127,6 +167,15 @@ class Book < ApplicationRecord
       @downloaded_cover_id = open_library_cover_id
     rescue OpenLibrary::Error => error
       errors.add(:cover, "couldn't be downloaded: #{error.message}. Try again, or upload an image instead")
+    end
+
+    def reading_dates_make_sense
+      today = Date.current
+      errors.add(:started_on, "can't be in the future") if started_on && started_on > today
+      errors.add(:finished_on, "can't be in the future") if finished_on && finished_on > today
+      if started_on && finished_on && finished_on < started_on
+        errors.add(:finished_on, "can't be before the date you started")
+      end
     end
 
     def cover_is_a_reasonable_image

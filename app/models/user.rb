@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :books, dependent: :destroy
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
+  has_many :reading_goals, dependent: :destroy
 
   # Following: a user follows many users and is followed by many users.
   # Both sides go through the same follows table, looked at from each end.
@@ -31,6 +32,10 @@ class User < ApplicationRecord
                             uniqueness: true,
                             format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 8 }, allow_nil: true
+
+  def reading_goal_for(year = Date.current.year)
+    reading_goals.find_by(year: year)
+  end
 
   # The site must always have at least one admin.
   def last_admin?

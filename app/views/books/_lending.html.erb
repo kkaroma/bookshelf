@@ -1,0 +1,63 @@
+<%# The owner's private Lending box: who has the book now (with "Mark as
+    returned"), or a form to lend it, plus past loans. A Turbo Frame, so only
+    this box refreshes. %>
+<% if book.owned_by?(Current.user) %>
+  <% loan = book.current_loan %>
+  <%= turbo_frame_tag dom_id(book, :lending), class: "lending" do %>
+    <div class="lending-header">
+      <h2>Lending</h2>
+      <span class="muted">Only you can see this.</span>
+    </div>
+
+    <% if loan %>
+      <div class="loan-current <%= "is-overdue" if loan.overdue? %>">
+        <p>
+          Lent to <strong><%= loan.borrower_name %></strong> since <%= l(loan.lent_on, format: :long) %>
+          <% if loan.due_on %>
+            · <%= loan.overdue? ? "was due back" : "due back" %> <%= l(loan.due_on, format: :long) %>
+            <% if loan.overdue? %><span class="overdue-tag">Overdue</span><% end %>
+          <% end %>
+        </p>
+        <% if loan.note %><p class="muted loan-note"><%= loan.note %></p><% end %>
+        <%= button_to "Mark as returned", return_book_loan_path(book, loan), method: :patch, class: "btn btn-secondary btn-sm" %>
+      </div>
+    <% else %>
+      <details class="lend-form">
+        <summary>Lend this book</summary>
+        <%= form_with model: Loan.new(lent_on: Date.current), url: book_loans_path(book), class: "form" do |form| %>
+          <div class="field">
+            <%= form.label :borrower_name, "Lent to" %>
+            <%= form.text_field :borrower_name, required: true, maxlength: 100, placeholder: "Who's borrowing it?", class: "input" %>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <%= form.label :lent_on, "Lent on" %>
+              <%= form.date_field :lent_on, required: true, max: Date.current, class: "input" %>
+            </div>
+            <div class="field">
+              <%= form.label :due_on, "Due back" %>
+              <%= form.date_field :due_on, class: "input" %>
+              <span class="field-hint">Optional</span>
+            </div>
+          </div>
+          <div class="field">
+            <%= form.label :note %>
+            <%= form.text_field :note, maxlength: 500, placeholder: "e.g. lent at book club", class: "input" %>
+          </div>
+          <div class="form-actions">
+            <%= form.submit "Record loan", class: "btn btn-primary btn-sm" %>
+          </div>
+        <% end %>
+      </details>
+    <% end %>
+
+    <% past = book.loans.returned.limit(5) %>
+    <% if past.any? %>
+      <ul class="loan-history">
+        <% past.each do |old| %>
+          <li><%= old.borrower_name %> · <%= l(old.lent_on, format: :short) %> – <%= l(old.returned_on, format: :short) %></li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% end %>
+<% end %>

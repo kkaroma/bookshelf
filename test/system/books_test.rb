@@ -467,4 +467,53 @@ class BooksTest < ApplicationSystemTestCase
     assert_selector ".book-card", text: "Sapiens"
     assert_selector ".book-card", text: "Project Hail Mary"
   end
+
+  test "filtering and sorting the Books page" do
+    books(:hobbit).update!(genre: "Fantasy")
+    visit books_path
+    assert_selector ".book-card", count: 2
+
+    select "Fantasy", from: "Genre"
+    assert_selector ".book-card", count: 1, text: "The Hobbit"
+    assert_current_path books_path(genre: "Fantasy")
+
+    select "All genres", from: "Genre"
+    check "For exchange only"
+    assert_selector ".book-card", count: 1, text: "Dune"
+
+    uncheck "For exchange only"
+    select "Publication year", from: "Sort"
+    assert_selector ".book-card", count: 2
+    assert_equal [ "Dune", "The Hobbit" ], all(".book-card-title").map(&:text) # 1965 before 1937
+  end
+
+  test "marking my reading and setting a reading goal" do
+    visit book_path(books(:hobbit))
+    click_on "Reading"
+    assert_selector ".status-button.is-current", text: "Reading"
+    assert_text "Started"
+
+    click_on "Read"
+    assert_selector ".status-button.is-current", text: "Read"
+    assert_text "Finished"
+
+    visit root_path
+    fill_in "Books to read in #{Date.current.year}", with: "10"
+    click_on "Set goal"
+    assert_selector ".reading-goal-count", text: "1 of 10 books read"
+  end
+
+  test "lending a book and getting it back" do
+    visit book_path(books(:hobbit))
+    within ".lending" do
+      find("summary", text: "Lend this book").click
+      fill_in "Lent to", with: "Bob"
+      click_on "Record loan"
+      assert_text "Lent to Bob since"
+
+      click_on "Mark as returned"
+      assert_text "Lend this book"
+      assert_selector ".loan-history li", text: "Bob"
+    end
+  end
 end

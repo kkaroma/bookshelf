@@ -53,6 +53,25 @@
   </section>
 <% end %>
 
+<%= render "home/reading_goal", goal: @reading_goal %>
+
+<% if @loans_out.any? %>
+  <section class="home-section" id="lent_out">
+    <div class="section-heading"><h2>Lent out</h2></div>
+    <ul class="lent-out-list card">
+      <% @loans_out.each do |loan| %>
+        <li class="<%= "is-overdue" if loan.overdue? %>">
+          <%= link_to loan.book.title, loan.book %> — <%= loan.borrower_name %>
+          <span class="muted">
+            since <%= l(loan.lent_on, format: :short) %><% if loan.due_on %>, due <%= l(loan.due_on, format: :short) %><% end %>
+          </span>
+          <% if loan.overdue? %><span class="overdue-tag">Overdue</span><% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
 <%= render "home/shelf", id: "following", title: "From people you follow", books: @followed_books,
       empty: safe_join([ "You're not following anyone with books yet. ", link_to("Find members to follow", users_path), "." ]) %>
 

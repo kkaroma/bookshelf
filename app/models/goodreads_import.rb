@@ -11,6 +11,8 @@ require "csv"
 class GoodreadsImport
   # Goodreads' "Exclusive Shelf" values, with the names we show.
   SHELVES = { "read" => "Read", "currently-reading" => "Currently reading", "to-read" => "Want to read" }.freeze
+  # Each Goodreads shelf becomes a reading status on the imported book.
+  STATUS_FOR_SHELF = { "read" => "read", "currently-reading" => "reading", "to-read" => "want_to_read" }.freeze
   DEFAULT_SHELVES = %w[ read currently-reading ].freeze
   MAX_ROWS = 2_000
   COVER_JOB_SPACING = 5.seconds # spread Open Library lookups out (its ISBN search allows ~100 per 5 minutes)
@@ -38,7 +40,8 @@ class GoodreadsImport
           next
         end
 
-        attributes = attributes_from(row)
+        attributes = attributes_from(row).merge(reading_status: STATUS_FOR_SHELF[shelf])
+        attributes[:finished_on] = date_from(row["Date Read"]) if shelf == "read"
         title_key = [ attributes[:title], attributes[:author] ].map { |value| value.to_s.downcase.squish }
         if (attributes[:isbn] && seen_isbns.include?(attributes[:isbn])) || seen_titles.include?(title_key)
           duplicates += 1
@@ -101,6 +104,14 @@ class GoodreadsImport
     def isbn_from(value)
       digits = value.to_s.upcase.gsub(/[^0-9X]/, "")
       digits if Book.valid_isbn?(digits)
+    end
+
+    # Goodreads dates look like "2024/03/02". Future or unreadable dates are dropped.
+    def date_from(value)
+      date = Date.strptime(value.to_s, "%Y/%m/%d")
+      date if date <= Date.current
+    rescue Date::Error
+      nil
     end
 
     def year_from(value)

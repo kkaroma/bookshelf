@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_075855) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,7 +56,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_075855) do
     t.decimal "average_rating", precision: 2, scale: 1
     t.boolean "available_for_exchange", default: false, null: false
     t.string "isbn"
+    t.string "genre"
+    t.integer "reading_status"
+    t.date "started_on"
+    t.date "finished_on"
     t.index ["available_for_exchange"], name: "index_books_on_available_for_exchange"
+    t.index ["genre"], name: "index_books_on_genre"
+    t.index ["user_id", "finished_on"], name: "index_books_on_user_id_and_finished_on"
     t.index ["user_id"], name: "index_books_on_user_id"
   end
 
@@ -97,6 +103,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_075855) do
     t.index ["follower_id"], name: "index_follows_on_follower_id"
   end
 
+  create_table "loans", force: :cascade do |t|
+    t.bigint "book_id", null: false
+    t.string "borrower_name", null: false
+    t.date "lent_on", null: false
+    t.date "due_on"
+    t.date "returned_on"
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_loans_on_book_id"
+    t.index ["book_id"], name: "index_loans_one_open_per_book", unique: true, where: "(returned_on IS NULL)"
+  end
+
   create_table "ratings", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "book_id", null: false
@@ -106,6 +125,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_075855) do
     t.index ["book_id"], name: "index_ratings_on_book_id"
     t.index ["user_id", "book_id"], name: "index_ratings_on_user_id_and_book_id", unique: true
     t.index ["user_id"], name: "index_ratings_on_user_id"
+  end
+
+  create_table "reading_goals", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.integer "year", null: false
+    t.integer "target", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "year"], name: "index_reading_goals_on_user_id_and_year", unique: true
+    t.index ["user_id"], name: "index_reading_goals_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -314,8 +343,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_075855) do
   add_foreign_key "exchange_requests", "users", column: "requester_id"
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
+  add_foreign_key "loans", "books"
   add_foreign_key "ratings", "books"
   add_foreign_key "ratings", "users"
+  add_foreign_key "reading_goals", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "solid_queue_batch_executions", "solid_queue_batches", column: "batch_id", on_delete: :cascade
   add_foreign_key "solid_queue_batch_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

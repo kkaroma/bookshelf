@@ -61,6 +61,18 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select ".empty-state a[href=?]", user_path(@alice), text: "Show all books"
   end
 
+  test "profiles can filter by reading status and show what's being read" do
+    books(:hobbit).update_reading_status!("reading")
+
+    get user_url(@alice)
+    assert_select "select[name=status]"
+    assert_select ".currently-reading", /I'm currently reading:\s+The Hobbit/
+
+    get user_url(@alice, status: "read")
+    assert_select ".book-card", 0
+    assert_select ".empty-state h2", "No books match these filters"
+  end
+
   test "a profile with no books says so, without a search summary" do
     newbie = User.create!(name: "Nora New", email_address: "nora@example.com", password: "password123")
     get user_url(newbie)

@@ -19,12 +19,22 @@
       <% if @book.isbn %>
         <span class="pill">ISBN <%= @book.isbn %></span>
       <% end %>
+      <% if @book.genre %>
+        <span class="pill"><%= @book.genre %></span>
+      <% end %>
+      <% if @book.reading_status && !@book.owned_by?(Current.user) %>
+        <span class="pill">
+          <%= @book.user.name.split.first %>
+          <%= { "want_to_read" => "wants to read this", "reading" => "is reading this", "read" => "has read this" }[@book.reading_status] %>
+        </span>
+      <% end %>
       <% if @book.available_for_exchange? %>
         <span class="pill pill-exchange">⇄ Available for exchange</span>
       <% end %>
       <span class="pill">Added by <%= @book.owned_by?(Current.user) ? "you" : link_to(@book.user.name, @book.user) %> <%= time_ago_in_words(@book.created_at) %> ago</span>
     </div>
 
+    <%= render "books/reading_status", book: @book %>
     <%= render "books/rating", book: @book, my_rating: @my_rating %>
     <%= render "books/exchange_panel", book: @book, my_pending_request: @my_pending_request,
                pending_requests_count: @pending_requests_count %>
@@ -36,6 +46,7 @@
     <% end %>
 
     <%= render "books/review", book: @book %>
+    <%= render "books/lending", book: @book %>
 
     <% if can_edit?(@book) %>
       <div class="actions">

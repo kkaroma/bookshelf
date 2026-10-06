@@ -22,6 +22,9 @@ class HomeController < ApplicationController
     def dashboard
       user = Current.user
       @getting_started = GettingStarted.new(user)
+      @reading_goal = user.reading_goal_for
+      @loans_out = Loan.outstanding.joins(:book).where(books: { user_id: user.id })
+                       .includes(:book).order(Arel.sql("due_on ASC NULLS LAST"), :lent_on)
       @waiting_requests_count = user.received_exchange_requests.pending.count
 
       @followed_books = Book.where(user_id: user.active_follows.select(:followed_id))

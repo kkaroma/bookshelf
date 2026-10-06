@@ -37,6 +37,17 @@ class GoodreadsImportTest < ActiveSupport::TestCase
     assert_nil dune.review
   end
 
+  test "Goodreads shelves become reading statuses, with the date read" do
+    sapiens, dune = import.imported
+    assert sapiens.read?
+    assert_equal Date.new(2024, 5, 20), sapiens.finished_on
+    assert dune.reading?
+    assert_nil dune.finished_on
+
+    want = import(shelves: %w[ to-read ]).imported.first
+    assert want.want_to_read?
+  end
+
   test "you choose which shelves to import" do
     result = import(shelves: %w[ to-read ])
     assert_equal [ "Project Hail Mary" ], result.imported.map(&:title)

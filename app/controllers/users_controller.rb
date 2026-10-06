@@ -9,10 +9,10 @@ class UsersController < ApplicationController
 
   # /users/:id?q=hobbit searches this person's books only.
   def show
-    @query = params[:q].to_s.squish
-    books = @user.books.with_attached_cover.includes(:user).order(:title)
-    books = books.search(@query) if @query.present?
+    @filters = BookFilters.new(params, allow_status: true)
+    books = @filters.apply(@user.books.with_attached_cover.includes(:user, :loans))
     @pagination = Pagination.new(books, page: params[:page], per_page: 24)
+    @currently_reading = @user.books.reading.order(started_on: :desc).limit(3)
     @books = @pagination.records
   end
 

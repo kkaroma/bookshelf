@@ -24,10 +24,17 @@
 </section>
 
 <% mine = @user == Current.user %>
+<% if @currently_reading.any? %>
+  <p class="currently-reading">
+    <strong><%= mine ? "I'm currently reading" : "Currently reading" %>:</strong>
+    <%= safe_join(@currently_reading.map { |book| link_to(book.title, book) }, ", ") %>
+  </p>
+<% end %>
+
 <h2 class="section-title"><%= mine ? "My books" : "#{@user.name}'s books" %></h2>
 
 <%= render layout: "books/search", locals: {
-      url: user_path(@user), query: @query, books: @books, pagination: @pagination,
+      url: user_path(@user), filters: @filters, books: @books, pagination: @pagination, show_status: true,
       label: mine ? "Search my books" : "Search #{@user.name}'s books",
       placeholder: mine ? "Search my books by title, author or ISBN…" : "Search #{@user.name.split.first}'s books…",
       total_label: pluralize(@pagination.total_count, "book") } do %>

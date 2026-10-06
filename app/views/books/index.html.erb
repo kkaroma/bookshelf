@@ -1,4 +1,4 @@
-<% content_for :title, @query.present? ? "Search: #{@query}" : "Books" %>
+<% content_for :title, @filters.query.present? ? "Search: #{@filters.query}" : "Books" %>
 
 <div class="page-header">
   <div>
@@ -9,7 +9,7 @@
 </div>
 
 <%= render layout: "books/search", locals: {
-      url: books_path, query: @query, books: @books, pagination: @pagination,
+      url: books_path, filters: @filters, books: @books, pagination: @pagination, show_exchange: true,
       label: "Search books", placeholder: "Search by title, author or ISBN…",
       total_label: "#{pluralize(@pagination.total_count, "book")} on the shelf" } do %>
   <div class="empty-state">

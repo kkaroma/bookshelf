@@ -28,4 +28,10 @@
 #       enabled: "ON"
 
 en:
+  # How dates look across the site, e.g. l(date, format: :long) -> "4 October 2026".
+  date:
+    formats:
+      default: "%-d %b %Y"
+      long: "%-d %B %Y"
+      short: "%-d %b"
   hello: "Hello world"

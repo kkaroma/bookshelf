@@ -1,0 +1,38 @@
+<%# This year's reading goal: a progress bar, or a small form to set one.
+    A Turbo Frame, so setting or changing the goal only refreshes this card. %>
+<% year = Date.current.year %>
+<%= turbo_frame_tag "reading_goal", class: "card reading-goal" do %>
+  <% if goal %>
+    <div class="reading-goal-header">
+      <h2>Reading goal <%= year %></h2>
+      <span class="muted"><%= goal.percent %>%</span>
+    </div>
+    <p class="reading-goal-count">
+      <strong><%= goal.progress %></strong> of <%= pluralize(goal.target, "book") %> read
+      <% if goal.reached? %><span class="goal-reached">🎉 Goal reached!</span><% end %>
+    </p>
+    <div class="progress" role="progressbar" aria-label="Reading goal progress"
+         aria-valuemin="0" aria-valuemax="<%= goal.target %>" aria-valuenow="<%= [ goal.progress, goal.target ].min %>">
+      <span style="width: <%= goal.percent %>%"></span>
+    </div>
+
+    <details class="reading-goal-change">
+      <summary>Change goal</summary>
+      <%= form_with model: goal, url: reading_goal_path, method: :patch, class: "reading-goal-form" do |form| %>
+        <%= form.label :target, "Books to read in #{year}", class: "visually-hidden" %>
+        <%= form.number_field :target, min: 1, max: 1000, required: true, class: "input" %>
+        <%= form.submit "Save", class: "btn btn-secondary btn-sm" %>
+      <% end %>
+      <%= button_to "Remove goal", reading_goal_path, method: :delete, class: "link-button link-button-danger" %>
+    </details>
+  <% else %>
+    <h2>Set a reading goal for <%= year %></h2>
+    <p class="muted">How many books would you like to finish this year? Books you mark as “Read” count towards it.</p>
+    <%= form_with model: ReadingGoal.new(target: 12), url: reading_goal_path, method: :patch, class: "reading-goal-form" do |form| %>
+      <%= form.label :target, "Books to read in #{year}", class: "visually-hidden" %>
+      <%= form.number_field :target, min: 1, max: 1000, required: true, class: "input" %>
+      <span>books</span>
+      <%= form.submit "Set goal", class: "btn btn-primary btn-sm" %>
+    <% end %>
+  <% end %>
+<% end %>

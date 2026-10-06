@@ -1,30 +1,58 @@
-<%# Live search over a list of books, used on the Books page and on profiles.
-    Rendered as a layout partial: the block passed in is shown when the list
-    has no books at all (before any searching).
+<%# Search, filters and sorting over a list of books, used on the Books page and
+    on profiles. Rendered as a layout partial: the block passed in is shown when
+    the list has no books at all (before any searching or filtering).
 
-    Locals: url (where the form submits), query, books (this page's books),
-    pagination, label (for the box), placeholder, total_label (e.g. "12 books
-    on the shelf").
+    Locals: url (where the form submits), filters (BookFilters), books (this
+    page's books), pagination, label (for the box), placeholder, total_label
+    (e.g. "12 books on the shelf"), show_status (profile only), show_exchange.
 
-    Typing submits the form (after a short pause) into the books_results frame,
-    so only the results change and the box keeps focus. Without JavaScript it's
-    an ordinary search form. %>
+    Typing, or changing a filter, submits the form into the books_results frame,
+    so only the results change. Without JavaScript it's an ordinary form. %>
+<% query = filters.query %>
 <%= form_with url: url, method: :get, class: "search-form", html: { role: "search" },
       data: { controller: "search", turbo_frame: "books_results" } do |form| %>
-  <%= form.label :q, label, class: "visually-hidden" %>
-  <%= form.search_field :q, value: query, class: "input search-input", autocomplete: "off",
-        placeholder: placeholder,
-        data: { action: "input->search#queue search->search#submitNow" } %>
-  <%= form.submit "Search", name: nil, class: "btn btn-secondary" %>
+  <div class="search-row">
+    <%= form.label :q, label, class: "visually-hidden" %>
+    <%= form.search_field :q, value: query, class: "input search-input", autocomplete: "off",
+          placeholder: placeholder,
+          data: { action: "input->search#queue search->search#submitNow" } %>
+    <%= form.submit "Search", name: nil, class: "btn btn-secondary" %>
+  </div>
+
+  <div class="filter-row">
+    <%= form.label :genre, "Genre", class: "visually-hidden" %>
+    <%= form.select :genre, Book::GENRES, { include_blank: "All genres", selected: filters.genre },
+          class: "input filter-select", data: { action: "change->search#submitNow" } %>
+
+    <% if local_assigns[:show_status] %>
+      <%= form.label :status, "Reading status", class: "visually-hidden" %>
+      <%= form.select :status, Book::READING_STATUS_LABELS.invert, { include_blank: "Any reading status", selected: filters.status },
+            class: "input filter-select", data: { action: "change->search#submitNow" } %>
+    <% end %>
+
+    <% if local_assigns[:show_exchange] %>
+      <label class="filter-check">
+        <%= form.check_box :exchange, { checked: filters.exchange_only?, data: { action: "change->search#submitNow" } }, "1", nil %>
+        For exchange only
+      </label>
+    <% end %>
+
+    <span class="filter-sort">
+      <%= form.label :sort, "Sort" %>
+      <%= form.select :sort, BookFilters::SORTS.invert, { selected: filters.sort },
+            class: "input filter-select", data: { action: "change->search#submitNow" } %>
+    </span>
+  </div>
 <% end %>
 
-<%# target: "_top" makes links inside the frame (book cards, "Clear search") load
-    the whole page, so "Clear search" also empties the search box. %>
+<%# target: "_top" makes links inside the frame (book cards, "Clear") load the
+    whole page, so "Clear" also resets the search box and filters. %>
 <%= turbo_frame_tag "books_results", target: "_top" do %>
-  <% if query.present? %>
+  <% if filters.filtering? %>
     <p class="search-summary" aria-live="polite">
-      <%= pluralize(pagination.total_count, "book") %> matching “<strong><%= query %></strong>”
-      · <%= link_to "Clear search", url %>
+      <%= pluralize(pagination.total_count, "book") %>
+      <% if query.present? %>matching “<strong><%= query %></strong>”<% end %>
+      · <%= link_to "Clear #{query.present? ? "search" : "filters"}", url %>
     </p>
   <% elsif books.any? %>
     <p class="search-summary muted"><%= total_label %></p>
@@ -35,10 +63,10 @@
       <%= render books %>
     </div>
     <%= render "shared/pagination", pagination: pagination %>
-  <% elsif query.present? %>
+  <% elsif filters.filtering? %>
     <div class="empty-state">
-      <h2>No books match “<%= query %>”</h2>
-      <p class="muted">Check the spelling, try fewer words, or search by the author's surname.</p>
+      <h2><%= query.present? ? "No books match “#{query}”" : "No books match these filters" %></h2>
+      <p class="muted">Check the spelling, try fewer words, or loosen the filters.</p>
       <%= link_to "Show all books", url, class: "btn btn-secondary" %>
     </div>
   <% else %>

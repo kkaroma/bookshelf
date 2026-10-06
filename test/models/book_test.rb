@@ -149,6 +149,36 @@ class BookTest < ActiveSupport::TestCase
     assert_not book.reload.cover.attached?
   end
 
+  # --- Genre & reading status ---
+
+  test "genre must come from the list" do
+    assert Book.new(user: users(:one), title: "T", author: "A", genre: "Fantasy").valid?
+    assert Book.new(user: users(:one), title: "T", author: "A", genre: "  ").tap(&:valid?).genre.nil?
+    book = Book.new(user: users(:one), title: "T", author: "A", genre: "Vampire poetry")
+    assert_not book.valid?
+    assert_includes book.errors[:genre], "isn't one of the listed genres"
+  end
+
+  test "reading dates can't be in the future or out of order" do
+    book = Book.new(user: users(:one), title: "T", author: "A", started_on: Date.current + 1)
+    assert_not book.valid?
+
+    book = Book.new(user: users(:one), title: "T", author: "A", started_on: Date.new(2026, 5, 2), finished_on: Date.new(2026, 5, 1))
+    assert_not book.valid?
+    assert_includes book.errors[:finished_on], "can't be before the date you started"
+  end
+
+  test "update_reading_status! fills in and clears dates" do
+    book = books(:hobbit)
+    book.update_reading_status!("reading")
+    assert_equal Date.current, book.started_on
+
+    book.update_reading_status!("want_to_read")
+    assert_nil book.started_on
+
+    assert_raises(ArgumentError) { book.update_reading_status!("devoured") }
+  end
+
   # --- Search ---
 
   test "search finds books by title, ignoring case and partial words" do

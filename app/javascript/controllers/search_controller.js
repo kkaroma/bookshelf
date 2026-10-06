@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Submits the search form shortly after the person stops typing, so results
+// Submits the search form shortly after the person stops typing (or at once
+// when a filter changes), so results
 // update as they type without sending a request for every key press. The
 // results load into a Turbo Frame; this controller keeps the address bar in
 // step (so reloading or sharing the page keeps the search).
@@ -27,10 +28,13 @@ export default class extends Controller {
 
   // Replace (not add) the history entry: typing shouldn't make the Back button
   // step through every search. Keeping history.state preserves Turbo's own data.
+  // Every filled-in field (search, genre, sort…) goes into the address.
   #updateAddressBar() {
     const url = new URL(this.element.action, window.location.href)
-    const query = new FormData(this.element).get("q")?.trim()
-    if (query) url.searchParams.set("q", query)
+    for (const [ name, value ] of new FormData(this.element)) {
+      const text = String(value).trim()
+      if (text && !(name === "sort" && text === "title")) url.searchParams.set(name, text) // title is the default sort
+    }
     history.replaceState(history.state, "", url)
   }
 }

@@ -1,0 +1,22 @@
+<%# The owner's reading status, with buttons to change it. A Turbo Frame, so
+    clicking a button only refreshes this box. Others see a short label instead. %>
+<% if book.owned_by?(Current.user) %>
+  <%= turbo_frame_tag dom_id(book, :reading_status), class: "reading-status" do %>
+    <span class="rate-label">My reading</span>
+    <div class="status-buttons" role="group" aria-label="Reading status">
+      <% Book::READING_STATUS_LABELS.each do |status, label| %>
+        <% current = book.reading_status == status %>
+        <%= button_to label, book_reading_status_path(book), method: :patch,
+              params: { reading_status: (current ? "" : status) },
+              class: [ "status-button", ("is-current" if current) ],
+              aria: { pressed: current },
+              title: (current ? "Click again to clear" : "Mark as “#{label}”") %>
+      <% end %>
+    </div>
+    <span class="reading-dates muted">
+      <% if book.started_on %>Started <%= l(book.started_on, format: :long) %><% end %>
+      <% if book.started_on && book.finished_on %> · <% end %>
+      <% if book.finished_on %>Finished <%= l(book.finished_on, format: :long) %><% end %>
+    </span>
+  <% end %>
+<% end %>

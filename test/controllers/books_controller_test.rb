@@ -190,6 +190,38 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_no_match "<script>alert(1)</script>", response.body
   end
 
+  # --- Filters & sorting ---
+
+  test "the Books page has genre, exchange and sort controls (no reading status)" do
+    get books_url
+    assert_select "select[name=genre] option", Book::GENRES.size + 1
+    assert_select "input[type=checkbox][name=exchange]"
+    assert_select "select[name=sort] option", BookFilters::SORTS.size
+    assert_select "select[name=status]", count: 0
+  end
+
+  test "filtering by genre shows matching books and a way to clear" do
+    @book.update!(genre: "Fantasy")
+    get books_url(genre: "Fantasy")
+
+    assert_select "#books .book-card", 1
+    assert_select "#book_#{@book.id}"
+    assert_select ".search-summary", /1 book/
+    assert_select ".search-summary a[href=?]", books_path, text: "Clear filters"
+    assert_select "select[name=genre] option[selected]", "Fantasy"
+  end
+
+  test "filters that match nothing say so" do
+    get books_url(genre: "Poetry")
+    assert_select ".empty-state h2", "No books match these filters"
+  end
+
+  test "page links keep filters and sorting" do
+    30.times { |i| Book.create!(user: users(:two), title: format("Zed %02d", i), author: "A", genre: "Poetry") }
+    get books_url(genre: "Poetry", sort: "newest")
+    assert_select ".pagination a[rel=next][href=?]", books_path(genre: "Poetry", sort: "newest", page: 2)
+  end
+
   # --- Pages ---
 
   test "long lists are split into pages of 24" do

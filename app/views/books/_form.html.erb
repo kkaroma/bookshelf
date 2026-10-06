@@ -30,6 +30,29 @@
     </div>
   </div>
 
+  <div class="form-row">
+    <div class="field">
+      <%= form.label :genre %>
+      <%= form.select :genre, Book::GENRES, { include_blank: "Choose a genre…" }, class: "input" %>
+    </div>
+
+    <div class="field">
+      <%= form.label :reading_status, "My reading" %>
+      <%= form.select :reading_status, Book::READING_STATUS_LABELS.invert, { include_blank: "Not set" }, class: "input" %>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <%= form.label :started_on, "Started reading" %>
+      <%= form.date_field :started_on, max: Date.current, class: "input" %>
+    </div>
+    <div class="field">
+      <%= form.label :finished_on, "Finished reading" %>
+      <%= form.date_field :finished_on, max: Date.current, class: "input" %>
+    </div>
+  </div>
+
   <div class="field">
     <%= form.label :isbn, "ISBN" %>
     <div class="isbn-row">

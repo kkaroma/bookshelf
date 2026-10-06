@@ -6,9 +6,8 @@ class BooksController < ApplicationController
   # GET /books or /books.json
   # /books?q=hobbit searches; without q it lists every book.
   def index
-    @query = params[:q].to_s.squish
-    books = Book.with_attached_cover.includes(:user).order(:title)
-    books = books.search(@query) if @query.present?
+    @filters = BookFilters.new(params)
+    books = @filters.apply(Book.with_attached_cover.includes(:user, :loans))
     @pagination = Pagination.new(books, page: params[:page], per_page: 24)
     @books = @pagination.records
   end
@@ -88,6 +87,7 @@ class BooksController < ApplicationController
     # Only allow a list of trusted parameters through.
     def book_params
       params.expect(book: [ :title, :subtitle, :author, :isbn, :description, :published_year, :review, :available_for_exchange,
+                            :genre, :reading_status, :started_on, :finished_on,
                             :cover, :remove_cover, :open_library_cover_id ])
     end
 end
