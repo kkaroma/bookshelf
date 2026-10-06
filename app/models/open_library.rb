@@ -20,6 +20,11 @@ module OpenLibrary
     def thumbnail_url = OpenLibrary.cover_url(cover_id, size: "M")
   end
 
+  # Everything we can fill in on the book form from one ISBN.
+  BookDetails = Data.define(:isbn, :title, :subtitle, :author, :year, :cover_id) do
+    def cover_url = cover_id && OpenLibrary.cover_url(cover_id, size: "M")
+  end
+
   # How we make a single HTTP GET request. Tests swap this for a fake so they
   # never touch the real internet.
   mattr_accessor :fetcher, default: ->(uri) {
@@ -46,6 +51,26 @@ module OpenLibrary
 
       docs = JSON.parse(fetch(URI("#{SEARCH_URL}?#{query.to_query}")).body).fetch("docs", [])
       docs.filter_map { |doc| result_from(doc) }.uniq(&:cover_id).first(limit)
+    rescue JSON::ParserError
+      raise Error, "Open Library sent an answer we couldn't read"
+    end
+
+    # Looks up one book by ISBN. Returns BookDetails, or nil if Open Library
+    # doesn't know that ISBN.
+    def lookup_isbn(isbn)
+      digits = isbn.to_s.upcase.gsub(/[^0-9X]/, "")
+      query = { q: "isbn:#{digits}", fields: "title,subtitle,author_name,first_publish_year,cover_i", limit: 1 }
+      doc = JSON.parse(fetch(URI("#{SEARCH_URL}?#{query.to_query}")).body).fetch("docs", []).first
+      return unless doc && doc["title"].present?
+
+      BookDetails.new(
+        isbn: digits,
+        title: doc["title"],
+        subtitle: doc["subtitle"].presence,
+        author: Array(doc["author_name"]).first,
+        year: doc["first_publish_year"],
+        cover_id: doc["cover_i"]
+      )
     rescue JSON::ParserError
       raise Error, "Open Library sent an answer we couldn't read"
     end

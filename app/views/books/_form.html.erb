@@ -1,33 +1,56 @@
-<%= form_with(model: book, class: "form") do |form| %>
+<%= form_with(model: book, class: "form",
+      data: { controller: "isbn-lookup barcode-scanner", isbn_lookup_url_value: isbn_lookup_path(format: :json),
+              action: "barcode-scanner:scanned->isbn-lookup#scanned" }) do |form| %>
   <%= render "shared/form_errors", object: book %>
 
   <div class="field">
     <%= form.label :title %>
-    <%= form.text_field :title, required: true, autofocus: true, placeholder: "The Hobbit", class: "input" %>
+    <%= form.text_field :title, required: true, autofocus: true, placeholder: "The Hobbit", class: "input",
+          data: { isbn_lookup_target: "title" } %>
   </div>
 
   <div class="field">
     <%= form.label :subtitle %>
-    <%= form.text_field :subtitle, maxlength: 200, placeholder: "There and Back Again", class: "input" %>
+    <%= form.text_field :subtitle, maxlength: 200, placeholder: "There and Back Again", class: "input",
+          data: { isbn_lookup_target: "subtitle" } %>
     <span class="field-hint">Optional</span>
   </div>
 
   <div class="form-row">
     <div class="field">
       <%= form.label :author %>
-      <%= form.text_field :author, required: true, placeholder: "J.R.R. Tolkien", class: "input" %>
+      <%= form.text_field :author, required: true, placeholder: "J.R.R. Tolkien", class: "input",
+            data: { isbn_lookup_target: "author" } %>
     </div>
 
     <div class="field">
       <%= form.label :published_year %>
-      <%= form.number_field :published_year, min: 1, max: Date.current.year, placeholder: "1937", class: "input" %>
+      <%= form.number_field :published_year, min: 1, max: Date.current.year, placeholder: "1937", class: "input",
+            data: { isbn_lookup_target: "year" } %>
     </div>
   </div>
 
   <div class="field">
     <%= form.label :isbn, "ISBN" %>
-    <%= form.text_field :isbn, inputmode: "numeric", autocomplete: "off", placeholder: "978-0-547-92822-7", class: "input" %>
-    <span class="field-hint">Optional. The 10- or 13-digit number near the barcode — dashes are fine.</span>
+    <div class="isbn-row">
+      <%= form.text_field :isbn, inputmode: "numeric", autocomplete: "off", placeholder: "978-0-547-92822-7", class: "input",
+            data: { isbn_lookup_target: "isbn", action: "change->isbn-lookup#isbnChanged" } %>
+      <button type="button" class="btn btn-secondary" data-isbn-lookup-target="button" data-action="isbn-lookup#lookup">Look up</button>
+      <button type="button" class="btn btn-secondary" hidden
+              data-barcode-scanner-target="button" data-action="barcode-scanner#open">📷 Scan barcode</button>
+    </div>
+
+    <%# The camera view for scanning. A <dialog> sits on top of the page; closing
+        it (Cancel, Escape, or a successful scan) turns the camera off. %>
+    <dialog class="scanner" data-barcode-scanner-target="dialog" data-action="close->barcode-scanner#close"
+            aria-labelledby="scanner_title">
+      <h2 id="scanner_title">Scan the barcode</h2>
+      <video class="scanner-video" data-barcode-scanner-target="video" playsinline muted></video>
+      <p class="muted" data-barcode-scanner-target="message"></p>
+      <button type="button" class="btn btn-secondary" data-action="barcode-scanner#close">Cancel</button>
+    </dialog>
+    <span class="field-hint">Optional. The 10- or 13-digit number near the barcode — dashes are fine. “Look up” fills in the rest from Open Library.</span>
+    <p class="lookup-status" data-isbn-lookup-target="status" role="status" aria-live="polite" hidden></p>
   </div>
 
   <%= render "books/cover_field", form: form, book: book %>

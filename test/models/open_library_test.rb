@@ -60,6 +60,40 @@ class OpenLibraryTest < ActiveSupport::TestCase
     assert_raises(OpenLibrary::Error) { OpenLibrary.search(title: "Dune") }
   end
 
+  test "lookup_isbn returns the details for one book" do
+    requested = nil
+    fake_open_library "search.json" => ->(uri) {
+      requested = CGI.unescape(uri.to_s)
+      open_library_json([ { "title" => "The Hobbit", "subtitle" => "There and Back Again",
+                            "author_name" => [ "J.R.R. Tolkien" ], "first_publish_year" => 1937, "cover_i" => 111 } ])
+    }
+
+    details = OpenLibrary.lookup_isbn("978-0-547-92822-7")
+
+    assert_includes requested, "q=isbn:9780547928227"
+    assert_equal "The Hobbit", details.title
+    assert_equal "There and Back Again", details.subtitle
+    assert_equal "J.R.R. Tolkien", details.author
+    assert_equal 1937, details.year
+    assert_equal 111, details.cover_id
+    assert_equal "https://covers.openlibrary.org/b/id/111-M.jpg", details.cover_url
+  end
+
+  test "lookup_isbn copes with missing pieces" do
+    fake_open_library "search.json" => open_library_json([ { "title" => "Obscure Pamphlet" } ])
+
+    details = OpenLibrary.lookup_isbn("9780547928227")
+    assert_equal "Obscure Pamphlet", details.title
+    assert_nil details.subtitle
+    assert_nil details.author
+    assert_nil details.cover_url
+  end
+
+  test "lookup_isbn returns nil for an unknown ISBN" do
+    fake_open_library "search.json" => open_library_json([])
+    assert_nil OpenLibrary.lookup_isbn("9780547928227")
+  end
+
   test "download_cover returns the image ready for Active Storage" do
     fake_open_library "covers.openlibrary.org/b/id/42-L.jpg" => open_library_image
 

@@ -5,6 +5,7 @@
     <h1>Books</h1>
     <p class="muted">Search by title, author or ISBN.</p>
   </div>
+  <%= link_to "Import from Goodreads", new_goodreads_import_path, class: "btn btn-secondary" %>
 </div>
 
 <%= render layout: "books/search", locals: {

@@ -1,0 +1,46 @@
+<% content_for :title, "Import from Goodreads" %>
+
+<div class="form-page">
+  <%= link_to "← Books", books_path, class: "back-link" %>
+
+  <div class="card">
+    <h1>Import from Goodreads</h1>
+    <p class="muted">Bring your Goodreads library over in one go — titles, authors, ISBNs and your reviews.</p>
+
+    <ol class="import-steps">
+      <li>On <strong>goodreads.com</strong>, open <strong>My Books</strong>.</li>
+      <li>In the left menu, under <strong>Tools</strong>, click <strong>Import and export</strong>.</li>
+      <li>Click <strong>Export Library</strong>, wait for it to finish, and download the file (it ends in <code>.csv</code>).</li>
+      <li>Choose that file below.</li>
+    </ol>
+
+    <%= form_with url: goodreads_import_path, class: "form" do |form| %>
+      <% if @error %>
+        <div class="form-errors" role="alert"><h2><%= @error %></h2></div>
+      <% end %>
+
+      <div class="field">
+        <%= form.label :file, "Goodreads export file" %>
+        <%= form.file_field :file, accept: ".csv,text/csv", required: true, class: "input" %>
+      </div>
+
+      <fieldset class="field shelf-choice">
+        <legend class="field-label">Which Goodreads shelves?</legend>
+        <% GoodreadsImport::SHELVES.each do |key, label| %>
+          <label>
+            <%= check_box_tag "shelves[]", key, @shelves.include?(key), id: "shelf_#{key.underscore}" %>
+            <%= label %>
+          </label>
+        <% end %>
+        <span class="field-hint">“Want to read” books usually aren't on your shelf yet, so they're left out unless you tick it.</span>
+      </fieldset>
+
+      <p class="field-hint">Books already on your shelf are skipped, so it's safe to import again later.</p>
+
+      <div class="form-actions">
+        <%= form.submit "Import books", class: "btn btn-primary" %>
+        <%= link_to "Cancel", books_path, class: "btn btn-ghost" %>
+      </div>
+    <% end %>
+  </div>
+</div>

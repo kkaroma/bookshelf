@@ -385,4 +385,86 @@ class BooksTest < ApplicationSystemTestCase
     assert_no_checked_field "New followers"
     assert_not users(:one).reload.notify_followers?
   end
+
+  test "filling in a book from its ISBN" do
+    fake_open_library(
+      "search.json" => open_library_json([
+        { "title" => "Piranesi", "author_name" => [ "Susanna Clarke" ], "first_publish_year" => 2020, "cover_i" => 555 }
+      ]),
+      "covers.openlibrary.org/b/id/555-L.jpg" => open_library_image
+    )
+
+    click_on "Add a book", match: :first
+    fill_in "Subtitle", with: "A Novel" # already typed: must not be overwritten
+    fill_in "ISBN", with: "978-1-63557-563-7"
+    click_on "Look up"
+
+    assert_text "Found “Piranesi”. Filled in: title, author, year."
+    assert_field "Title", with: "Piranesi"
+    assert_field "Author", with: "Susanna Clarke"
+    assert_field "Published year", with: "2020"
+    assert_field "Subtitle", with: "A Novel"
+    assert_selector ".cover-preview img" # the cover was picked too
+
+    click_on "Create Book"
+    assert_text "Book was successfully created."
+    assert_selector ".book-detail .book-cover-image img"
+  end
+
+  test "an invalid ISBN explains itself" do
+    click_on "Add a book", match: :first
+    fill_in "ISBN", with: "978-1-63557-563-8"
+    click_on "Look up"
+    assert_text "That isn't a valid ISBN"
+  end
+
+  test "scanning a book's barcode fills in the ISBN and looks it up" do
+    fake_open_library "search.json" => open_library_json([
+      { "title" => "Piranesi", "author_name" => [ "Susanna Clarke" ], "first_publish_year" => 2020 }
+    ])
+    # Stand-ins for the camera and the browser's barcode reader, installed before
+    # the page's own scripts run (a real camera isn't available in tests).
+    page.driver.browser.execute_cdp("Page.addScriptToEvaluateOnNewDocument", source: <<~JS)
+      window.BarcodeDetector = class {
+        static async getSupportedFormats() { return [ "ean_13" ] }
+        async detect() { return [ { format: "ean_13", rawValue: "5012345678900" },  // a price sticker: ignored
+                                  { format: "ean_13", rawValue: "9781635575637" } ] }
+      }
+      navigator.mediaDevices.getUserMedia = async () => {
+        const canvas = Object.assign(document.createElement("canvas"), { width: 4, height: 4 })
+        canvas.getContext("2d").fillRect(0, 0, 4, 4)
+        return canvas.captureStream()
+      }
+    JS
+
+    visit new_book_path
+    click_on "Scan barcode"
+
+    assert_field "ISBN", with: "9781635575637"
+    assert_text "Found “Piranesi”"
+    assert_field "Title", with: "Piranesi"
+    assert_no_selector "dialog[open]" # the camera view closed itself
+  end
+
+  test "the scan button is hidden where the browser can't read barcodes" do
+    page.driver.browser.execute_cdp("Page.addScriptToEvaluateOnNewDocument", source: "delete window.BarcodeDetector")
+    visit new_book_path
+    assert_button "Look up"
+    assert_no_button "Scan barcode"
+  end
+
+  test "importing a Goodreads library" do
+    visit books_path
+    click_on "Import from Goodreads"
+    assert_selector "h1", text: "Import from Goodreads"
+
+    attach_file "Goodreads export file", file_fixture("goodreads_library_export.csv")
+    check "Want to read"
+    click_on "Import books"
+
+    assert_text "Imported 3 books from Goodreads."
+    assert_selector "h2", text: "My books"
+    assert_selector ".book-card", text: "Sapiens"
+    assert_selector ".book-card", text: "Project Hail Mary"
+  end
 end

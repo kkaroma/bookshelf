@@ -37,6 +37,10 @@ Rails.application.routes.draw do
 
   # "Find cover online" in the book form: /cover_search?title=...&author=...&isbn=...
   resource :cover_search, only: :show
+  # Book details for an ISBN, as JSON for the book form: /isbn_lookup.json?isbn=...
+  resource :isbn_lookup, only: :show
+  # Import a Goodreads library export: /goodreads_import/new
+  resource :goodreads_import, only: %i[ new create ]
 
   # Admin-only pages live under /admin (controllers in app/controllers/admin/).
   namespace :admin do

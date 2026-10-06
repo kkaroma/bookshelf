@@ -1598,6 +1598,48 @@ ul.report-list { list-style: none; padding-left: 0; }
 }
 .cover-result-meta { font-size: 0.72rem; color: var(--text-muted); }
 
+/* ---------- ISBN lookup (book form) ---------- */
+.isbn-row { display: flex; gap: 0.5rem; }
+.isbn-row .input { flex: 1; }
+.lookup-status {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-size: 0.9rem;
+}
+.lookup-status[data-kind="success"] { background: var(--success-soft); color: var(--success); }
+.lookup-status[data-kind="error"] { background: var(--danger-soft); color: var(--danger); }
+
+.isbn-row { flex-wrap: wrap; }
+
+.scanner {
+  width: min(92vw, 480px);
+  padding: 1.25rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lift);
+}
+.scanner::backdrop { background: rgb(0 0 0 / 0.6); }
+.scanner h2 { font-size: 1.15rem; }
+.scanner-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius-sm);
+  background: #000;
+}
+
+/* ---------- Goodreads import ---------- */
+.import-steps { margin: 0 0 1.5rem; padding-left: 1.2rem; display: grid; gap: 0.3rem; }
+.shelf-choice { border: 0; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.shelf-choice label { display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
+.shelf-choice input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: var(--primary); }
+
 /* ---------- Narrow form pages ---------- */
 .form-page { max-width: 640px; }
 

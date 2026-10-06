@@ -1,6 +1,7 @@
 <%# Cover picker in the book form: upload a file, or search Open Library.
     The cover_picker Stimulus controller shows a preview of whichever you chose. %>
 <div class="field cover-field" data-controller="cover-picker"
+     data-action="isbn-lookup:found@window->cover-picker#useLookedUpCover"
      data-cover-picker-search-url-value="<%= cover_search_path %>">
   <span class="field-label">Cover</span>
 

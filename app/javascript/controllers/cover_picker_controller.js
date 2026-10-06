@@ -33,6 +33,15 @@ export default class extends Controller {
     if (isbn && isbnField && !isbnField.value) isbnField.value = isbn
   }
 
+  // The ISBN lookup found a cover: use it, unless a cover is already chosen
+  // (an uploaded file, a pick from the search, or the book's current cover).
+  useLookedUpCover({ detail: { coverId, coverUrl } }) {
+    if (this.coverIdTarget.value || this.fileTarget.files.length || this.previewTarget.querySelector("img")) return
+
+    this.coverIdTarget.value = coverId
+    this.#showPreview(coverUrl)
+  }
+
   // Choosing a file to upload.
   uploaded() {
     const file = this.fileTarget.files[0]
