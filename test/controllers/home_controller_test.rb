@@ -76,16 +76,16 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select ".attention a[href=?]", exchange_requests_path, text: /1 exchange request\s+waiting/
   end
 
-  test "shows books from people you follow" do
+  test "shows what people you follow have been doing" do
     sign_in_as users(:two) # Bob follows Alice
     get root_url
-    assert_select "#following #book_#{books(:hobbit).id}"
+    assert_select "#following .feed-added", /Alice Reader\s+added\s+The Hobbit/
   end
 
   test "suggests finding members when you follow no one" do
     sign_in_as users(:one)
     get root_url
-    assert_select "#following .home-empty a[href=?]", users_path
+    assert_select "#following .home-empty a[href=?]", users_path, text: "Find members to follow"
   end
 
   test "the exchange section shows other people's books, not your own" do

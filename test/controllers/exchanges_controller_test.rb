@@ -46,6 +46,28 @@ class ExchangesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".nav-main a.active", "Books"
   end
 
+  test "without a town, the shelf suggests adding one" do
+    get exchanges_url
+    assert_select ".near-me a[href=?]", edit_settings_profile_path, text: "Add your town"
+  end
+
+  test "books from your own town come first, and you can show only those" do
+    users(:one).update!(city: "Dar es Salaam")
+    users(:admin).update!(city: "dar es salaam")
+    users(:two).update!(city: "Arusha")
+    near = Book.create!(user: users(:admin), title: "Nearby Book", author: "A", available_for_exchange: true, updated_at: 1.year.ago)
+
+    get exchanges_url
+    assert_select ".near-me", /Books in\s+Dar es Salaam\s+are shown first/
+    assert_select "#books .book-card:first-child .book-card-title", "Nearby Book" # first despite being older
+    assert_select "#book_#{near.id} .same-town", "📍 dar es salaam"
+    assert_select "#book_#{books(:dune).id} .book-card-owner", /Arusha/
+
+    get exchanges_url(near: 1)
+    assert_select "#books .book-card", 1
+    assert_select ".near-me a", "Show books everywhere"
+  end
+
   test "signed-out visitors are sent to sign in" do
     sign_out
     get exchanges_url

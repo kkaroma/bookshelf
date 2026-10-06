@@ -72,8 +72,27 @@
   </section>
 <% end %>
 
-<%= render "home/shelf", id: "following", title: "From people you follow", books: @followed_books,
-      empty: safe_join([ "You're not following anyone with books yet. ", link_to("Find members to follow", users_path), "." ]) %>
+<section class="home-section" id="following">
+  <div class="section-heading"><h2>From people you follow</h2></div>
+  <% if @feed.any? %>
+    <ul class="feed">
+      <% @feed.each do |event| %>
+        <li class="feed-item feed-<%= event.kind %>">
+          <%= render "books/mini_cover", book: event.book %>
+          <div class="feed-text">
+            <p><%= feed_sentence(event) %></p>
+            <% if event.kind == :reviewed %><q class="feed-quote"><%= event.detail %></q><% end %>
+            <span class="muted feed-time"><%= time_ago_in_words(event.at) %> ago</span>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="home-empty muted">
+      Nothing from people you follow yet. <%= link_to "Find members to follow", users_path %>.
+    </p>
+  <% end %>
+</section>
 
 <%= render "home/shelf", id: "exchange", title: "New on the Exchange shelf", books: @exchange_books,
       see_all_path: exchanges_path,

@@ -27,8 +27,7 @@ class HomeController < ApplicationController
                        .includes(:book).order(Arel.sql("due_on ASC NULLS LAST"), :lent_on)
       @waiting_requests_count = user.received_exchange_requests.pending.count
 
-      @followed_books = Book.where(user_id: user.active_follows.select(:followed_id))
-                            .with_attached_cover.includes(:user).order(created_at: :desc).limit(6)
+      @feed = ActivityFeed.new(user).events
       @exchange_books = Book.for_exchange.where.not(user: user)
                             .with_attached_cover.includes(:user).order(updated_at: :desc).limit(6)
       @my_books = user.books.with_attached_cover.includes(:user).order(created_at: :desc).limit(6)

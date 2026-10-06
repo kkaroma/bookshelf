@@ -1,0 +1,9 @@
+<p style="margin-top:0;">Hi <%= @recipient.name %>,</p>
+<p>
+  <strong><%= @message.sender.name %></strong> sent you a message about
+  <strong><%= @message.exchange_request.book.title %></strong>:
+</p>
+<p style="margin:0; padding:12px 16px; background:#f1ede5; border-left:3px solid #e4ddd1; border-radius:0 8px 8px 0; white-space:pre-line;"><%= @message.body %></p>
+
+<%= render "shared/email_button", text: "Reply", url: exchange_request_url(@message.exchange_request, anchor: "new_message") %>
+<%= render "notifications_mailer/footer", what: "“Messages”" %>

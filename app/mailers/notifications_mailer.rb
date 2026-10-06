@@ -32,6 +32,19 @@ class NotificationsMailer < ApplicationMailer
     mail to: recipient.email_address, subject: subject
   end
 
+  def new_message(message)
+    @message = message
+    @recipient = message.recipient
+    mail to: @recipient.email_address,
+         subject: "#{message.sender.name} sent you a message about “#{message.exchange_request.book.title}”"
+  end
+
+  def wishlist_match(member, book)
+    @member = member
+    @book = book
+    mail to: member.email_address, subject: "“#{book.title}” from your wishlist is up for exchange"
+  end
+
   def new_follower(follow)
     @follower = follow.follower
     @followed = follow.followed

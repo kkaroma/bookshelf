@@ -15,7 +15,11 @@
 
   <div class="request-main">
     <p class="request-summary">
-      <% if received %>
+      <% if exchange_request.completed? %>
+        <%= received ? "You swapped" : "You received" %>
+        <%= link_to exchange_request.book.title, exchange_request.book %>
+        <%= received ? "with" : "from" %> <%= link_to other_person.name, other_person %>
+      <% elsif received %>
         <%= link_to other_person.name, other_person %> would like your book
         <%= link_to exchange_request.book.title, exchange_request.book %>
       <% else %>
@@ -39,7 +43,9 @@
     <div class="request-footer">
       <span class="status status-<%= exchange_request.status %>"><%= exchange_request.status.humanize %></span>
       <span class="muted">
-        <% if exchange_request.responded_at %>
+        <% if exchange_request.completed_at %>
+          swapped <%= l(exchange_request.completed_at.to_date, format: :long) %>
+        <% elsif exchange_request.responded_at %>
           <%= time_ago_in_words(exchange_request.responded_at) %> ago
         <% else %>
           sent <%= time_ago_in_words(exchange_request.created_at) %> ago
@@ -64,9 +70,22 @@
     </div>
 
     <% if exchange_request.accepted? %>
-      <p class="request-contact">
-        Arrange the swap with <%= other_person.name %>:
-        <%= mail_to other_person.email_address %>
+      <div class="request-contact">
+        <p>
+          Arrange the swap with <%= other_person.name %>: send a message below, or email
+          <%= mail_to other_person.email_address %>
+        </p>
+        <%= button_to "Mark swap as done", complete_exchange_request_path(exchange_request), method: :patch,
+              class: "btn btn-primary btn-sm",
+              form: { data: { turbo_confirm: "Have you swapped? “#{exchange_request.book.title}” will move to #{exchange_request.requester.name}'s shelf#{" and “#{exchange_request.offered_book.title}” to #{exchange_request.owner.name}'s" if exchange_request.offered_book}. Reviews, reading status and lending history stay private to the previous owner and are cleared." } } %>
+      </div>
+    <% end %>
+
+    <% unless current_page?(exchange_request_path(exchange_request)) %>
+      <p class="request-conversation-link">
+        <%= link_to exchange_request_path(exchange_request) do %>
+          💬 <%= exchange_request.messages.size.positive? ? "Messages (#{exchange_request.messages.size})" : "Send a message" %>
+        <% end %>
       </p>
     <% end %>
   </div>

@@ -6,7 +6,9 @@
   <%= form_with model: @user, url: settings_notifications_path, method: :patch, class: "form" do |form| %>
     <% [ [ :notify_exchange_requests, "Exchange requests", "When someone asks to swap for your book, and when your own requests are accepted or declined." ],
          [ :notify_comments, "Comments", "When someone comments on your book, or replies to your comment." ],
-         [ :notify_followers, "New followers", "When someone starts following you." ] ].each do |field, label, hint| %>
+         [ :notify_followers, "New followers", "When someone starts following you." ],
+         [ :notify_messages, "Messages", "When someone sends you a message about a swap." ],
+         [ :notify_wishlist, "Wishlist alerts", "When a book on your wishlist is offered for exchange." ] ].each do |field, label, hint| %>
       <div class="field checkbox-field">
         <%= form.check_box field %>
         <div>

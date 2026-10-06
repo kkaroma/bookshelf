@@ -2,5 +2,6 @@
 admin_wants_dune:
   requester: admin
   book: dune
+  owner: two
   message: I've always wanted to read this one!
   status: pending

@@ -1,0 +1,9 @@
+Hi <%= @recipient.name %>,
+
+<%= @message.sender.name %> sent you a message about "<%= @message.exchange_request.book.title %>":
+
+<%= @message.body %>
+
+Reply: <%= exchange_request_url(@message.exchange_request, anchor: "new_message") %>
+
+You're getting this because "Messages" is switched on in your email settings: <%= edit_settings_notifications_url %>

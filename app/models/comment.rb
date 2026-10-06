@@ -1,6 +1,7 @@
 class Comment < ApplicationRecord
   belongs_to :user
   belongs_to :book
+  has_many :notifications, as: :notifiable, dependent: :destroy
 
   # Replies: a comment can answer another comment on the same book.
   # Threads are one level deep - replying to a reply joins the same thread.
@@ -14,7 +15,7 @@ class Comment < ApplicationRecord
   normalizes :body, with: ->(body) { body.strip }
 
   before_validation :join_parent_thread
-  after_create_commit :email_people_involved
+  after_create_commit :tell_people_involved
 
   validates :body, presence: true, length: { maximum: 2000 }
   validate :parent_is_on_the_same_book
@@ -42,9 +43,11 @@ class Comment < ApplicationRecord
   end
 
   private
-    def email_people_involved
-      people_to_notify.select(&:notify_comments?).each do |person|
-        NotificationsMailer.new_comment(self, person).deliver_later
+    def tell_people_involved
+      people_to_notify.each do |person|
+        kind = reply? && parent.user_id == person.id ? "new_reply" : "new_comment"
+        Notification.notify(person, kind, about: self, actor: user)
+        NotificationsMailer.new_comment(self, person).deliver_later if person.notify_comments?
       end
     end
 

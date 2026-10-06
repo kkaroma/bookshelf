@@ -9,7 +9,7 @@
       <% if @user.admin? %><span class="badge">Admin</span><% end %>
     </h1>
     <p class="muted">
-      Member since <%= @user.created_at.strftime("%B %Y") %>
+      <% if @user.city %>📍 <%= @user.city %> · <% end %>Member since <%= @user.created_at.strftime("%B %Y") %>
       <% if @user == Current.user %> · <%= link_to "Settings", settings_path %><% end %>
     </p>
 

@@ -32,12 +32,15 @@ Rails.application.routes.draw do
   end
 
   # My exchange requests (received and sent), and answering them.
-  resources :exchange_requests, only: :index do
+  resources :exchange_requests, only: %i[ index show ] do
     member do
       patch :accept   # owner says yes
       patch :decline  # owner says no
       patch :cancel   # requester withdraws
+      patch :complete # either person: "we swapped" - the books change owners
     end
+    # The conversation about a request: POST /exchange_requests/:id/messages
+    resources :messages, only: :create, module: :exchange_requests
   end
 
   # "Find cover online" in the book form: /cover_search?title=...&author=...&isbn=...
@@ -54,6 +57,14 @@ Rails.application.routes.draw do
 
   # The exchange shelf: every book available for exchange.
   resources :exchanges, only: :index
+
+  # My wishlist: /wishlist (books I'd like; I'm told when one is offered for exchange).
+  resources :wishlist_items, only: %i[ index create destroy ], path: "wishlist"
+
+  # The notification bell: /notifications, and /notifications/:id opens one.
+  resources :notifications, only: %i[ index show ] do
+    patch :mark_all_read, on: :collection
+  end
 
   # This year's reading goal (on the Home page): PATCH to set it, DELETE to remove it.
   resource :reading_goal, only: %i[ update destroy ]

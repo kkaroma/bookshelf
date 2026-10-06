@@ -4,7 +4,7 @@ class Settings::NotificationsController < Settings::BaseController
   end
 
   def update
-    @user.update!(params.expect(user: [ :notify_exchange_requests, :notify_comments, :notify_followers ]))
+    @user.update!(params.expect(user: [ :notify_exchange_requests, :notify_comments, :notify_followers, :notify_messages, :notify_wishlist ]))
     redirect_to edit_settings_notifications_path, notice: "Your email preferences were saved."
   end
 end

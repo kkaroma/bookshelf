@@ -1,0 +1,67 @@
+<% content_for :title, "My wishlist" %>
+
+<%= link_to "← Exchange shelf", exchanges_path, class: "back-link" %>
+
+<div class="page-header">
+  <div>
+    <h1>My wishlist</h1>
+    <p class="muted">Books you'd like. When someone offers one for exchange, we'll let you know.</p>
+  </div>
+</div>
+
+<div class="card wishlist-add">
+  <h2>Add a book</h2>
+  <%= form_with model: @item, url: wishlist_items_path, class: "form" do |form| %>
+    <%= render "shared/form_errors", object: @item %>
+    <div class="form-row">
+      <div class="field">
+        <%= form.label :title %>
+        <%= form.text_field :title, required: true, placeholder: "Dune", class: "input" %>
+      </div>
+      <div class="field">
+        <%= form.label :author %>
+        <%= form.text_field :author, placeholder: "Frank Herbert", class: "input" %>
+        <span class="field-hint">Optional</span>
+      </div>
+      <div class="field">
+        <%= form.label :isbn, "ISBN" %>
+        <%= form.text_field :isbn, inputmode: "numeric", placeholder: "Optional", class: "input" %>
+      </div>
+    </div>
+    <div class="form-actions">
+      <%= form.submit "Add to wishlist", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
+
+<% if @items.any? %>
+  <ul class="wishlist">
+    <% @items.each do |item| %>
+      <% available = item.available_books.to_a %>
+      <li id="<%= dom_id item %>" class="wishlist-item <%= "is-available" if available.any? %>">
+        <div class="wishlist-item-main">
+          <strong><%= item.title %></strong>
+          <% if item.author %><span class="muted"> by <%= item.author %></span><% end %>
+          <% if item.isbn %><span class="muted"> · ISBN <%= item.isbn %></span><% end %>
+
+          <% if available.any? %>
+            <ul class="wishlist-matches">
+              <% available.each do |book| %>
+                <li>
+                  ✓ Available now from <%= link_to book.user.name, book.user %>
+                  <% if book.user.same_city_as?(Current.user) %><span class="same-town">📍 <%= book.user.city %></span><% end %>
+                  — <%= link_to "Request exchange", new_book_exchange_request_path(book) %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="muted wishlist-waiting">Not on the Exchange shelf yet — we'll tell you when it is.</p>
+          <% end %>
+        </div>
+        <%= button_to "Remove", wishlist_item_path(item), method: :delete, class: "link-button link-button-danger" %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="muted">Your wishlist is empty.</p>
+<% end %>

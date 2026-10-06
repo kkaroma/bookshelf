@@ -3,14 +3,16 @@ class Follow < ApplicationRecord
   # counter_cache keeps users.following_count / users.followers_count up to date.
   belongs_to :follower, class_name: "User", counter_cache: :following_count
   belongs_to :followed, class_name: "User", counter_cache: :followers_count
+  has_many :notifications, as: :notifiable, dependent: :destroy
 
   validates :followed_id, uniqueness: { scope: :follower_id, message: "is already being followed" }
   validate :not_following_yourself
 
-  after_create_commit :email_followed
+  after_create_commit :tell_followed
 
   private
-    def email_followed
+    def tell_followed
+      Notification.notify(followed, "new_follower", about: self, actor: follower)
       NotificationsMailer.new_follower(self).deliver_later if followed.notify_followers?
     end
 

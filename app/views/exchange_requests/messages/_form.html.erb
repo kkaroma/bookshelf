@@ -1,0 +1,11 @@
+<%= form_with model: [ exchange_request, message ], id: "new_message", class: "form message-form" do |form| %>
+  <%= render "shared/form_errors", object: message %>
+  <div class="field">
+    <%= form.label :body, "Message #{exchange_request.other_party(Current.user).name}" %>
+    <%= form.textarea :body, required: true, maxlength: 2000, rows: 3, class: "input",
+          placeholder: "Suggest where and when to meet, or ask about the book…" %>
+  </div>
+  <div class="form-actions">
+    <%= form.submit "Send", class: "btn btn-primary btn-sm" %>
+  </div>
+<% end %>

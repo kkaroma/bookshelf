@@ -1,0 +1,8 @@
+<p style="margin-top:0;">Hi <%= @member.name %>,</p>
+<p>
+  Good news: <strong><%= @book.title %></strong> by <%= @book.author %>, which is on your wishlist,
+  has just been offered for exchange by <strong><%= @book.user.name %></strong>.
+</p>
+
+<%= render "shared/email_button", text: "See the book", url: book_url(@book) %>
+<%= render "notifications_mailer/footer", what: "“Wishlist alerts”" %>

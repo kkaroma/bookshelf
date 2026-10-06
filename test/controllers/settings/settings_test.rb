@@ -71,6 +71,13 @@ class SettingsTest < ActionDispatch::IntegrationTest
     assert @alice.reload.member?
   end
 
+  test "set your town, shown on your profile" do
+    patch settings_profile_url, params: { user: { name: @alice.name, email_address: @alice.email_address, city: "Mwanza" } }
+    assert_equal "Mwanza", @alice.reload.city
+    get user_url(@alice)
+    assert_select ".profile-main p.muted", /📍 Mwanza/
+  end
+
   # --- Password ---
 
   test "change your password, and other devices are signed out" do

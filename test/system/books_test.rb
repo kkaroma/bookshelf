@@ -377,7 +377,7 @@ class BooksTest < ApplicationSystemTestCase
     click_on "Change password"
     assert_text "Password changed."
 
-    click_on "Notifications"
+    within(".tabs") { click_on "Notifications" } # (the header's bell is also called "Notifications")
     assert_selector "h2", text: "Email notifications"
     uncheck "New followers"
     click_on "Save preferences"
@@ -515,5 +515,40 @@ class BooksTest < ApplicationSystemTestCase
       assert_text "Lend this book"
       assert_selector ".loan-history li", text: "Bob"
     end
+  end
+
+  test "requesting, chatting, notifications and completing a swap" do
+    # Alice asks Bob for Dune, then sends a message
+    visit book_path(books(:dune))
+    click_on "Request exchange"
+    click_on "Send request"
+    assert_text "Request sent!"
+    within(".request", text: "You asked Bob Bookworm for Dune") { click_on "Send a message" }
+    fill_in "Message Bob Bookworm", with: "Could we meet on Saturday?"
+    click_on "Send"
+    assert_selector ".message.is-mine", text: "Could we meet on Saturday?"
+
+    # Bob sees the bell, opens the notification, accepts, and replies
+    click_on "Sign out"
+    assert_text "You have been signed out."
+    sign_in_as users(:two)
+    assert_selector ".bell-count", text: "2" # the request, and the message
+
+    find("a.bell").click
+    assert_selector ".notification.is-unread", count: 2
+    click_on "Alice Reader sent you a message about Dune"
+    assert_selector ".message.is-theirs", text: "Could we meet on Saturday?"
+
+    within(".request") { accept_confirm { click_on "Accept" } }
+    assert_text "You accepted Alice Reader's request"
+    assert_selector "h2", text: "Messages with Alice Reader" # still on the request's page
+    fill_in "Message Alice Reader", with: "Saturday works!"
+    click_on "Send"
+    assert_selector ".message.is-mine", text: "Saturday works!"
+
+    accept_confirm { click_on "Mark swap as done" }
+    assert_text "Swap done! “Dune” is now on Alice Reader's shelf."
+    assert_selector ".status-completed", text: "COMPLETED"
+    assert_equal users(:one), books(:dune).reload.user
   end
 end

@@ -23,7 +23,7 @@ class AdminReportTest < ActiveSupport::TestCase
   end
 
   test "requests by status lists every status, including zeros" do
-    assert_equal({ "pending" => 1, "accepted" => 0, "declined" => 0, "cancelled" => 0 }, @report.requests_by_status)
+    assert_equal({ "pending" => 1, "accepted" => 0, "declined" => 0, "cancelled" => 0, "completed" => 0 }, @report.requests_by_status)
   end
 
   test "percent rounds and copes with zero" do

@@ -15,6 +15,12 @@
     </div>
 
     <div class="field">
+      <%= form.label :city, "Town or city" %>
+      <%= form.text_field :city, maxlength: 60, autocomplete: "address-level2", placeholder: "e.g. Dar es Salaam", class: "input" %>
+      <span class="field-hint">Optional. Shown on your profile, and used to show books near you first on the Exchange shelf.</span>
+    </div>
+
+    <div class="field">
       <%= label_tag :current_password, "Current password" %>
       <%= password_field_tag :current_password, nil, autocomplete: "current-password", class: "input" %>
       <span class="field-hint">Only needed if you change your email address.</span>

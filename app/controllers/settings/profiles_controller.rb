@@ -4,7 +4,7 @@ class Settings::ProfilesController < Settings::BaseController
   end
 
   def update
-    @user.assign_attributes(params.expect(user: [ :name, :email_address ]))
+    @user.assign_attributes(params.expect(user: [ :name, :email_address, :city ]))
 
     # Whoever controls the email address can reset the password, so changing
     # it needs the current password.

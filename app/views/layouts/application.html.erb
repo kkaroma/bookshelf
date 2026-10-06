@@ -54,6 +54,12 @@
 
         <div class="nav-links">
           <% if authenticated? %>
+            <% unread = Current.user.notifications.unread.count %>
+            <%= link_to notifications_path, class: [ "bell", ("active" if controller_name == "notifications") ],
+                  aria: { label: unread.zero? ? "Notifications" : "Notifications (#{unread} unread)" } do %>
+              <%= render "shared/bell_icon" %>
+              <% if unread.positive? %><span class="bell-count"><%= unread > 99 ? "99+" : unread %></span><% end %>
+            <% end %>
             <span class="nav-user">
               <%= link_to Current.user.name, Current.user, class: "nav-user-name", title: "Signed in as #{Current.user.name} — your profile" %>
               <% if Current.user.admin? %><span class="badge">Admin</span><% end %>

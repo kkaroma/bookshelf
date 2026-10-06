@@ -5,6 +5,12 @@ class User < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
   has_many :reading_goals, dependent: :destroy
+  has_many :wishlist_items, -> { order(:title) }, dependent: :destroy
+  has_many :notifications, -> { newest_first }, foreign_key: :recipient_id, inverse_of: :recipient, dependent: :destroy
+  # Notifications others received about something this person did. If they
+  # delete their account, those stay but no longer name them.
+  has_many :caused_notifications, class_name: "Notification", foreign_key: :actor_id,
+           inverse_of: :actor, dependent: :nullify
 
   # Following: a user follows many users and is followed by many users.
   # Both sides go through the same follows table, looked at from each end.
@@ -18,7 +24,8 @@ class User < ApplicationRecord
   # Exchange requests I've sent, and ones others sent me for my books.
   has_many :sent_exchange_requests, class_name: "ExchangeRequest", foreign_key: :requester_id,
            inverse_of: :requester, dependent: :destroy
-  has_many :received_exchange_requests, through: :books, source: :exchange_requests
+  has_many :received_exchange_requests, class_name: "ExchangeRequest", foreign_key: :owner_id,
+           inverse_of: :owner, dependent: :destroy
 
   # Stored as a number in the database (0 or 1), used by name in code:
   # user.admin?, user.member?, user.admin!, User.admins
@@ -26,12 +33,23 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(n) { n.strip }
+  normalizes :city, with: ->(city) { city.squish.presence }
 
   validates :name, presence: true, length: { maximum: 50 }
+  validates :city, length: { maximum: 60 }
+
+  # Is this person in the same town? (Ignores capital letters.)
+  def same_city_as?(other)
+    city.present? && other&.city.present? && city.casecmp?(other.city)
+  end
   validates :email_address, presence: true,
                             uniqueness: true,
                             format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 8 }, allow_nil: true
+
+  def wishlisted?(book)
+    wishlist_items.any? { |item| item.matches?(book) }
+  end
 
   def reading_goal_for(year = Date.current.year)
     reading_goals.find_by(year: year)

@@ -1,0 +1,25 @@
+<% content_for :title, "Swap: #{@exchange_request.book.title}" %>
+
+<%= link_to "← All requests", exchange_requests_path(box: (@exchange_request.requester == Current.user ? "sent" : nil)), class: "back-link" %>
+
+<div class="request-list">
+  <%= render @exchange_request %>
+</div>
+
+<section class="conversation" aria-labelledby="conversation_title">
+  <h2 id="conversation_title">Messages with <%= @exchange_request.other_party(Current.user).name %></h2>
+
+  <div id="messages" class="messages">
+    <% if @messages.any? %>
+      <%= render partial: "exchange_requests/messages/message", collection: @messages %>
+    <% else %>
+      <p id="no_messages" class="muted">No messages yet. Say hello and arrange how to swap!</p>
+    <% end %>
+  </div>
+
+  <% if @exchange_request.open_for_messages? %>
+    <%= render "exchange_requests/messages/form", exchange_request: @exchange_request, message: Message.new %>
+  <% else %>
+    <p class="muted">This request is <%= @exchange_request.status %>, so the conversation is closed.</p>
+  <% end %>
+</section>

@@ -20,6 +20,11 @@
     <% if book.reading_status %>
       <p class="book-card-status status-<%= book.reading_status.dasherize %>"><%= book.reading_status_label %></p>
     <% end %>
-    <p class="book-card-owner">Added by <%= book.owned_by?(Current.user) ? "you" : book.user.name %></p>
+    <p class="book-card-owner">
+      Added by <%= book.owned_by?(Current.user) ? "you" : book.user.name %>
+      <% if local_assigns[:show_city] && book.user.city %>
+        · <span class="<%= "same-town" if book.user.same_city_as?(Current.user) %>">📍 <%= book.user.city %></span>
+      <% end %>
+    </p>
   </div>
 <% end %>

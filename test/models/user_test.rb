@@ -64,6 +64,20 @@ class UserTest < ActiveSupport::TestCase
     assert_not users(:admin).last_admin?
   end
 
+  test "city is optional and tidied up" do
+    assert_nil build_user(city: "   ").tap(&:valid?).city
+    assert_equal "Dar es Salaam", build_user(city: "  Dar   es Salaam ").city
+    assert_not build_user(city: "x" * 61).valid?
+  end
+
+  test "same_city_as? ignores capital letters" do
+    a = build_user(city: "Dar es Salaam")
+    assert a.same_city_as?(build_user(city: "dar es salaam"))
+    assert_not a.same_city_as?(build_user(city: "Arusha"))
+    assert_not a.same_city_as?(build_user(city: nil))
+    assert_not build_user(city: nil).same_city_as?(build_user(city: nil))
+  end
+
   test "rejects an unknown role" do
     assert_not build_user(role: "superhero").valid?
   end

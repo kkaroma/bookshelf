@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_193641) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,6 +60,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
     t.integer "reading_status"
     t.date "started_on"
     t.date "finished_on"
+    t.datetime "reviewed_at"
     t.index ["available_for_exchange"], name: "index_books_on_available_for_exchange"
     t.index ["genre"], name: "index_books_on_genre"
     t.index ["user_id", "finished_on"], name: "index_books_on_user_id_and_finished_on"
@@ -87,8 +88,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
     t.datetime "responded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "completed_at"
+    t.bigint "owner_id", null: false
     t.index ["book_id"], name: "index_exchange_requests_on_book_id"
     t.index ["offered_book_id"], name: "index_exchange_requests_on_offered_book_id"
+    t.index ["owner_id"], name: "index_exchange_requests_on_owner_id"
     t.index ["requester_id", "book_id"], name: "index_exchange_requests_one_pending_per_book", unique: true, where: "(status = 0)"
     t.index ["requester_id"], name: "index_exchange_requests_on_requester_id"
   end
@@ -114,6 +118,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
     t.datetime "updated_at", null: false
     t.index ["book_id"], name: "index_loans_on_book_id"
     t.index ["book_id"], name: "index_loans_one_open_per_book", unique: true, where: "(returned_on IS NULL)"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.bigint "exchange_request_id", null: false
+    t.bigint "sender_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exchange_request_id"], name: "index_messages_on_exchange_request_id"
+    t.index ["sender_id"], name: "index_messages_on_sender_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "recipient_id", null: false
+    t.bigint "actor_id"
+    t.string "notifiable_type", null: false
+    t.bigint "notifiable_id", null: false
+    t.string "kind", null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
+    t.index ["recipient_id", "created_at"], name: "index_notifications_on_recipient_id_and_created_at"
+    t.index ["recipient_id", "read_at"], name: "index_notifications_on_recipient_id_and_read_at"
+    t.index ["recipient_id"], name: "index_notifications_on_recipient_id"
   end
 
   create_table "ratings", force: :cascade do |t|
@@ -329,7 +359,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
     t.boolean "notify_exchange_requests", default: true, null: false
     t.boolean "notify_comments", default: true, null: false
     t.boolean "notify_followers", default: true, null: false
+    t.string "city"
+    t.boolean "notify_messages", default: true, null: false
+    t.boolean "notify_wishlist", default: true, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
+  create_table "wishlist_items", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "title", null: false
+    t.string "author"
+    t.string "isbn"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["isbn"], name: "index_wishlist_items_on_isbn"
+    t.index ["user_id"], name: "index_wishlist_items_on_user_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -340,10 +384,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
   add_foreign_key "comments", "users"
   add_foreign_key "exchange_requests", "books"
   add_foreign_key "exchange_requests", "books", column: "offered_book_id"
+  add_foreign_key "exchange_requests", "users", column: "owner_id"
   add_foreign_key "exchange_requests", "users", column: "requester_id"
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "loans", "books"
+  add_foreign_key "messages", "exchange_requests"
+  add_foreign_key "messages", "users", column: "sender_id"
+  add_foreign_key "notifications", "users", column: "actor_id"
+  add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "ratings", "books"
   add_foreign_key "ratings", "users"
   add_foreign_key "reading_goals", "users"
@@ -356,4 +405,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_184939) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "wishlist_items", "users"
 end

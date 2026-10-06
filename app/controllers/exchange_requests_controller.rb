@@ -1,7 +1,8 @@
 class ExchangeRequestsController < ApplicationController
   before_action :set_book, only: %i[ new create ]
   before_action :require_requestable_book, only: %i[ new create ]
-  before_action :set_exchange_request, only: %i[ accept decline cancel ]
+  before_action :set_exchange_request, only: %i[ show accept decline cancel complete ]
+  before_action :require_participant, only: %i[ show complete ]
   before_action :require_book_owner, only: %i[ accept decline ]
   before_action :require_requester, only: :cancel
 
@@ -9,7 +10,16 @@ class ExchangeRequestsController < ApplicationController
   def index
     @box = params[:box] == "sent" ? "sent" : "received"
     requests = @box == "sent" ? ExchangeRequest.sent_by(Current.user) : ExchangeRequest.received_by(Current.user)
-    @exchange_requests = requests.includes(:requester, :offered_book, book: :user).newest_first
+    @exchange_requests = requests.includes(:requester, :owner, :offered_book, :messages, book: :user).newest_first
+  end
+
+  # One request, with its conversation. Opening it marks its message
+  # notifications as read.
+  def show
+    @messages = @exchange_request.messages.includes(:sender)
+    Current.user.notifications.unread
+           .where(kind: "new_message", notifiable_type: "Message", notifiable_id: @exchange_request.messages.select(:id))
+           .update_all(read_at: Time.current)
   end
 
   def new
@@ -31,18 +41,28 @@ class ExchangeRequestsController < ApplicationController
 
   def accept
     @exchange_request.accept!
-    redirect_to exchange_requests_path,
+    # Back to wherever it was answered from (the list, or the request's own page).
+    redirect_back_or_to exchange_requests_path,
                 notice: "You accepted #{@exchange_request.requester.name}'s request. Get in touch to arrange the swap!"
   end
 
   def decline
     @exchange_request.decline!
-    redirect_to exchange_requests_path, notice: "Request declined."
+    redirect_back_or_to exchange_requests_path, notice: "Request declined."
+  end
+
+  # Either person: "we've swapped". The books change owners.
+  def complete
+    @exchange_request.complete!(by: Current.user)
+    redirect_to exchange_request_path(@exchange_request),
+                notice: "Swap done! “#{@exchange_request.book.title}” is now on #{@exchange_request.requester == Current.user ? "your" : "#{@exchange_request.requester.name}'s"} shelf."
+  rescue ExchangeRequest::NotAccepted => error
+    redirect_to exchange_request_path(@exchange_request), alert: error.message
   end
 
   def cancel
     @exchange_request.cancel!
-    redirect_to exchange_requests_path(box: "sent"), notice: "Request cancelled."
+    redirect_back_or_to exchange_requests_path(box: "sent"), notice: "Request cancelled."
   end
 
   # A request that's already been answered can't be answered again
@@ -67,8 +87,13 @@ class ExchangeRequestsController < ApplicationController
       @exchange_request = ExchangeRequest.find(params.expect(:id))
     end
 
+    # Only the two people involved can see a request and its messages.
+    def require_participant
+      head :not_found unless @exchange_request.participant?(Current.user)
+    end
+
     def require_book_owner
-      unless @exchange_request.book.owned_by?(Current.user)
+      unless @exchange_request.owner == Current.user
         redirect_to exchange_requests_path, alert: "Only the book's owner can answer this request."
       end
     end

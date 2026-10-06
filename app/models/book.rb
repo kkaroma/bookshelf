@@ -2,6 +2,7 @@ class Book < ApplicationRecord
   belongs_to :user, counter_cache: true # keeps users.books_count up to date
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
+  has_many :notifications, as: :notifiable, dependent: :destroy
   has_many :loans, -> { order(lent_on: :desc, id: :desc) }, dependent: :destroy
   has_many :exchange_requests, dependent: :destroy
   # Requests where this book was offered in return; if it's deleted they just lose the offer.
@@ -10,6 +11,10 @@ class Book < ApplicationRecord
 
   # Taking a book off the exchange shelf (or accepting a request for it)
   # declines everyone else who was still waiting.
+  # When a book is offered for exchange, tell members who have it on their wishlist.
+  after_commit :alert_wishlists, on: %i[ create update ],
+               if: -> { available_for_exchange? && saved_change_to_available_for_exchange? }
+
   after_update :decline_pending_exchange_requests,
                if: -> { saved_change_to_available_for_exchange?(to: false) }
 
@@ -75,6 +80,8 @@ class Book < ApplicationRecord
   validate :cover_is_a_reasonable_image
 
   before_save :drop_cover, if: -> { remove_cover && !new_cover? }
+  # Remember when the owner last wrote their review (for the activity feed).
+  before_save -> { self.reviewed_at = review.present? ? Time.current : nil }, if: :will_save_change_to_review?
   validates :published_year,
             numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: -> { Date.current.year } },
             allow_nil: true
@@ -107,6 +114,18 @@ class Book < ApplicationRecord
   # The loan that hasn't come back yet, if the book is lent out.
   def current_loan
     loans.outstanding.first
+  end
+
+  # Hands the book to a new owner after a completed swap. The old owner's
+  # review, reading status and lending history are theirs, so they're cleared;
+  # the new owner's own rating is removed because owners can't rate their books.
+  def transfer_to!(new_owner)
+    transaction do
+      loans.destroy_all
+      ratings.where(user: new_owner).destroy_all
+      update!(user: new_owner, review: nil, reviewed_at: nil, reading_status: nil,
+              started_on: nil, finished_on: nil, available_for_exchange: false)
+    end
   end
 
   def reading_status_label
@@ -149,6 +168,17 @@ class Book < ApplicationRecord
   end
 
   private
+    # Each member hears about a given book once, however many matching wishlist
+    # entries they have.
+    def alert_wishlists
+      WishlistItem.matching(self).includes(:user).map(&:user).uniq.each do |member|
+        next if notifications.exists?(recipient: member, kind: "wishlist_match")
+
+        Notification.notify(member, "wishlist_match", about: self, actor: user)
+        NotificationsMailer.wishlist_match(member, self).deliver_later if member.notify_wishlist?
+      end
+    end
+
     def new_cover?
       attachment_changes["cover"].present?
     end

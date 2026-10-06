@@ -1,0 +1,38 @@
+<% content_for :title, "Notifications" %>
+
+<div class="page-header">
+  <div>
+    <h1>Notifications</h1>
+    <p class="muted">What's happened with your books, requests and followers.</p>
+  </div>
+  <% if Current.user.notifications.unread.exists? %>
+    <%= button_to "Mark all as read", mark_all_read_notifications_path, method: :patch, class: "btn btn-secondary" %>
+  <% end %>
+</div>
+
+<% if @notifications.any? %>
+  <ul class="notification-list">
+    <% @notifications.each do |notification| %>
+      <li id="<%= dom_id notification %>" class="notification <%= "is-unread" unless notification.read? %>">
+        <%= link_to notification_path(notification), class: "notification-link" do %>
+          <% if notification.actor %>
+            <span class="avatar" style="--hue: <%= avatar_hue(notification.actor) %>" aria-hidden="true"><%= initials(notification.actor.name) %></span>
+          <% else %>
+            <span class="avatar" aria-hidden="true">📚</span>
+          <% end %>
+          <span class="notification-text">
+            <%= notification_message(notification) %>
+            <span class="muted notification-time"><%= time_ago_in_words(notification.created_at) %> ago</span>
+          </span>
+          <% unless notification.read? %><span class="unread-dot" aria-label="Unread"></span><% end %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+  <%= render "shared/pagination", pagination: @pagination %>
+<% else %>
+  <div class="empty-state">
+    <h2>Nothing yet</h2>
+    <p class="muted">When someone follows you, comments on your books or asks to swap, you'll see it here.</p>
+  </div>
+<% end %>

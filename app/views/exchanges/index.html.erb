@@ -10,11 +10,25 @@
       <% end %>
     </p>
   </div>
+  <%= link_to "My wishlist (#{Current.user.wishlist_items.size})", wishlist_items_path, class: "btn btn-secondary" %>
 </div>
+
+<p class="near-me">
+  <% if @my_city %>
+    📍 Books in <strong><%= @my_city %></strong> are shown first.
+    <% if @near_only %>
+      <%= link_to "Show books everywhere", exchanges_path %>
+    <% else %>
+      <%= link_to "Only near me", exchanges_path(near: 1) %>
+    <% end %>
+  <% else %>
+    📍 <%= link_to "Add your town", edit_settings_profile_path %> to see books near you first.
+  <% end %>
+</p>
 
 <% if @books.any? %>
   <div id="books" class="book-grid">
-    <%= render @books %>
+    <%= render partial: "books/book", collection: @books, locals: { show_city: true } %>
   </div>
   <%= render "shared/pagination", pagination: @pagination %>
 <% else %>

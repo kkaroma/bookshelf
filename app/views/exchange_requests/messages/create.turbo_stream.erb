@@ -1,0 +1,4 @@
+<%= turbo_stream.remove "no_messages" %>
+<%= turbo_stream.append "messages", partial: "exchange_requests/messages/message", locals: { message: @message } %>
+<%= turbo_stream.replace "new_message", partial: "exchange_requests/messages/form",
+      locals: { exchange_request: @exchange_request, message: Message.new } %>

@@ -1,0 +1,7 @@
+Hi <%= @member.name %>,
+
+Good news: "<%= @book.title %>" by <%= @book.author %>, which is on your wishlist, has just been offered for exchange by <%= @book.user.name %>.
+
+See the book: <%= book_url(@book) %>
+
+You're getting this because "Wishlist alerts" is switched on in your email settings: <%= edit_settings_notifications_url %>

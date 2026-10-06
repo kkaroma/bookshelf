@@ -19,6 +19,16 @@
             class: "btn btn-ghost btn-sm" %>
     </div>
   </div>
+<% elsif !book.available_for_exchange? %>
+  <div class="exchange-panel wishlist-panel">
+    <% if Current.user.wishlisted?(book) %>
+      <span>✓ This book is on your <%= link_to "wishlist", wishlist_items_path %>. We'll tell you if it's offered for exchange.</span>
+    <% else %>
+      <span class="muted">Would you like this book? We'll tell you if anyone offers it for exchange.</span>
+      <%= button_to "Add to my wishlist", wishlist_items_path, class: "btn btn-secondary btn-sm",
+            params: { wishlist_item: { title: book.title, author: book.author, isbn: book.isbn } } %>
+    <% end %>
+  </div>
 <% elsif book.requestable_by?(Current.user) %>
   <div class="exchange-panel">
     <span><%= book.user.name %> is happy to swap this book.</span>

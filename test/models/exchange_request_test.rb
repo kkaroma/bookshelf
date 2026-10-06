@@ -53,7 +53,7 @@ class ExchangeRequestTest < ActiveSupport::TestCase
 
   test "the database also refuses a second pending request" do
     assert_raises(ActiveRecord::RecordNotUnique) do
-      ExchangeRequest.insert!({ requester_id: @admin.id, book_id: @dune.id, status: 0 })
+      ExchangeRequest.insert!({ requester_id: @admin.id, owner_id: @bob.id, book_id: @dune.id, status: 0 })
     end
   end
 

@@ -1,0 +1,9 @@
+<% mine = message.sender_id == Current.user.id %>
+<div id="<%= dom_id message %>" class="message <%= mine ? "is-mine" : "is-theirs" %>">
+  <div class="message-bubble">
+    <p class="message-body"><%= message.body %></p>
+    <span class="message-meta">
+      <%= mine ? "You" : message.sender.name %> · <%= time_ago_in_words(message.created_at) %> ago
+    </span>
+  </div>
+</div>
