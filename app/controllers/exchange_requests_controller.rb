@@ -1,5 +1,6 @@
 class ExchangeRequestsController < ApplicationController
   before_action :set_book, only: %i[ new create ]
+  before_action :require_confirmed_email, only: %i[ new create ]
   before_action :require_requestable_book, only: %i[ new create ]
   before_action :set_exchange_request, only: %i[ show accept decline cancel complete ]
   before_action :require_participant, only: %i[ show complete ]

@@ -1,0 +1,16 @@
+<% item = @flag.flaggable %>
+Hi <%= @admin.name %>,
+
+<% if @flag.flaggable_type == "Book" -%>
+<%= @flag.reporter.name %> reported the book "<%= item.title %>" added by <%= item.user.name %>.
+<% else -%>
+<%= @flag.reporter.name %> reported a comment by <%= item.user.name %> on "<%= item.book.title %>":
+
+  <%= truncate(item.body, length: 300) %>
+<% end -%>
+
+Reason: <%= @flag.reason_label %><% if @flag.note %> - "<%= @flag.note %>"<% end %>
+
+Review reported content: <%= admin_flags_url %>
+
+You're getting this because you're an admin of Bookshelf.

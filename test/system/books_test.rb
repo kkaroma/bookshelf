@@ -292,8 +292,8 @@ class BooksTest < ApplicationSystemTestCase
     assert_text "You have been signed out."
     sign_in_as users(:admin)
 
-    click_on "Reports"
-    assert_selector "h1", text: "Reports"
+    within(".nav-main") { click_on "Admin" }
+    assert_selector ".tabs a.active", text: "Statistics"
 
     this_week = Time.current.beginning_of_week.strftime("%-d %b")
     column = find("figure[aria-labelledby=books_chart_title] .chart-col[aria-label='Week of #{this_week}: 2 new books']")

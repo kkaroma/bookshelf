@@ -103,4 +103,22 @@ class AdminReportTest < ActiveSupport::TestCase
     hobbit.update!(isbn: "9780547928227")
     assert_equal [ books(:dune) ], @report.books_missing_details.to_a
   end
+
+  test "the CSV has the overview numbers and weekly rows" do
+    rows = CSV.parse(@report.to_csv)
+    assert_equal [ "Section", "Item", "Value" ], rows.first
+    assert_includes rows, [ "Overview", "Books", "2" ]
+    assert_includes rows, [ "Overview", "Comments", "3" ]
+    assert_equal AdminReport::WEEKS, rows.count { |row| row[0] == "New members per week" }
+  end
+
+  test "the CSV can't smuggle spreadsheet formulas in through titles" do
+    books(:dune).update!(title: "=HYPERLINK(\"http://evil.example\")")
+    Rating.create!(user: users(:one), book: books(:dune), score: 5)
+    Rating.create!(user: users(:admin), book: books(:dune), score: 4)
+
+    titles = CSV.parse(@report.to_csv).filter_map { |row| row[1] if row[0] == "Top-rated books" }
+    assert_includes titles, "'=HYPERLINK(\"http://evil.example\")"
+    assert titles.none? { |title| title.start_with?("=") }
+  end
 end

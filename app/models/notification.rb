@@ -1,12 +1,13 @@
 # An in-app notification (the bell): "Bob commented on The Hobbit".
 #
-# `notifiable` is what it's about - a Comment, Follow, ExchangeRequest, Message
-# or Book. It's a *polymorphic* association: one pair of columns
+# `notifiable` is what it's about - a Comment, Follow, ExchangeRequest, Message,
+# Book or Flag. It's a *polymorphic* association: one pair of columns
 # (notifiable_type + notifiable_id) that can point at any of those.
 class Notification < ApplicationRecord
   KINDS = %w[
     exchange_request_received exchange_request_accepted exchange_request_declined
     swap_completed new_message new_comment new_reply new_follower wishlist_match
+    new_flag
   ].freeze
 
   belongs_to :recipient, class_name: "User"

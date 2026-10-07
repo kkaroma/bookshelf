@@ -1850,3 +1850,71 @@ ul.report-list { list-style: none; padding-left: 0; }
   color: var(--text-muted);
   text-align: center;
 }
+
+/* ---------- Admin & safety ---------- */
+.badge-danger { background: var(--danger-soft); color: var(--danger); }
+.badge-muted { background: var(--surface-muted); color: var(--text-muted); }
+
+/* "Please confirm your email" reminder above every page. */
+.confirm-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  font-size: 0.95rem;
+}
+.confirm-banner form { margin: 0; }
+
+/* Sign-up spam trap: off screen for people, still in the page for robots. */
+.hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Report a book or comment */
+.report-link { margin-top: 2rem; font-size: 0.85rem; }
+.report-link a { color: var(--text-muted); }
+.flag-quote {
+  margin: 1rem 0;
+  padding: 0.8rem 1rem;
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+.flag-quote p { margin: 0.35rem 0 0; white-space: pre-line; }
+.flag-reasons { border: 0; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
+.flag-reasons legend { font-weight: 600; margin-bottom: 0.4rem; }
+.flag-reason { display: flex; align-items: center; gap: 0.55rem; font-weight: 500; }
+.flag-reason input { accent-color: var(--primary); }
+
+/* Admin: reported content */
+.flag-list { display: grid; gap: 1rem; max-width: 760px; }
+.flag-item { padding: 1.1rem 1.25rem; }
+.flag-item-header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.flag-reports { margin: 0.75rem 0; padding-left: 1.1rem; display: grid; gap: 0.3rem; font-size: 0.95rem; }
+.flag-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.flag-actions form { margin: 0; }
+
+/* Admin: members */
+.admin-members { display: grid; gap: 0.6rem; max-width: 960px; }
+.admin-member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.admin-member.is-suspended { background: var(--surface-muted); }
+.admin-member-info { flex: 1 1 260px; min-width: 0; }
+.admin-member-info .member-meta { display: block; overflow-wrap: anywhere; }
+.admin-member-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.admin-member-actions form { margin: 0; }
+.admin-search .search-row { flex-wrap: wrap; max-width: 720px; }
+.admin-search .search-input { flex: 1 1 220px; }
+.admin-search .filter-select { flex: none; }

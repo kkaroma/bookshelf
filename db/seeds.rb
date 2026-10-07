@@ -17,4 +17,5 @@ User.find_or_create_by!(email_address: admin_email) do |user|
   user.name = "Admin"
   user.password = admin_password
   user.role = :admin
+  user.email_confirmed_at = Time.current
 end

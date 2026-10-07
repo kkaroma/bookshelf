@@ -14,6 +14,9 @@ Rails.application.routes.draw do
 
   resource :session
   resource :registration, only: %i[ new create ]
+  # The link in the confirmation email (GET /email_confirmation?token=...),
+  # and "send it again" (POST /email_confirmation).
+  resource :email_confirmation, only: %i[ show create ]
   resources :passwords, param: :token
   resources :books do
     # The owner's review of a book: /books/:book_id/review/edit
@@ -52,8 +55,28 @@ Rails.application.routes.draw do
 
   # Admin-only pages live under /admin (controllers in app/controllers/admin/).
   namespace :admin do
-    resource :reports, only: :show # /admin/reports
+    resource :reports, only: :show # /admin/reports (and /admin/reports.csv)
+    # Manage members: /admin/users
+    resources :users, only: :index do
+      member do
+        patch :promote   # make admin
+        patch :demote    # back to member
+        patch :suspend
+        patch :reinstate
+        patch :confirm_email
+      end
+    end
+    # Reported books and comments: /admin/flags
+    resources :flags, only: :index do
+      collection do
+        patch :dismiss # PATCH /admin/flags/dismiss?book_id=1 (or comment_id=)
+        delete :remove # deletes the reported book or comment
+      end
+    end
   end
+
+  # Report a book or comment: /flags/new?book_id=1 or /flags/new?comment_id=3
+  resources :flags, only: %i[ new create ]
 
   # The exchange shelf: every book available for exchange.
   resources :exchanges, only: :index

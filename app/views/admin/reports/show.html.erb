@@ -1,12 +1,15 @@
-<% content_for :title, "Reports" %>
+<% content_for :title, "Statistics" %>
 <% report = @report %>
 
 <div class="page-header">
   <div>
-    <h1>Reports</h1>
-    <p class="muted">Figures as of <%= report.now.strftime("%-d %B %Y, %H:%M") %>. Only admins can see this page.</p>
+    <h1>Admin</h1>
+    <p class="muted">Figures as of <%= report.now.strftime("%-d %B %Y, %H:%M") %>. Only admins can see these pages.</p>
   </div>
+  <%= link_to "Download CSV", admin_reports_path(format: :csv), class: "btn btn-secondary", download: "",
+        title: "The numbers on this page as a spreadsheet (Excel, Google Sheets)" %>
 </div>
+<%= render "admin/tabs" %>
 
 <%# ---------- 1. Overview ---------- %>
 <section class="report-section" aria-labelledby="overview_title">

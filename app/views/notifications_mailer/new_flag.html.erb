@@ -1,0 +1,17 @@
+<% item = @flag.flaggable %>
+<p style="margin-top:0;">Hi <%= @admin.name %>,</p>
+<p>
+  <strong><%= @flag.reporter.name %></strong> reported
+  <% if @flag.flaggable_type == "Book" %>
+    the book <strong>“<%= item.title %>”</strong> added by <%= item.user.name %>.
+  <% else %>
+    a comment by <%= item.user.name %> on <strong>“<%= item.book.title %>”</strong>:
+  <% end %>
+</p>
+<% if @flag.flaggable_type == "Comment" %>
+  <blockquote style="margin:0 0 16px; padding:12px 16px; background:#f3efe8; border-radius:8px;"><%= truncate(item.body, length: 300) %></blockquote>
+<% end %>
+<p>Reason: <strong><%= @flag.reason_label %></strong><% if @flag.note %> — “<%= @flag.note %>”<% end %></p>
+
+<%= render "shared/email_button", text: "Review reported content", url: admin_flags_url %>
+<p style="color:#6b6258; font-size:14px;">You're getting this because you're an admin of Bookshelf.</p>

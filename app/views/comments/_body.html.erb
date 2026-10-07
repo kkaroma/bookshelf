@@ -19,6 +19,10 @@
               class: "link-button link-button-danger",
               form: { data: { turbo_confirm: comment.reply? ? "Delete this reply?" : "Delete this comment and its replies?" } } %>
       <% end %>
+      <% if comment.flaggable_by?(Current.user) %>
+        <%= link_to "Report", new_flag_path(comment_id: comment.id), class: "link-button",
+              data: { turbo_frame: "_top" } %>
+      <% end %>
     </div>
   </div>
 </article>

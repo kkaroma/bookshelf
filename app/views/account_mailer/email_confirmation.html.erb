@@ -1,0 +1,8 @@
+<p style="margin-top:0;">Hi <%= @user.name %>,</p>
+<p>Please confirm that <strong><%= @user.email_address %></strong> is your email address. Once you have, you can comment on books, ask for swaps and send messages.</p>
+
+<%= render "shared/email_button", text: "Confirm my email address", url: email_confirmation_url(token: @token) %>
+
+<p style="color:#6b6258; font-size:14px;">
+  This link expires in 3 days. If you didn't sign up for Bookshelf, you can ignore this email.
+</p>

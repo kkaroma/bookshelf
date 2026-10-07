@@ -54,4 +54,17 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     get notifications_url
     assert_select ".empty-state h2", "Nothing yet"
   end
+
+  test "admins' report notifications open the reported content page" do
+    flag = Flag.create!(reporter: @alice, flaggable: comments(:bob_on_hobbit), reason: "spam")
+    sign_out
+    sign_in_as users(:admin)
+
+    notification = users(:admin).notifications.find_by!(notifiable: flag)
+    get notifications_url
+    assert_select ".notification", /Alice Reader reported a comment/
+
+    get notification_url(notification)
+    assert_redirected_to admin_flags_path
+  end
 end

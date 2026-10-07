@@ -127,4 +127,22 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get users_url
     assert_redirected_to new_session_url
   end
+
+  test "suspended members are left out of the Members list" do
+    @bob.suspend!
+    get users_url
+    assert_select "#user_#{@bob.id}", count: 0
+    assert_select ".member", User.count - 1
+  end
+
+  test "only admins see that a profile is suspended" do
+    @bob.suspend!
+    get user_url(@bob)
+    assert_select ".badge", text: "Suspended", count: 0
+
+    sign_out
+    sign_in_as users(:admin)
+    get user_url(@bob)
+    assert_select ".badge", "Suspended"
+  end
 end

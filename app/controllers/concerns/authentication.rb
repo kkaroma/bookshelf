@@ -26,7 +26,8 @@ module Authentication
     end
 
     def find_session_by_cookie
-      Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      # Suspended members' sessions are deleted, but never trust one anyway.
+      Session.joins(:user).merge(User.active).find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
     end
 
     def request_authentication

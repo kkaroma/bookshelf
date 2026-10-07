@@ -1,0 +1,88 @@
+<% content_for :title, "Reported content" %>
+
+<div class="page-header">
+  <div>
+    <h1>Admin</h1>
+    <p class="muted">Books and comments members have reported. Remove them, or dismiss the reports if nothing is wrong.</p>
+  </div>
+</div>
+<%= render "admin/tabs" %>
+
+<% if @reported.empty? %>
+  <div class="empty-state">
+    <h2>Nothing to review</h2>
+    <p class="muted">✓ No open reports. We'll email you when a member reports something.</p>
+  </div>
+<% else %>
+  <div class="flag-list">
+    <% @reported.each do |item, flags| %>
+      <% is_book = item.is_a?(Book) %>
+      <% target = is_book ? { book_id: item.id } : { comment_id: item.id } %>
+      <article id="<%= dom_id item, :reported %>" class="card flag-item">
+        <header class="flag-item-header">
+          <span class="tag"><%= is_book ? "Book" : "Comment" %></span>
+          <strong><%= pluralize(flags.size, "report") %></strong>
+          <span class="muted">· first <%= time_ago_in_words(flags.first.created_at) %> ago</span>
+        </header>
+
+        <% if is_book %>
+          <div class="request-target">
+            <%= render "books/mini_cover", book: item %>
+            <div>
+              <%= link_to item.title, item %>
+              <p class="muted">by <%= item.author %> · added by <%= link_to item.user.name, item.user %></p>
+            </div>
+          </div>
+        <% else %>
+          <blockquote class="flag-quote">
+            <%= link_to item.user.name, item.user %> on
+            <%= link_to "“#{item.book.title}”", book_path(item.book, anchor: dom_id(item)) %>:
+            <p><%= item.body %></p>
+          </blockquote>
+        <% end %>
+
+        <ul class="flag-reports">
+          <% flags.each do |flag| %>
+            <li>
+              <strong><%= flag.reason_label %></strong>
+              <% if flag.note %> — “<%= flag.note %>”<% end %>
+              <span class="muted">· <%= flag.reporter.name %>, <%= time_ago_in_words(flag.created_at) %> ago</span>
+            </li>
+          <% end %>
+        </ul>
+
+        <div class="flag-actions">
+          <%= button_to (is_book ? "Remove book" : "Remove comment"), remove_admin_flags_path(target), method: :delete,
+                class: "btn btn-danger btn-sm",
+                form: { data: { turbo_confirm: is_book ? "Delete “#{item.title}” and everything on it (comments, ratings, requests)? This can't be undone." : "Delete this comment#{" and its replies" if item.replies.any?}? This can't be undone." } } %>
+          <%= button_to "Dismiss — nothing wrong", dismiss_admin_flags_path(target), method: :patch, class: "btn btn-secondary btn-sm" %>
+          <% unless item.user.admin? || item.user.suspended? %>
+            <%= link_to "Manage #{item.user.name.split.first}…", admin_users_path(q: item.user.email_address), class: "btn btn-ghost btn-sm" %>
+          <% end %>
+        </div>
+      </article>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @recently_dismissed.any? %>
+  <section class="report-section">
+    <h2>Recently dismissed</h2>
+    <ul class="report-list">
+      <% @recently_dismissed.each do |flag| %>
+        <li>
+          <span>
+            <%= flag.reporter.name %> reported
+            <% if flag.flaggable.is_a?(Book) %>
+              <%= link_to flag.flaggable.title, flag.flaggable %>
+            <% else %>
+              <%= link_to "a comment by #{flag.flaggable.user.name}", book_path(flag.flaggable.book, anchor: dom_id(flag.flaggable)) %>
+            <% end %>
+            (<%= flag.reason_label.downcase %>)
+          </span>
+          <span class="muted">dismissed by <%= flag.resolved_by&.name || "a former admin" %> <%= time_ago_in_words(flag.resolved_at) %> ago</span>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

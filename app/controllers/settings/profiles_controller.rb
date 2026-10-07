@@ -12,7 +12,12 @@ class Settings::ProfilesController < Settings::BaseController
       @user.errors.add(:base, "Enter your current password to change your email address")
       render :edit, status: :unprocessable_content
     elsif @user.save
-      redirect_to edit_settings_profile_path, notice: "Your profile was saved."
+      notice = if @user.saved_change_to_email_address?
+        "Your profile was saved. We've emailed a link to #{@user.email_address} — open it to confirm your new address."
+      else
+        "Your profile was saved."
+      end
+      redirect_to edit_settings_profile_path, notice: notice
     else
       render :edit, status: :unprocessable_content
     end

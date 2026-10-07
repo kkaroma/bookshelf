@@ -1,0 +1,8 @@
+Hi <%= @user.name %>,
+
+Please confirm that <%= @user.email_address %> is your email address. Once you have, you can comment on books, ask for swaps and send messages.
+
+Open this link to confirm:
+<%= email_confirmation_url(token: @token) %>
+
+This link expires in 3 days. If you didn't sign up for Bookshelf, you can ignore this email.

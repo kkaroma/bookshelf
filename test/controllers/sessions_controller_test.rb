@@ -36,4 +36,20 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
     assert_empty cookies[:session_id]
   end
+
+  test "suspended members can't sign in" do
+    users(:two).suspend!
+    post session_path, params: { email_address: "two@example.com", password: "password" }
+
+    assert_redirected_to new_session_path
+    assert_match(/suspended/, flash[:alert])
+    assert_nil cookies[:session_id].presence
+  end
+
+  test "a suspended member's old session no longer works" do
+    sign_in_as users(:two)
+    users(:two).update_columns(suspended_at: Time.current) # even if a session were left behind
+    get books_url
+    assert_redirected_to new_session_url
+  end
 end

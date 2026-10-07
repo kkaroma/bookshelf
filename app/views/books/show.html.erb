@@ -65,5 +65,9 @@
     <% end %>
 
     <%= render "comments/section", book: @book, comments: @comments %>
+
+    <% if @book.flaggable_by?(Current.user) %>
+      <p class="report-link"><%= link_to "Report this book", new_flag_path(book_id: @book.id) %></p>
+    <% end %>
   </div>
 </article>

@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :ratings, dependent: :destroy
   has_many :reading_goals, dependent: :destroy
   has_many :wishlist_items, -> { order(:title) }, dependent: :destroy
+  has_many :flags, foreign_key: :reporter_id, inverse_of: :reporter, dependent: :destroy
   has_many :notifications, -> { newest_first }, foreign_key: :recipient_id, inverse_of: :recipient, dependent: :destroy
   # Notifications others received about something this person did. If they
   # delete their account, those stay but no longer name them.
@@ -31,6 +32,20 @@ class User < ApplicationRecord
   # user.admin?, user.member?, user.admin!, User.admins
   enum :role, { member: 0, admin: 1 }, default: :member, validate: true
 
+  # Members who can use the site (suspended members can't sign in).
+  scope :active, -> { where(suspended_at: nil) }
+
+  # The link in the "confirm your email" email carries this token. It stops
+  # working after 3 days, or as soon as the email address changes.
+  generates_token_for :email_confirmation, expires_in: 3.days do
+    email_address
+  end
+
+  # A new or changed email address needs confirming again.
+  before_save :unconfirm_email, if: -> { persisted? && will_save_change_to_email_address? }
+  after_commit :send_email_confirmation, on: %i[ create update ],
+               if: -> { saved_change_to_email_address? && !email_confirmed? }
+
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(n) { n.strip }
   normalizes :city, with: ->(city) { city.squish.presence }
@@ -53,6 +68,39 @@ class User < ApplicationRecord
 
   def reading_goal_for(year = Date.current.year)
     reading_goals.find_by(year: year)
+  end
+
+  def email_confirmed? = email_confirmed_at.present?
+
+  def confirm_email!
+    update!(email_confirmed_at: Time.current) unless email_confirmed?
+  end
+
+  def send_email_confirmation
+    AccountMailer.email_confirmation(self).deliver_later
+  end
+
+  def suspended? = suspended_at.present?
+
+  # Admins must be made members again before they can be suspended.
+  def suspendable? = !admin? && !suspended?
+
+  # Suspending signs the member out everywhere and stops them signing in. Their
+  # books leave the Exchange shelf (which declines requests for them, telling
+  # the requesters) and the requests they sent are cancelled.
+  def suspend!
+    raise ArgumentError, "admins can't be suspended" if admin?
+
+    transaction do
+      update!(suspended_at: Time.current)
+      sessions.destroy_all
+      books.for_exchange.find_each { |book| book.update!(available_for_exchange: false) }
+      sent_exchange_requests.pending.find_each(&:cancel!)
+    end
+  end
+
+  def reinstate!
+    update!(suspended_at: nil)
   end
 
   # The site must always have at least one admin.
@@ -78,4 +126,9 @@ class User < ApplicationRecord
     @following_ids ||= active_follows.pluck(:followed_id).to_set
     @following_ids.include?(other.id)
   end
+
+  private
+    def unconfirm_email
+      self.email_confirmed_at = nil
+    end
 end

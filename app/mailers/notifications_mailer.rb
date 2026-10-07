@@ -45,6 +45,14 @@ class NotificationsMailer < ApplicationMailer
     mail to: member.email_address, subject: "“#{book.title}” from your wishlist is up for exchange"
   end
 
+  # To every admin when a member reports a book or comment.
+  def new_flag(flag, admin)
+    @flag = flag
+    @admin = admin
+    what = flag.flaggable_type == "Book" ? "a book" : "a comment"
+    mail to: admin.email_address, subject: "#{flag.reporter.name} reported #{what} on Bookshelf"
+  end
+
   def new_follower(follow)
     @follower = follow.follower
     @followed = follow.followed

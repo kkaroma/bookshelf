@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :set_user, only: %i[ show followers following ]
 
   def index
-    @pagination = Pagination.new(User.order(:name), page: params[:page], per_page: 30)
+    @pagination = Pagination.new(User.active.order(:name), page: params[:page], per_page: 30)
     @users = @pagination.records
   end
 

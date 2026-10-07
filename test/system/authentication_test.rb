@@ -28,6 +28,24 @@ class AuthenticationTest < ApplicationSystemTestCase
     assert_text "Welcome back, Carol!"
   end
 
+  test "a new member confirms their email address from the link" do
+    visit new_registration_path
+    fill_in "Name", with: "Carol"
+    fill_in "Email address", with: "carol@example.com"
+    fill_in "Password", with: "secret-password"
+    fill_in "Confirm password", with: "secret-password"
+    click_on "Create account"
+
+    assert_selector ".confirm-banner", text: "Please confirm your email address"
+    click_on "Send the link again"
+    assert_text "We've emailed a new confirmation link to carol@example.com"
+
+    # Open the link from the email.
+    visit email_confirmation_path(token: User.find_by!(email_address: "carol@example.com").generate_token_for(:email_confirmation))
+    assert_text "Thanks, your email address is confirmed."
+    assert_no_selector ".confirm-banner"
+  end
+
   test "sign up shows errors for bad details" do
     visit new_registration_path
     fill_in "Name", with: "Carol"

@@ -1,3 +1,5 @@
+require "csv"
+
 # All the numbers on the admin Reports page, worked out in one place.
 # Every method only reads data; nothing here changes anything.
 class AdminReport
@@ -16,6 +18,9 @@ class AdminReport
   # --- 1. Overview ---
 
   def members_count        = User.count
+  def suspended_count      = User.where.not(suspended_at: nil).count
+  def unconfirmed_count    = User.where(email_confirmed_at: nil).count
+  def open_flags_count     = Flag.unresolved.count
   def members_this_month   = User.where(created_at: now.beginning_of_month..).count
   def books_count          = Book.count
   def books_with_cover     = Book.joins(:cover_attachment).count
@@ -89,7 +94,51 @@ class AdminReport
     books_missing_details_scope.count
   end
 
+  # --- Download ---
+
+  # The same numbers as one spreadsheet: Section, Item, Value - one row each.
+  def to_csv
+    CSV.generate do |csv|
+      csv << [ "Section", "Item", "Value" ]
+      csv_rows.each { |section, item, value| csv << [ section, spreadsheet_safe(item), value ] }
+    end
+  end
+
   private
+    def csv_rows
+      rows = [
+        [ "Report", "Figures as of", now.strftime("%Y-%m-%d %H:%M") ],
+        [ "Overview", "Members", members_count ],
+        [ "Overview", "Members joined this month", members_this_month ],
+        [ "Overview", "Suspended members", suspended_count ],
+        [ "Overview", "Members who haven't confirmed their email", unconfirmed_count ],
+        [ "Overview", "Books", books_count ],
+        [ "Overview", "Books with a cover", books_with_cover ],
+        [ "Overview", "Books with an ISBN", books_with_isbn ],
+        [ "Overview", "Reviews", reviews_count ],
+        [ "Overview", "Comments", comments_count ],
+        [ "Overview", "Ratings", ratings_count ],
+        [ "Overview", "On the Exchange shelf", exchange_shelf_count ],
+        [ "Overview", "Open reports of books or comments", open_flags_count ]
+      ]
+      requests_by_status.each { |status, count| rows << [ "Exchange requests", status.humanize, count ] }
+      new_members_by_week.each { |week| rows << [ "New members per week", "Week of #{week.starts_on.iso8601}", week.count ] }
+      new_books_by_week.each { |week| rows << [ "New books per week", "Week of #{week.starts_on.iso8601}", week.count ] }
+      top_rated_books.each { |book| rows << [ "Top-rated books", book.title, book.average_rating.to_f ] }
+      most_requested_books.each { |book| rows << [ "Most-requested books", book.title, book.requests_total ] }
+      most_active_members.each do |member|
+        rows << [ "Most active members", member.name, member.books_count + member.comments_total + member.ratings_total ]
+      end
+      rows
+    end
+
+    # Spreadsheets run anything starting with = + - or @ as a formula, so a
+    # book titled "=HYPERLINK(...)" could do harm. A leading ' makes it text.
+    def spreadsheet_safe(text)
+      text = text.to_s
+      text.match?(/\A[=+\-@\t\r]/) ? "'#{text}" : text
+    end
+
     # New records per week for the last WEEKS weeks (weeks start on Monday),
     # oldest first, including weeks with zero.
     def weekly(model)

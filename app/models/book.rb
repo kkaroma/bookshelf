@@ -1,4 +1,6 @@
 class Book < ApplicationRecord
+  include Flaggable
+
   belongs_to :user, counter_cache: true # keeps users.books_count up to date
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy

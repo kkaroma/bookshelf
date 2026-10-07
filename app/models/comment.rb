@@ -1,4 +1,6 @@
 class Comment < ApplicationRecord
+  include Flaggable
+
   belongs_to :user
   belongs_to :book
   has_many :notifications, as: :notifiable, dependent: :destroy

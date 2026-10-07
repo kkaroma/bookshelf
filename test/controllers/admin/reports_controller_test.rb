@@ -6,7 +6,8 @@ class Admin::ReportsControllerTest < ActionDispatch::IntegrationTest
     get admin_reports_url
 
     assert_response :success
-    assert_select "h1", "Reports"
+    assert_select "h1", "Admin"
+    assert_select ".tabs a.active", "Statistics"
     assert_select "#overview_title", "Overview"
     assert_select ".stat-tile", 7
     assert_select ".stat-tile", /Members\s+3/
@@ -49,14 +50,52 @@ class Admin::ReportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_url
   end
 
-  test "only admins see the Reports link" do
+  test "only admins see the Admin link" do
     sign_in_as users(:one)
     get root_url
-    assert_select ".nav-main a", text: "Reports", count: 0
+    assert_select ".nav-main a[href=?]", admin_reports_path, count: 0
 
     sign_out
     sign_in_as users(:admin)
     get root_url
-    assert_select ".nav-main a[href=?]", admin_reports_path, text: "Reports"
+    assert_select ".nav-main a[href=?]", admin_reports_path, text: "Admin"
+  end
+
+  test "the Admin link counts reported items waiting" do
+    Flag.create!(reporter: users(:one), flaggable: books(:dune), reason: "spam")
+    Flag.create!(reporter: users(:one), flaggable: comments(:bob_on_hobbit), reason: "offensive")
+    sign_in_as users(:admin)
+    get root_url
+    assert_select ".nav-main a[href=?] .nav-count", admin_reports_path, "2"
+  end
+
+  # --- CSV download ---
+
+  test "the reports page links to the CSV download" do
+    sign_in_as users(:admin)
+    get admin_reports_url
+    assert_select "a[href=?]", admin_reports_path(format: :csv), "Download CSV"
+  end
+
+  test "the CSV has a row per number" do
+    sign_in_as users(:admin)
+    get admin_reports_url(format: :csv)
+
+    assert_response :success
+    assert_equal "text/csv", response.media_type
+    assert_match(/attachment; filename="bookshelf-report-#{Date.current.iso8601}\.csv"/, response.headers["Content-Disposition"])
+
+    rows = CSV.parse(response.body)
+    assert_equal [ "Section", "Item", "Value" ], rows.first
+    assert_includes rows, [ "Overview", "Members", "3" ]
+    assert_includes rows, [ "Exchange requests", "Pending", "1" ]
+    assert_equal 8, rows.count { |row| row[0] == "New books per week" }
+    assert_includes rows, [ "Most-requested books", "Dune", "1" ]
+  end
+
+  test "members can't download the CSV" do
+    sign_in_as users(:one)
+    get admin_reports_url(format: :csv)
+    assert_response :not_found
   end
 end

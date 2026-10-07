@@ -39,7 +39,7 @@
           <div class="nav-main">
             <%= link_to "Books", books_path, class: ["nav-link", ("active" if controller_name == "books")] %>
             <%= link_to "Exchange shelf", exchanges_path, class: ["nav-link", ("active" if controller_name == "exchanges")] %>
-            <%= link_to "Members", users_path, class: ["nav-link", ("active" if controller_name == "users")] %>
+            <%= link_to "Members", users_path, class: ["nav-link", ("active" if controller_path == "users")] %>
             <%= link_to exchange_requests_path, class: ["nav-link", ("active" if controller_name == "exchange_requests")] do %>
               Requests
               <% if (waiting = Current.user.received_exchange_requests.pending.count) > 0 %>
@@ -47,7 +47,12 @@
               <% end %>
             <% end %>
             <% if Current.user.admin? %>
-              <%= link_to "Reports", admin_reports_path, class: ["nav-link", ("active" if controller_path == "admin/reports")] %>
+              <%= link_to admin_reports_path, class: ["nav-link", ("active" if controller_path.start_with?("admin/"))] do %>
+                Admin
+                <% if (reported = Flag.reported_items_count) > 0 %>
+                  <span class="nav-count" aria-label="<%= pluralize(reported, "reported item") %> to review"><%= reported %></span>
+                <% end %>
+              <% end %>
             <% end %>
           </div>
         <% end %>
@@ -62,7 +67,6 @@
             <% end %>
             <span class="nav-user">
               <%= link_to Current.user.name, Current.user, class: "nav-user-name", title: "Signed in as #{Current.user.name} — your profile" %>
-              <% if Current.user.admin? %><span class="badge">Admin</span><% end %>
             </span>
             <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>
             <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-ghost" %>
@@ -75,6 +79,15 @@
     </header>
 
     <main class="container">
+      <% if authenticated? && !Current.user.email_confirmed? %>
+        <div class="confirm-banner" role="status">
+          <span>
+            <strong>Please confirm your email address.</strong>
+            We sent a link to <%= Current.user.email_address %>. Until then you can't comment, ask for swaps or send messages.
+          </span>
+          <%= button_to "Send the link again", email_confirmation_path, class: "btn btn-secondary btn-sm" %>
+        </div>
+      <% end %>
       <% flash.each do |type, message| %>
         <div class="flash flash-<%= type %>" role="status"><%= message %></div>
       <% end %>

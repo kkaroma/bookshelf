@@ -14,6 +14,7 @@ module NotificationsHelper
     when "new_reply"                 then safe_join([ actor, " replied to your comment on ", book_title(about.book) ])
     when "new_follower"              then safe_join([ actor, " started following you" ])
     when "wishlist_match"            then safe_join([ book_title(about), ", on your wishlist, is now on the Exchange shelf (offered by ", tag.strong(about.user.name), ")" ])
+    when "new_flag"                  then safe_join([ actor, " reported ", about.flaggable_type == "Book" ? safe_join([ "the book ", book_title(about.flaggable) ]) : "a comment" ])
     end
   end
 
@@ -29,6 +30,7 @@ module NotificationsHelper
     when "new_comment", "new_reply"                               then book_path(about.book, anchor: dom_id(about))
     when "new_follower"                                           then user_path(notification.actor || notification.recipient)
     when "wishlist_match"                                         then book_path(about)
+    when "new_flag"                                               then admin_flags_path
     end
   end
 

@@ -329,14 +329,16 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Write your review", count: 0
   end
 
-  test "the admin badge shows only for admins" do
+  test "the header names the member; admins get an Admin link instead of a badge" do
     get books_url
-    assert_select ".badge", count: 0
+    assert_select ".nav-user-name", "Alice Reader"
+    assert_select ".nav-main a[href=?]", admin_reports_path, count: 0
 
     sign_out
     sign_in_as users(:admin)
     get books_url
-    assert_select ".nav-user .badge", "Admin"
+    assert_select ".nav-user .badge", count: 0
+    assert_select ".nav-main a[href=?]", admin_reports_path, "Admin"
   end
 
   test "should destroy book" do

@@ -26,6 +26,13 @@ class NotificationsMailerPreview < ActionMailer::Preview
     NotificationsMailer.new_follower(Follow.first)
   end
 
+  def new_flag
+    comment = Comment.first
+    reporter = User.where.not(id: comment.user_id).first
+    flag = Flag.new(flaggable: comment, reporter: reporter, reason: "offensive", note: "Not very kind.")
+    NotificationsMailer.new_flag(flag, User.admin.first)
+  end
+
   private
     # An unsaved example, for when the database has no requests yet.
     def sample_request

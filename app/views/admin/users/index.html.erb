@@ -1,0 +1,75 @@
+<% content_for :title, "Manage members" %>
+
+<div class="page-header">
+  <div>
+    <h1>Admin</h1>
+    <p class="muted">Make or remove admins, suspend members, and confirm email addresses by hand.</p>
+  </div>
+</div>
+<%= render "admin/tabs" %>
+
+<%= form_with url: admin_users_path, method: :get, class: "search-form admin-search", html: { role: "search" } do |form| %>
+  <div class="search-row">
+    <%= form.label :q, "Search members", class: "visually-hidden" %>
+    <%= form.search_field :q, value: @query, class: "input search-input", placeholder: "Name or email address", autocomplete: "off" %>
+    <%= form.label :show, "Show", class: "visually-hidden" %>
+    <%= form.select :show, { "Everyone" => "all", "Admins" => "admins", "Suspended" => "suspended", "Email not confirmed" => "unconfirmed" },
+          { selected: @show }, class: "input filter-select" %>
+    <%= form.submit "Search", name: nil, class: "btn btn-secondary" %>
+  </div>
+<% end %>
+
+<p class="search-summary">
+  <%= pluralize(@pagination.total_count, "member") %>
+  <% if @query.present? || @show != "all" %>
+    · <%= link_to "Show everyone", admin_users_path %>
+  <% end %>
+</p>
+
+<div class="admin-members">
+  <% @users.each do |user| %>
+    <div id="<%= dom_id user %>" class="admin-member<%= " is-suspended" if user.suspended? %>">
+      <span class="avatar" style="--hue: <%= avatar_hue(user) %>" aria-hidden="true"><%= initials(user.name) %></span>
+
+      <div class="admin-member-info">
+        <div>
+          <%= link_to user.name, user, class: "member-name" %>
+          <% if user == Current.user %><span class="muted">(you)</span><% end %>
+          <% if user.admin? %><span class="badge">Admin</span><% end %>
+          <% if user.suspended? %><span class="badge badge-danger">Suspended</span><% end %>
+          <% unless user.email_confirmed? %><span class="badge badge-muted">Email not confirmed</span><% end %>
+        </div>
+        <span class="member-meta">
+          <%= user.email_address %> · joined <%= l(user.created_at.to_date, format: :long) %> ·
+          <%= pluralize(user.books_count, "book") %>
+          <% if user.suspended? %> · suspended <%= time_ago_in_words(user.suspended_at) %> ago<% end %>
+        </span>
+      </div>
+
+      <div class="admin-member-actions">
+        <% unless user.email_confirmed? %>
+          <%= button_to "Confirm email", confirm_email_admin_user_path(user), method: :patch, class: "btn btn-ghost btn-sm" %>
+        <% end %>
+
+        <% if user.admin? %>
+          <% unless user.last_admin? %>
+            <%= button_to "Remove admin", demote_admin_user_path(user), method: :patch, class: "btn btn-secondary btn-sm",
+                  form: { data: { turbo_confirm: user == Current.user ? "Remove your own admin role? You'll lose access to these pages." : "Make #{user.name} an ordinary member?" } } %>
+          <% end %>
+        <% elsif user.suspended? %>
+          <%= button_to "Reinstate", reinstate_admin_user_path(user), method: :patch, class: "btn btn-secondary btn-sm" %>
+        <% else %>
+          <%= button_to "Make admin", promote_admin_user_path(user), method: :patch, class: "btn btn-secondary btn-sm",
+                form: { data: { turbo_confirm: "Make #{user.name} an admin? They'll be able to edit and delete anyone's books and comments, and manage members." } } %>
+          <%= button_to "Suspend", suspend_admin_user_path(user), method: :patch, class: "btn btn-danger btn-sm",
+                form: { data: { turbo_confirm: "Suspend #{user.name}? They'll be signed out and can't sign in again until you reinstate them. Their books leave the Exchange shelf." } } %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @users.empty? %>
+  <p class="muted">No members match.</p>
+<% end %>
+<%= render "shared/pagination", pagination: @pagination %>

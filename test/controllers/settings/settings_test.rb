@@ -60,6 +60,13 @@ class SettingsTest < ActionDispatch::IntegrationTest
     assert_equal "new@example.com", @alice.reload.email_address
   end
 
+  test "a new email address has to be confirmed" do
+    patch settings_profile_url, params: { user: { name: @alice.name, email_address: "new@example.com" }, current_password: "password" }
+
+    assert_not @alice.reload.email_confirmed?
+    assert_match(/emailed a link to new@example.com/, flash[:notice])
+  end
+
   test "you can't take an email address someone else uses" do
     patch settings_profile_url, params: { user: { name: @alice.name, email_address: users(:two).email_address }, current_password: "password" }
     assert_response :unprocessable_content

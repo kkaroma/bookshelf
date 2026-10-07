@@ -1,0 +1,51 @@
+<% comment = @flaggable if @flaggable.is_a?(Comment) %>
+<% content_for :title, comment ? "Report a comment" : "Report “#{@flaggable.title}”" %>
+
+<div class="form-page">
+  <%= link_to "← Back", back_path, class: "back-link" %>
+
+  <div class="card">
+    <h1><%= comment ? "Report a comment" : "Report this book" %></h1>
+    <p class="muted">Tell the site's admins what's wrong. <%= @flaggable.user.name %> won't see who reported it.</p>
+
+    <% if comment %>
+      <blockquote class="flag-quote">
+        <strong><%= comment.user.name %></strong> on “<%= comment.book.title %>”:
+        <p><%= truncate(comment.body, length: 400) %></p>
+      </blockquote>
+    <% else %>
+      <div class="request-target">
+        <%= render "books/mini_cover", book: @flaggable %>
+        <div>
+          <strong><%= @flaggable.title %></strong>
+          <p class="muted">by <%= @flaggable.author %> · added by <%= @flaggable.user.name %></p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= form_with model: @flag, url: flags_path(comment ? { comment_id: comment.id } : { book_id: @flaggable.id }), class: "form" do |form| %>
+      <%= render "shared/form_errors", object: @flag %>
+
+      <fieldset class="field flag-reasons">
+        <legend>What's wrong?</legend>
+        <% Flag::REASONS.each do |value, label| %>
+          <label class="flag-reason">
+            <%= form.radio_button :reason, value, required: true %>
+            <%= label %>
+          </label>
+        <% end %>
+      </fieldset>
+
+      <div class="field">
+        <%= form.label :note, "Anything else the admins should know?" %>
+        <%= form.textarea :note, maxlength: 1000, rows: 3, class: "input" %>
+        <span class="field-hint">Optional, unless you chose “Something else”.</span>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit "Send report", class: "btn btn-primary" %>
+        <%= link_to "Cancel", back_path, class: "btn btn-ghost" %>
+      </div>
+    <% end %>
+  </div>
+</div>

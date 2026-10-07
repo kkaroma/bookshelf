@@ -11,6 +11,14 @@
     <%= form_with model: @user, url: registration_path, class: "form" do |form| %>
       <%= render "shared/form_errors", object: @user %>
 
+      <%# Spam protection: when the form was shown, and a field hidden from
+          people that sign-up robots fill in (see RegistrationsController). %>
+      <%= hidden_field_tag :form_started, RegistrationsController.form_started_token, id: nil %>
+      <div class="hp-field" aria-hidden="true">
+        <%= label_tag :website, "Leave this empty" %>
+        <%= text_field_tag :website, nil, tabindex: -1, autocomplete: "off" %>
+      </div>
+
       <div class="field">
         <%= form.label :name %>
         <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name", placeholder: "Jane Reader", class: "input" %>

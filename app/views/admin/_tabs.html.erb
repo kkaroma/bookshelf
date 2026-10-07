@@ -1,0 +1,11 @@
+<%# Tabs shared by every admin page. %>
+<% open_reports = Flag.reported_items_count %>
+<nav class="tabs" aria-label="Admin sections">
+  <% [ [ "Statistics", admin_reports_path ],
+       [ "Members", admin_users_path ],
+       [ "Reported content", admin_flags_path, open_reports ] ].each do |label, path, count| %>
+    <%= link_to path, class: [ "tab", ("active" if current_page?(path)) ], aria: { current: ("page" if current_page?(path)) } do %>
+      <%= label %><% if count.to_i.positive? %> <span class="nav-count"><%= count %></span><% end %>
+    <% end %>
+  <% end %>
+</nav>

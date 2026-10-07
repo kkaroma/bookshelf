@@ -2,6 +2,7 @@
 # Routes: POST /books/:book_id/comments, DELETE /books/:book_id/comments/:id
 class CommentsController < ApplicationController
   before_action :set_book
+  before_action :require_confirmed_email, only: :create
 
   def create
     @comment = @book.comments.build(comment_params.merge(user: Current.user))

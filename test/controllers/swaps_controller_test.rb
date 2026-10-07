@@ -39,6 +39,12 @@ class SwapsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "See you Saturday!", @swap.messages.last.body
   end
 
+  test "without JavaScript, sending a message goes back to the conversation" do
+    post exchange_request_messages_url(@swap), params: { message: { body: "See you Saturday!" } }
+    message = @swap.messages.last
+    assert_redirected_to exchange_request_url(@swap, anchor: "message_#{message.id}")
+  end
+
   test "opening the request marks its message notifications read" do
     @swap.messages.create!(sender: @bob, body: "Hello")
     assert_equal 1, @alice.notifications.unread.where(kind: "new_message").count

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_193641) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_090100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -95,6 +95,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_193641) do
     t.index ["owner_id"], name: "index_exchange_requests_on_owner_id"
     t.index ["requester_id", "book_id"], name: "index_exchange_requests_one_pending_per_book", unique: true, where: "(status = 0)"
     t.index ["requester_id"], name: "index_exchange_requests_on_requester_id"
+  end
+
+  create_table "flags", force: :cascade do |t|
+    t.bigint "reporter_id", null: false
+    t.string "flaggable_type", null: false
+    t.bigint "flaggable_id", null: false
+    t.string "reason", null: false
+    t.text "note"
+    t.datetime "resolved_at"
+    t.bigint "resolved_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flaggable_type", "flaggable_id"], name: "index_flags_on_flaggable"
+    t.index ["reporter_id", "flaggable_type", "flaggable_id"], name: "index_flags_one_open_per_reporter", unique: true, where: "(resolved_at IS NULL)"
+    t.index ["reporter_id"], name: "index_flags_on_reporter_id"
+    t.index ["resolved_at"], name: "index_flags_on_resolved_at"
+    t.index ["resolved_by_id"], name: "index_flags_on_resolved_by_id"
   end
 
   create_table "follows", force: :cascade do |t|
@@ -362,7 +379,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_193641) do
     t.string "city"
     t.boolean "notify_messages", default: true, null: false
     t.boolean "notify_wishlist", default: true, null: false
+    t.datetime "email_confirmed_at"
+    t.datetime "suspended_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["suspended_at"], name: "index_users_on_suspended_at"
   end
 
   create_table "wishlist_items", force: :cascade do |t|
@@ -386,6 +406,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_193641) do
   add_foreign_key "exchange_requests", "books", column: "offered_book_id"
   add_foreign_key "exchange_requests", "users", column: "owner_id"
   add_foreign_key "exchange_requests", "users", column: "requester_id"
+  add_foreign_key "flags", "users", column: "reporter_id"
+  add_foreign_key "flags", "users", column: "resolved_by_id", on_delete: :nullify
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "loans", "books"
