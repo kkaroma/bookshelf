@@ -551,4 +551,23 @@ class BooksTest < ApplicationSystemTestCase
     assert_selector ".status-completed", text: "COMPLETED"
     assert_equal users(:one), books(:dune).reload.user
   end
+
+  test "searching members as you type, then following one" do
+    users(:two).update!(city: "Dar es Salaam")
+    visit users_path
+    assert_selector ".member", count: User.count
+
+    fill_in "Search members", with: "dar"
+    assert_selector ".search-summary", text: "1 member matching “dar”"
+    assert_selector ".member", count: 1
+    assert_current_path users_path(q: "dar")
+
+    # Following from the results updates just that member's box.
+    click_on "Follow Bob Bookworm"
+    assert_selector "button[aria-label='Unfollow Bob Bookworm']"
+    assert_selector ".member", count: 1
+
+    click_on "Clear search"
+    assert_selector ".member", count: User.count
+  end
 end

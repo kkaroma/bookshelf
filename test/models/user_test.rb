@@ -174,4 +174,29 @@ class UserTest < ActiveSupport::TestCase
     assert_not bob.suspended?
     assert_includes User.active, bob
   end
+
+  # --- Search ---
+
+  test "search matches names and towns, ignoring capital letters" do
+    users(:two).update!(city: "Dar es Salaam")
+
+    assert_equal [ users(:two) ], User.search("bookworm").to_a
+    assert_equal [ users(:two) ], User.search("DAR").to_a
+    assert_equal User.count, User.search("  ").count # an empty search finds everyone
+  end
+
+  test "every word must match" do
+    users(:two).update!(city: "Arusha")
+    assert_equal [ users(:two) ], User.search("bob arusha").to_a
+    assert_empty User.search("alice arusha")
+  end
+
+  test "search never matches email addresses" do
+    assert_empty User.search("example.com")
+  end
+
+  test "search text is escaped for LIKE" do
+    assert_empty User.search("%")
+    assert_empty User.search("_")
+  end
 end

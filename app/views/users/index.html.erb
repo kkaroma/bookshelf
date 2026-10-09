@@ -3,11 +3,43 @@
 <div class="page-header">
   <div>
     <h1>Members</h1>
-    <p class="muted"><%= pluralize(@pagination.total_count, "reader") %> on Bookshelf. Follow people to keep up with their books.</p>
+    <p class="muted">Follow people to keep up with their books.</p>
   </div>
 </div>
 
-<div class="member-list">
-  <%= render @users %>
-</div>
-<%= render "shared/pagination", pagination: @pagination %>
+<%# Typing searches as you go: the form submits into the members_results frame
+    (see the search Stimulus controller). Without JavaScript it's a plain form. %>
+<%= form_with url: users_path, method: :get, class: "search-form", html: { role: "search" },
+      data: { controller: "search", turbo_frame: "members_results" } do |form| %>
+  <div class="search-row">
+    <%= form.label :q, "Search members", class: "visually-hidden" %>
+    <%= form.search_field :q, value: @query, class: "input search-input", autocomplete: "off",
+          placeholder: "Search by name or town",
+          data: { action: "input->search#queue search->search#submitNow" } %>
+    <%= form.submit "Search", name: nil, class: "btn btn-secondary" %>
+  </div>
+<% end %>
+
+<%= turbo_frame_tag "members_results", target: "_top" do %>
+  <% if @query.present? %>
+    <p class="search-summary" aria-live="polite">
+      <%= pluralize(@pagination.total_count, "member") %> matching “<strong><%= @query %></strong>”
+      · <%= link_to "Clear search", users_path %>
+    </p>
+  <% else %>
+    <p class="search-summary muted"><%= pluralize(@pagination.total_count, "reader") %> on Bookshelf</p>
+  <% end %>
+
+  <% if @users.any? %>
+    <div class="member-list">
+      <%= render @users %>
+    </div>
+    <%= render "shared/pagination", pagination: @pagination %>
+  <% else %>
+    <div class="empty-state">
+      <h2>No members match “<%= @query %>”</h2>
+      <p class="muted">Check the spelling, or try part of a name or a town.</p>
+      <%= link_to "Show all members", users_path, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+<% end %>

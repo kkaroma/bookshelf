@@ -35,6 +35,15 @@ class User < ApplicationRecord
   # Members who can use the site (suspended members can't sign in).
   scope :active, -> { where(suspended_at: nil) }
 
+  # The Members page search: every word must match the name or town.
+  # Email addresses are deliberately not searchable, to keep them private.
+  scope :search, ->(query) {
+    query.to_s.squish.split.first(MAX_SEARCH_WORDS).reduce(all) do |users, word|
+      users.where("users.name ILIKE :pattern OR users.city ILIKE :pattern", pattern: "%#{sanitize_sql_like(word)}%")
+    end
+  }
+  MAX_SEARCH_WORDS = 5
+
   # The link in the "confirm your email" email carries this token. It stops
   # working after 3 days, or as soon as the email address changes.
   generates_token_for :email_confirmation, expires_in: 3.days do

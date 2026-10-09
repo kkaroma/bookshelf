@@ -2,8 +2,10 @@
 class UsersController < ApplicationController
   before_action :set_user, only: %i[ show followers following ]
 
+  # /users?q=dar searches members by name or town.
   def index
-    @pagination = Pagination.new(User.active.order(:name), page: params[:page], per_page: 30)
+    @query = params[:q].to_s.squish
+    @pagination = Pagination.new(User.active.search(@query).order(:name), page: params[:page], per_page: 30)
     @users = @pagination.records
   end
 

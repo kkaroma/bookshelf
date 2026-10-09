@@ -85,7 +85,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     get users_url
     assert_select ".member", 30
-    assert_select ".page-header p", /34 readers/
+    assert_select ".search-summary", /34 readers/
     assert_select ".pagination a[rel=next][href=?]", users_path(page: 2)
   end
 
@@ -144,5 +144,41 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:admin)
     get user_url(@bob)
     assert_select ".badge", "Suspended"
+  end
+
+  test "the members page has a search box" do
+    get users_url
+    assert_select "form[role=search] input[type=search][name=q][placeholder=?]", "Search by name or town"
+    assert_select "turbo-frame#members_results[target=_top]"
+  end
+
+  test "searching shows only matching members" do
+    @bob.update!(city: "Dar es Salaam")
+    get users_url(q: "dar")
+
+    assert_select ".member", 1
+    assert_select "#user_#{@bob.id}"
+    assert_select ".search-summary", /1 member\s+matching “dar”/
+    assert_select ".search-summary a[href=?]", users_path, "Clear search"
+    assert_select "input[name=q][value=?]", "dar"
+  end
+
+  test "a search with no results says so" do
+    get users_url(q: "zzzz")
+    assert_select ".member", 0
+    assert_select ".empty-state h2", "No members match “zzzz”"
+  end
+
+  test "suspended members can't be found" do
+    @bob.suspend!
+    get users_url(q: "bookworm")
+    assert_select ".member", 0
+  end
+
+  test "page links keep the search" do
+    35.times { |i| User.create!(name: format("Zed Reader %02d", i), email_address: "zed#{i}@example.com", password: "password123") }
+    get users_url(q: "zed")
+    assert_select ".search-summary", /35 members/
+    assert_select ".pagination a[rel=next][href=?]", users_path(q: "zed", page: 2)
   end
 end
