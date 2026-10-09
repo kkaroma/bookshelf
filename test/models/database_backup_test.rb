@@ -44,7 +44,10 @@ class DatabaseBackupTest < ActiveSupport::TestCase
   end
 
   test "a failed pg_dump raises with its message" do
-    swap_method(DatabaseBackup, :pg_env, { "PGDATABASE" => "no_such_database_here", "PGGSSENCMODE" => "disable" }) do
+    skip_unless_pg_dump_installed
+    # The real connection details, but a database that doesn't exist.
+    bad_env = DatabaseBackup.pg_env.merge("PGDATABASE" => "no_such_database_here")
+    swap_method(DatabaseBackup, :pg_env, bad_env) do
       error = assert_raises(DatabaseBackup::Failed) { DatabaseBackup.create! }
       assert_match(/no_such_database_here/, error.message)
     end
@@ -68,6 +71,10 @@ class DatabaseBackupTest < ActiveSupport::TestCase
   end
 
   private
+    def skip_unless_pg_dump_installed
+      system("pg_dump", "--version", out: File::NULL) or skip "pg_dump isn't installed"
+    end
+
     # pg_dump refuses to dump a newer server (e.g. CI's runner tools vs its database).
     def skip_unless_pg_dump_matches_server
       tool = `pg_dump --version`[/\d+/].to_i

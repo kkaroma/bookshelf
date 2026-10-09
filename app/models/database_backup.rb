@@ -58,6 +58,8 @@ class DatabaseBackup
     output, status = Open3.capture2e(pg_env, "pg_dump", "--format=custom", "--no-owner", "--no-acl",
                                      "--exclude-table-data=solid_*", "--file", path)
     raise Failed, "pg_dump failed: #{output.strip}" unless status.success?
+  rescue Errno::ENOENT
+    raise Failed, "pg_dump isn't installed on this computer"
   end
 
   def self.pg_env(config = ActiveRecord::Base.connection_db_config.configuration_hash)
