@@ -6,4 +6,7 @@ class ApplicationController < ActionController::Base
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
+
+  # If this request crashes, the error email says which page and member.
+  before_action { Rails.error.set_context(url: request.url, user_id: Current.user&.id) }
 end

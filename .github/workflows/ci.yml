@@ -134,3 +134,33 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+  # Deploys to Fly.io after every check above passes on a push to main.
+  # Needs the FLY_API_TOKEN repository secret; without it this job just says so.
+  deploy:
+    needs: [ scan_ruby, scan_js, lint, test, system-test ]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # One deploy at a time; a newer push waits for the current deploy to finish.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        if: env.FLY_API_TOKEN != ''
+        uses: actions/checkout@v6
+
+      - name: Set up flyctl
+        if: env.FLY_API_TOKEN != ''
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        if: env.FLY_API_TOKEN != ''
+        run: flyctl deploy --remote-only --ha=false
+
+      - name: Explain skipped deploy
+        if: env.FLY_API_TOKEN == ''
+        run: echo "::notice::Not deployed - add the FLY_API_TOKEN repository secret to deploy automatically."

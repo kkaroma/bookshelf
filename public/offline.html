@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>You're offline · Bookshelf</title>
+  <style>
+    :root { --bg: #f7f4ee; --text: #1f1b16; --muted: #6b6258; --primary: #7a3e1d; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #171411; --text: #f3eee7; --muted: #a89e92; --primary: #e0a37a; } }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; box-sizing: border-box;
+           background: var(--bg); color: var(--text); text-align: center;
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    h1 { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: 1.8rem; margin: 1rem 0 0.5rem; }
+    p { color: var(--muted); max-width: 32ch; margin: 0 auto 1.5rem; line-height: 1.5; }
+    button { font: inherit; font-weight: 600; padding: 0.6rem 1.2rem; border: 0; border-radius: 8px;
+             background: var(--primary); color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/icon-192.png" width="72" height="72" alt="">
+    <h1>You're offline</h1>
+    <p>Bookshelf needs an internet connection. Check your connection and try again.</p>
+    <button type="button" onclick="location.reload()">Try again</button>
+  </main>
+</body>
+</html>

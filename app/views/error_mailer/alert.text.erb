@@ -1,0 +1,21 @@
+Something went wrong on Bookshelf.
+
+Error: <%= @error_class %>
+Message: <%= @message %>
+<% if @url -%>
+Page: <%= @url %>
+<% end -%>
+<% if @user_id -%>
+Signed-in member: <%= user_url(@user_id) %>
+<% end -%>
+<% if @source -%>
+Reported by: <%= @source %>
+<% end -%>
+Time: <%= Time.current.utc.strftime("%Y-%m-%d %H:%M UTC") %>
+
+Where in the code:
+<% @backtrace.each do |line| -%>
+  <%= line %>
+<% end -%>
+
+The same error won't be emailed again for an hour. Full details: fly logs --app kkaroma-bookshelf

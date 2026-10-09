@@ -1,0 +1,52 @@
+<% content_for :title, "Backups" %>
+
+<div class="page-header">
+  <div>
+    <h1>Admin</h1>
+    <p class="muted">
+      A copy of the whole database is saved once a day while the site is in use, and the last
+      <%= DatabaseBackup::KEEP %> are kept. Covers are stored separately and aren't in these files.
+    </p>
+  </div>
+  <%= button_to "Back up now", admin_backups_path, class: "btn btn-secondary" %>
+</div>
+<%= render "admin/tabs" %>
+
+<% if @backups.empty? %>
+  <div class="empty-state">
+    <h2>No backups yet</h2>
+    <p class="muted">The first one is made automatically within 15 minutes of the site waking up, or press “Back up now”.</p>
+  </div>
+<% else %>
+  <% latest = @backups.first %>
+  <p class="backup-status<%= " is-stale" if latest.created_at < 2.days.ago %>">
+    Last backup <strong><%= time_ago_in_words(latest.created_at) %> ago</strong>
+    (<%= l(latest.created_at.to_date, format: :long) %>, <%= latest.created_at.strftime("%H:%M") %>).
+  </p>
+
+  <ul class="backup-list">
+    <% @backups.each do |backup| %>
+      <li id="<%= dom_id backup, :backup %>">
+        <span>
+          <strong><%= l(backup.created_at.to_date, format: :long) %></strong>
+          <span class="muted"><%= backup.created_at.strftime("%H:%M") %> · <%= number_to_human_size(backup.byte_size) %></span>
+        </span>
+        <%= link_to "Download", admin_backup_path(backup), class: "btn btn-ghost btn-sm", data: { turbo: false } %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<details class="card backup-help">
+  <summary>How to restore a backup</summary>
+  <ol>
+    <li>Download the backup you want to go back to.</li>
+    <li>In Neon, make a new <strong>branch</strong> (so the current data is kept, just in case) and copy its connection string.</li>
+    <li>
+      On your computer, load the file into it:
+      <pre><code>pg_restore --no-owner --no-acl --dbname "NEW-CONNECTION-STRING" bookshelf-….dump</code></pre>
+    </li>
+    <li>Check the data, then point the site at it: <code>fly secrets set DATABASE_URL="NEW-CONNECTION-STRING"</code>.</li>
+  </ol>
+  <p class="muted">Needs the PostgreSQL 18 tools (<code>brew install postgresql@18</code>).</p>
+</details>

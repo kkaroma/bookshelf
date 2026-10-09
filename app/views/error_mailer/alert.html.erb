@@ -1,0 +1,12 @@
+<p style="margin-top:0;">Something went wrong on Bookshelf.</p>
+<table style="border-collapse:collapse; font-size:14px; margin-bottom:16px;">
+  <tr><td style="padding:4px 12px 4px 0; color:#6b6258;">Error</td><td><strong><%= @error_class %></strong></td></tr>
+  <tr><td style="padding:4px 12px 4px 0; color:#6b6258; vertical-align:top;">Message</td><td><%= @message %></td></tr>
+  <% if @url %><tr><td style="padding:4px 12px 4px 0; color:#6b6258;">Page</td><td><%= @url %></td></tr><% end %>
+  <% if @user_id %><tr><td style="padding:4px 12px 4px 0; color:#6b6258;">Member</td><td><%= link_to "Profile", user_url(@user_id) %></td></tr><% end %>
+  <% if @source %><tr><td style="padding:4px 12px 4px 0; color:#6b6258;">Reported by</td><td><%= @source %></td></tr><% end %>
+  <tr><td style="padding:4px 12px 4px 0; color:#6b6258;">Time</td><td><%= Time.current.utc.strftime("%Y-%m-%d %H:%M UTC") %></td></tr>
+</table>
+<p style="margin-bottom:4px;"><strong>Where in the code</strong></p>
+<pre style="margin:0 0 16px; padding:12px; background:#f3efe8; border-radius:8px; font-size:12px; white-space:pre-wrap;"><%= @backtrace.join("\n") %></pre>
+<p style="color:#6b6258; font-size:14px;">The same error won't be emailed again for an hour. Full details: <code>fly logs --app kkaroma-bookshelf</code></p>

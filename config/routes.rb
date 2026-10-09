@@ -66,6 +66,8 @@ Rails.application.routes.draw do
         patch :confirm_email
       end
     end
+    # Database backups: /admin/backups (list, "Back up now", download)
+    resources :backups, only: %i[ index create show ]
     # Reported books and comments: /admin/flags
     resources :flags, only: :index do
       collection do
@@ -117,9 +119,9 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # "Install as an app": the app manifest and the service worker (app/views/pwa/).
+  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
   root "home#show"

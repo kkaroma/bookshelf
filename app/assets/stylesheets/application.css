@@ -1111,6 +1111,7 @@ turbo-frame#books_results[busy] { opacity: 0.6; transition: opacity 0.15s; }
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.25rem;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
@@ -1918,3 +1919,23 @@ ul.report-list { list-style: none; padding-left: 0; }
 .admin-search .search-row { flex-wrap: wrap; max-width: 720px; }
 .admin-search .search-input { flex: 1 1 220px; }
 .admin-search .filter-select { flex: none; }
+
+/* Admin: backups */
+.backup-status { margin: 0 0 1rem; }
+.backup-status.is-stale { color: var(--danger); }
+.backup-list { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; gap: 0.5rem; max-width: 640px; }
+.backup-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.backup-list li .muted { margin-left: 0.5rem; font-size: 0.9rem; }
+.backup-help { max-width: 760px; padding: 1rem 1.25rem; }
+.backup-help summary { cursor: pointer; font-weight: 600; }
+.backup-help ol { padding-left: 1.2rem; display: grid; gap: 0.5rem; }
+.backup-help pre { margin: 0.4rem 0 0; padding: 0.6rem 0.8rem; overflow-x: auto; background: var(--surface-muted); border-radius: var(--radius-sm); font-size: 0.85rem; }
