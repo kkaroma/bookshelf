@@ -72,8 +72,26 @@
             <span class="nav-user">
               <%= link_to Current.user.name, Current.user, class: "nav-user-name", title: "Signed in as #{Current.user.name} — your profile" %>
             </span>
-            <%= link_to "Add a book", new_book_path, class: "btn btn-primary" %>
-            <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-ghost" %>
+            <%# On phones this shrinks to a "+" button (the label stays for screen readers). %>
+            <%= link_to new_book_path, class: "btn btn-primary btn-add", aria: { label: "Add a book" } do %>
+              <span class="btn-add-plus" aria-hidden="true">+</span><span class="btn-add-label">Add a book</span>
+            <% end %>
+            <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-ghost", form: { class: "nav-signout" } %>
+
+            <%# Phones only: your name, links and Sign out tucked into a menu. %>
+            <details class="account-menu" data-controller="dropdown"
+                     data-action="click@window->dropdown#closeOutside keydown.esc@window->dropdown#close">
+              <summary aria-label="Account menu">
+                <span class="avatar" style="--hue: <%= avatar_hue(Current.user) %>" aria-hidden="true"><%= initials(Current.user.name) %></span>
+              </summary>
+              <div class="account-menu-panel">
+                <p class="account-menu-name"><%= Current.user.name %></p>
+                <%= link_to "My profile", Current.user %>
+                <%= link_to "My wishlist", wishlist_items_path %>
+                <%= link_to "Settings", settings_path %>
+                <%= button_to "Sign out", session_path, method: :delete, class: "account-menu-signout" %>
+              </div>
+            </details>
           <% else %>
             <%= link_to "Sign in", new_session_path, class: "btn btn-ghost" %>
             <%= link_to "Sign up", new_registration_path, class: "btn btn-primary" %>
