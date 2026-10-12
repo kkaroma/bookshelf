@@ -12,7 +12,9 @@ class PwaTest < ActionDispatch::IntegrationTest
     assert_equal [ "192x192", "512x512", "512x512" ], manifest["icons"].map { |icon| icon["sizes"] }
     assert manifest["icons"].any? { |icon| icon["purpose"] == "maskable" }
     manifest["icons"].each do |icon|
-      assert Rails.public_path.join(icon["src"].delete_prefix("/")).exist?, "missing #{icon["src"]}"
+      path = URI(icon["src"]).path.delete_prefix("/")
+      assert Rails.public_path.join(path).exist?, "missing #{icon["src"]}"
+      assert_match(/\?v=#{ApplicationHelper::ICON_VERSION}\z/, icon["src"]) # so browsers fetch new icons
     end
   end
 
@@ -26,11 +28,16 @@ class PwaTest < ActionDispatch::IntegrationTest
   test "every page links the manifest and icons, signed in or not" do
     get root_url
     assert_select "link[rel=manifest][href=?]", pwa_manifest_path(format: :json)
-    assert_select "link[rel=apple-touch-icon][href=?]", "/apple-touch-icon.png"
+    assert_select "link[rel=apple-touch-icon][href=?]", "/apple-touch-icon.png?v=#{ApplicationHelper::ICON_VERSION}"
+    assert_select "link[rel=icon][href=?]", "/icon.svg?v=#{ApplicationHelper::ICON_VERSION}"
     assert_select "meta[name=theme-color]"
 
     sign_in_as users(:one)
     get books_url
     assert_select "link[rel=manifest]"
+  end
+
+  test "there's a favicon.ico for browsers and tools that ask for it" do
+    assert Rails.public_path.join("favicon.ico").exist?
   end
 end

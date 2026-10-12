@@ -20,9 +20,11 @@
     <meta name="theme-color" content="#7a3e1d">
     <meta name="apple-mobile-web-app-title" content="Bookshelf">
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <%# Browsers keep icons for a year; bump ApplicationHelper::ICON_VERSION
+        after changing them so everyone fetches the new ones. %>
+    <link rel="icon" href="/icon.png?v=<%= ApplicationHelper::ICON_VERSION %>" type="image/png">
+    <link rel="icon" href="/icon.svg?v=<%= ApplicationHelper::ICON_VERSION %>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=<%= ApplicationHelper::ICON_VERSION %>">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>

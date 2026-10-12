@@ -1,4 +1,8 @@
 module ApplicationHelper
+  # Added to the icon links (?v=2). Browsers keep icons for a year, so raise
+  # this whenever the files in public/ (icon.png, icon.svg, ...) change.
+  ICON_VERSION = 2
+
   # "Alice Reader" -> "AR"
   def initials(name)
     name.to_s.split.first(2).map { |word| word[0] }.join.upcase
