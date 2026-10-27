@@ -1,0 +1,92 @@
+<% content_for :title, "Swaps" %>
+<% report = @report %>
+<% by_status = report.requests_by_status %>
+
+<div class="page-header">
+  <div>
+    <h1>Admin</h1>
+    <p class="muted">How swapping is going, and which books members want.</p>
+  </div>
+  <%= link_to "Download CSV", admin_swaps_path(period: report.period.key, format: :csv), class: "btn btn-secondary", download: "" %>
+</div>
+<%= render "admin/tabs" %>
+<%= render "admin/period_picker", period: report.period %>
+
+<section class="report-section" aria-labelledby="swap_overview_title">
+  <h2 id="swap_overview_title">Swap requests · <%= report.period.label.downcase %></h2>
+  <div class="stat-grid">
+    <%= render "admin/reports/stat", label: "Requests made", value: report.requests_count,
+          detail: by_status.map { |status, count| "#{count} #{status}" }.join(" · ") %>
+    <%= render "admin/reports/stat", label: "Acceptance rate",
+          value: report.acceptance_rate ? "#{report.acceptance_rate}%" : "—",
+          detail: "of the requests owners answered" %>
+    <% seconds = report.median_answer_seconds %>
+    <%= render "admin/reports/stat", label: "Typical time to answer",
+          value: seconds ? distance_of_time_in_words(seconds) : "—", detail: "half of answers were quicker" %>
+    <%= render "admin/reports/stat", label: "Swaps completed", value: report.completed_count,
+          detail: "books changed owners" %>
+    <% oldest = report.oldest_waiting %>
+    <%= render "admin/reports/stat", label: "Waiting for an answer now", value: report.waiting.count,
+          detail: oldest ? "oldest: #{time_ago_in_words(oldest.created_at)}" : "none waiting" %>
+  </div>
+</section>
+
+<section class="report-section" aria-labelledby="swap_months_title">
+  <h2 id="swap_months_title">Month by month</h2>
+  <div class="chart-grid">
+    <%= render "shared/bar_chart", id: "requests_chart", title: "Requests per month", noun: "request",
+          bars: report.requests_by_month, span: "in 12 months", table_heading: "Month" %>
+    <%= render "shared/bar_chart", id: "completed_chart", title: "Completed swaps per month", noun: "swap",
+          bars: report.completed_by_month, span: "in 12 months", table_heading: "Month" %>
+  </div>
+</section>
+
+<section class="report-section" aria-labelledby="supply_title">
+  <h2 id="supply_title">Supply and demand · right now</h2>
+  <div class="report-grid">
+    <div class="report-card report-card-wide" id="most_wanted">
+      <h3>Most wanted</h3>
+      <p class="muted report-card-note">Books on members' wishlists. Ones nobody offers are worth asking about.</p>
+      <% wanted = report.most_wanted %>
+      <% if wanted.any? %>
+        <ol class="report-list">
+          <% wanted.each do |item| %>
+            <li>
+              <span><strong><%= item.title %></strong><% if item.author %> <span class="muted">by <%= item.author %></span><% end %></span>
+              <span class="muted">
+                Wanted by <%= pluralize(item.wanted_by, "member") %> ·
+                <% if item.on_shelf.zero? %>
+                  <span class="tag tag-warn">none on the shelf</span>
+                <% else %>
+                  <%= pluralize(item.on_shelf, "copy", plural: "copies") %> on the shelf
+                <% end %>
+              </span>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="muted">Nobody has added books to their wishlist yet.</p>
+      <% end %>
+    </div>
+
+    <div class="report-card" id="unrequested">
+      <h3>On the shelf, nobody asking</h3>
+      <% books = report.unrequested_books %>
+      <% if books.any? %>
+        <p class="muted report-card-note">
+          <%= pluralize(report.unrequested_count, "book") %> with no requests since being offered<%= " — the longest-waiting #{books.size}" if report.unrequested_count > books.size %>.
+        </p>
+        <ul class="report-list">
+          <% books.each do |book| %>
+            <li>
+              <%= link_to book.title, book %>
+              <span class="muted"><%= book.user.name %> · offered <%= time_ago_in_words(SwapReport.listed_at(book)) %> ago</span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="muted">✓ Every book on the shelf has had a request.</p>
+      <% end %>
+    </div>
+  </div>
+</section>

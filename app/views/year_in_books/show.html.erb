@@ -1,0 +1,102 @@
+<% yib = @year_in_books %>
+<% current = yib.year == Date.current.year %>
+<% content_for :title, "My #{yib.year} in books" %>
+
+<div class="page-header">
+  <div>
+    <h1>My <%= yib.year %> in books</h1>
+    <p class="muted"><%= current ? "So far this year" : "Looking back at #{yib.year}" %>, <%= Current.user.name.split.first %>. Only you can see this page.</p>
+  </div>
+</div>
+
+<% years = yib.available_years %>
+<% if years.size > 1 %>
+  <nav class="period-picker" aria-label="Year">
+    <% years.each do |year| %>
+      <%= link_to year, year_in_books_path(year: year), class: [ "period-choice", ("active" if year == yib.year) ],
+            aria: { current: ("true" if year == yib.year) } %>
+    <% end %>
+  </nav>
+<% end %>
+
+<% if !yib.anything? %>
+  <div class="empty-state">
+    <h2>Nothing here yet</h2>
+    <p class="muted">Mark books as “Read” (with the date you finished), rate books and swap with other members — your year fills in by itself.</p>
+    <%= link_to "Go to my books", user_path(Current.user), class: "btn btn-secondary" %>
+  </div>
+<% else %>
+  <section class="year-hero card" aria-label="Highlights">
+    <div class="year-big">
+      <strong id="books_read_count"><%= yib.read_count %></strong>
+      <span><%= "book".pluralize(yib.read_count) %> read</span>
+    </div>
+    <% if (goal = yib.goal) %>
+      <div class="year-goal">
+        <p><%= goal.reached? ? "🎉 Goal reached:" : "Goal:" %> <strong><%= goal.progress %></strong> of <%= pluralize(goal.target, "book") %></p>
+        <div class="progress" role="progressbar" aria-label="Reading goal progress"
+             aria-valuemin="0" aria-valuemax="<%= goal.target %>" aria-valuenow="<%= [ goal.progress, goal.target ].min %>">
+          <span style="width: <%= goal.percent %>%"></span>
+        </div>
+      </div>
+    <% end %>
+    <ul class="year-facts">
+      <% if (month = yib.busiest_month) %><li>📅 Busiest month: <strong><%= month.long_label.split.first %></strong> (<%= pluralize(month.count, "book") %>)</li><% end %>
+      <% if (quick = yib.quickest_read) %>
+        <% days = (quick.finished_on - quick.started_on).to_i %>
+        <li>⚡ Quickest read: <%= link_to quick.title, quick %> in <%= days.zero? ? "a day" : pluralize(days + 1, "day") %></li>
+      <% end %>
+      <% if (favourite = yib.favourite_rating) %>
+        <li>⭐ Highest rated: <%= link_to favourite.book.title, favourite.book %> (<%= favourite.score %>/5)</li>
+      <% end %>
+    </ul>
+  </section>
+
+  <div class="stat-grid year-stats">
+    <%= render "admin/reports/stat", label: "Books added", value: yib.books_added %>
+    <%= render "admin/reports/stat", label: "Reviews written", value: yib.reviews_written %>
+    <%= render "admin/reports/stat", label: "Books rated", value: yib.ratings.count %>
+    <%= render "admin/reports/stat", label: "Comments", value: yib.comments_written %>
+    <%= render "admin/reports/stat", label: "Swaps", value: yib.swaps.size %>
+  </div>
+
+  <section class="report-section" aria-labelledby="months_title">
+    <h2 id="months_title" class="visually-hidden">Month by month</h2>
+    <%= render "shared/bar_chart", id: "read_chart", title: "Books finished each month", noun: "book",
+          bars: yib.by_month, span: "in #{yib.year}", table_heading: "Month" %>
+  </section>
+
+  <% if (genres = yib.top_genres).any? %>
+    <section class="report-section" aria-labelledby="genres_title">
+      <h2 id="genres_title">Favourite genres</h2>
+      <ol class="year-genres">
+        <% genres.each do |genre, count| %>
+          <li><strong><%= genre %></strong> <span class="muted"><%= pluralize(count, "book") %></span></li>
+        <% end %>
+      </ol>
+    </section>
+  <% end %>
+
+  <% if yib.read_count.positive? %>
+    <section class="report-section" aria-labelledby="read_title">
+      <h2 id="read_title">Books I read</h2>
+      <div id="books" class="book-grid">
+        <%= render yib.books_read.with_attached_cover.includes(:user, :loans) %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if (swaps = yib.swaps).any? %>
+    <section class="report-section" aria-labelledby="swaps_title">
+      <h2 id="swaps_title">Swaps</h2>
+      <ul class="report-list year-swaps">
+        <% swaps.each do |swap| %>
+          <li>
+            <span><%= swap_sentence(swap) %></span>
+            <span class="muted"><%= l(swap.completed_at.to_date, format: :long) %></span>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+<% end %>

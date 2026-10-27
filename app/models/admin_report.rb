@@ -1,8 +1,8 @@
-require "csv"
-
 # All the numbers on the admin Reports page, worked out in one place.
 # Every method only reads data; nothing here changes anything.
 class AdminReport
+  include ReportCsv
+
   WEEKS = 8
   STALE_AFTER = 7.days
   TOP = 5
@@ -94,17 +94,8 @@ class AdminReport
     books_missing_details_scope.count
   end
 
-  # --- Download ---
-
-  # The same numbers as one spreadsheet: Section, Item, Value - one row each.
-  def to_csv
-    CSV.generate do |csv|
-      csv << [ "Section", "Item", "Value" ]
-      csv_rows.each { |section, item, value| csv << [ section, spreadsheet_safe(item), value ] }
-    end
-  end
-
   private
+    # The rows of the CSV download (to_csv comes from ReportCsv).
     def csv_rows
       rows = [
         [ "Report", "Figures as of", now.strftime("%Y-%m-%d %H:%M") ],
@@ -130,13 +121,6 @@ class AdminReport
         rows << [ "Most active members", member.name, member.books_count + member.comments_total + member.ratings_total ]
       end
       rows
-    end
-
-    # Spreadsheets run anything starting with = + - or @ as a formula, so a
-    # book titled "=HYPERLINK(...)" could do harm. A leading ' makes it text.
-    def spreadsheet_safe(text)
-      text = text.to_s
-      text.match?(/\A[=+\-@\t\r]/) ? "'#{text}" : text
     end
 
     # New records per week for the last WEEKS weeks (weeks start on Monday),

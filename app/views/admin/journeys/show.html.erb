@@ -1,0 +1,63 @@
+<% content_for :title, "Member journey" %>
+<% journey = @journey %>
+
+<div class="page-header">
+  <div>
+    <h1>Admin</h1>
+    <p class="muted">Of the members who joined, how many went on to each step — and where newcomers stop.</p>
+  </div>
+  <%= link_to "Download CSV", admin_journey_path(period: journey.period.key, format: :csv), class: "btn btn-secondary", download: "" %>
+</div>
+<%= render "admin/tabs" %>
+<%= render "admin/period_picker", period: journey.period %>
+
+<section class="report-section" aria-labelledby="journey_title">
+  <h2 id="journey_title"><%= pluralize(journey.joined_count, "member") %> joined · <%= journey.period.label.downcase %></h2>
+
+  <% if journey.joined_count.zero? %>
+    <p class="muted">Nobody joined in this period. Try a longer one.</p>
+  <% else %>
+    <ol class="funnel">
+      <% journey.steps.each do |step| %>
+        <% percent = journey.percent(step) %>
+        <li id="step_<%= step.key %>" class="funnel-step">
+          <span class="funnel-label"><%= step.label %></span>
+          <span class="funnel-track" aria-hidden="true"><span class="funnel-bar" style="width: <%= [ percent, 1 ].max %>%"></span></span>
+          <span class="funnel-value"><strong><%= step.count %></strong> <span class="muted"><%= percent %>%</span></span>
+        </li>
+      <% end %>
+    </ol>
+    <p class="muted funnel-note">Each step counts everyone who did it, so a member can skip a step and still be counted later on.</p>
+  <% end %>
+</section>
+
+<section class="report-section" aria-labelledby="stuck_title">
+  <h2 id="stuck_title">Who might need a nudge</h2>
+  <div class="report-grid">
+    <div class="report-card" id="unconfirmed">
+      <h3>Haven't confirmed their email</h3>
+      <p><strong class="stat-value"><%= journey.unconfirmed_count %></strong></p>
+      <% if journey.unconfirmed_count.positive? %>
+        <%= link_to "See them in Members →", admin_users_path(show: "unconfirmed") %>
+      <% end %>
+    </div>
+
+    <div class="report-card report-card-wide" id="no_books">
+      <h3>Confirmed, but no books yet</h3>
+      <% members = journey.no_books_yet %>
+      <% if members.any? %>
+        <p class="muted report-card-note"><%= pluralize(journey.no_books_yet_count, "member") %><%= " — the newest #{members.size}" if journey.no_books_yet_count > members.size %>.</p>
+        <ul class="report-list">
+          <% members.each do |member| %>
+            <li>
+              <%= link_to member.name, member %>
+              <span class="muted">joined <%= time_ago_in_words(member.created_at) %> ago</span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="muted">✓ Everyone who confirmed has added a book.</p>
+      <% end %>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,8 @@
+<%# "Last 3 months · Last 12 months · This year · All time" - plain links that
+    keep you on the same report. Local: period (ReportPeriod). %>
+<nav class="period-picker" aria-label="Time period">
+  <% ReportPeriod::CHOICES.each do |key, label| %>
+    <%= link_to label, url_for(period: key), class: [ "period-choice", ("active" if period.key == key) ],
+          aria: { current: ("true" if period.key == key) } %>
+  <% end %>
+</nav>

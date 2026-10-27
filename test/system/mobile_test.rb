@@ -35,7 +35,7 @@ class MobileTest < ApplicationSystemTestCase
     conversation.messages.create!(sender: users(:two), body: "A fairly long message to check that chat bubbles wrap nicely on a small screen.")
     [ root_path, books_path, book_path(books(:dune)), new_book_path, exchanges_path,
       exchange_requests_path, users_path, user_path(users(:two)), notifications_path,
-      wishlist_items_path, edit_settings_profile_path, conversations_path, conversation_path(conversation) ].each do |path|
+      wishlist_items_path, edit_settings_profile_path, conversations_path, conversation_path(conversation), year_in_books_path ].each do |path|
       visit path
       assert_fits_the_screen
     end

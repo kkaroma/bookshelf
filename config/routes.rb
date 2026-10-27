@@ -56,6 +56,8 @@ Rails.application.routes.draw do
   # Admin-only pages live under /admin (controllers in app/controllers/admin/).
   namespace :admin do
     resource :reports, only: :show # /admin/reports (and /admin/reports.csv)
+    resource :swaps, only: :show   # /admin/swaps?period=3m (and .csv)
+    resource :journey, only: :show # /admin/journey?period=3m (and .csv)
     # Manage members: /admin/users
     resources :users, only: :index do
       member do
@@ -96,6 +98,9 @@ Rails.application.routes.draw do
   resources :notifications, only: %i[ index show ] do
     patch :mark_all_read, on: :collection
   end
+
+  # My year in books: /year-in-books (this year) or /year-in-books/2025
+  get "year-in-books(/:year)", to: "year_in_books#show", as: :year_in_books, constraints: { year: /\d{4}/ }
 
   # This year's reading goal (on the Home page): PATCH to set it, DELETE to remove it.
   resource :reading_goal, only: %i[ update destroy ]

@@ -84,6 +84,9 @@ class Book < ApplicationRecord
   before_save :drop_cover, if: -> { remove_cover && !new_cover? }
   # Remember when the owner last wrote their review (for the activity feed).
   before_save -> { self.reviewed_at = review.present? ? Time.current : nil }, if: :will_save_change_to_review?
+  # Remember when it went on the Exchange shelf (cleared when it comes off).
+  before_save -> { self.listed_for_exchange_at = available_for_exchange? ? Time.current : nil },
+              if: :will_save_change_to_available_for_exchange?
   validates :published_year,
             numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: -> { Date.current.year } },
             allow_nil: true

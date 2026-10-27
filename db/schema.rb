@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_27_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_28_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,6 +71,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_090000) do
     t.date "started_on"
     t.date "finished_on"
     t.datetime "reviewed_at"
+    t.datetime "listed_for_exchange_at"
     t.index ["available_for_exchange"], name: "index_books_on_available_for_exchange"
     t.index ["genre"], name: "index_books_on_genre"
     t.index ["user_id", "finished_on"], name: "index_books_on_user_id_and_finished_on"

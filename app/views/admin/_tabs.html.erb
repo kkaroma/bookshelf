@@ -2,6 +2,8 @@
 <% open_reports = Flag.reported_items_count %>
 <nav class="tabs" aria-label="Admin sections">
   <% [ [ "Statistics", admin_reports_path ],
+       [ "Swaps", admin_swaps_path ],
+       [ "Member journey", admin_journey_path ],
        [ "Members", admin_users_path ],
        [ "Reported content", admin_flags_path, open_reports ],
        [ "Backups", admin_backups_path ] ].each do |label, path, count| %>

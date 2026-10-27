@@ -1,0 +1,58 @@
+<%# A small column chart, one series. Each column shows its exact value on
+    hover or keyboard focus, the biggest is labelled on its cap, and "Show as
+    table" lists every value.
+    Locals: id, title, noun ("new book"), bars (ReportBar list), span ("in 8 weeks"),
+    table_heading ("Week starting"), label_prefix (optional, e.g. "Week of "). %>
+<% prefix = local_assigns.fetch(:label_prefix, "") %>
+<% total = bars.sum(&:count) %>
+<% max = bars.map(&:count).max %>
+<% top = [ max, 1 ].max %>
+<% busiest = bars.find { |bar| bar.count == max && max > 0 } %>
+
+<figure class="chart" aria-labelledby="<%= id %>_title" style="--columns: <%= bars.size %>">
+  <figcaption class="chart-header">
+    <h3 id="<%= id %>_title"><%= title %></h3>
+    <span class="muted"><strong class="chart-total"><%= total %></strong> <%= span %></span>
+  </figcaption>
+
+  <div class="chart-plot">
+    <div class="chart-axis-y" aria-hidden="true">
+      <span><%= top %></span>
+      <span>0</span>
+    </div>
+
+    <div class="chart-area">
+      <% bars.each do |bar| %>
+        <div class="chart-col" tabindex="0" aria-label="<%= prefix %><%= bar.short_label %>: <%= pluralize(bar.count, noun) %>">
+          <% if bar.count > 0 %>
+            <span class="chart-bar" style="height: <%= (100.0 * bar.count / top).round(1) %>%">
+              <% if bar == busiest %><span class="chart-cap" aria-hidden="true"><%= bar.count %></span><% end %>
+            </span>
+          <% end %>
+          <span class="chart-tip" aria-hidden="true">
+            <strong><%= bar.count %></strong> <%= noun.pluralize(bar.count) %>
+            <span><%= prefix %><%= bar.long_label %></span>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="chart-axis-x" aria-hidden="true">
+    <% bars.each do |bar| %>
+      <span><%= bar.short_label %></span>
+    <% end %>
+  </div>
+
+  <details class="chart-table">
+    <summary>Show as table</summary>
+    <table>
+      <thead><tr><th scope="col"><%= table_heading %></th><th scope="col"><%= noun.pluralize.capitalize %></th></tr></thead>
+      <tbody>
+        <% bars.each do |bar| %>
+          <tr><td><%= bar.long_label %></td><td><%= bar.count %></td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </details>
+</figure>

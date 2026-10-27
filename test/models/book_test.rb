@@ -255,4 +255,16 @@ class BookTest < ActiveSupport::TestCase
     book = Book.new(user: users(:one), title: "T", author: "A", published_year: 1999.5)
     assert_not book.valid?
   end
+
+  test "remembers when it went on the Exchange shelf, and forgets when it comes off" do
+    book = books(:hobbit)
+    travel_to(Time.zone.local(2026, 9, 1)) { book.update!(available_for_exchange: true) }
+    assert_equal Time.zone.local(2026, 9, 1), book.listed_for_exchange_at
+
+    book.update!(title: "The Hobbit (illustrated)")
+    assert_equal Time.zone.local(2026, 9, 1), book.listed_for_exchange_at # other changes leave it
+
+    book.update!(available_for_exchange: false)
+    assert_nil book.listed_for_exchange_at
+  end
 end

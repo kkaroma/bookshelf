@@ -1566,7 +1566,7 @@ turbo-frame#books_results[busy] { opacity: 0.6; transition: opacity 0.15s; }
 .chart-area {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(var(--columns, 8), 1fr); /* --columns is set on each chart */
   align-items: end;
   border-top: 1px solid var(--chart-grid);    /* top gridline */
   border-bottom: 1px solid var(--border);     /* baseline */
@@ -1626,7 +1626,7 @@ turbo-frame#books_results[busy] { opacity: 0.6; transition: opacity 0.15s; }
 
 .chart-axis-x {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(var(--columns, 8), 1fr); /* --columns is set on each chart */
   margin: 0.4rem 0 0 2rem;
   font-size: 0.7rem;
   color: var(--text-muted);
@@ -2036,6 +2036,43 @@ ul.report-list { list-style: none; padding-left: 0; }
 .profile-actions { margin-top: 0.75rem; }
 .profile-actions form { margin: 0; }
 .profile-actions .btn svg { margin-right: 0.1rem; }
+
+/* ---------- Report extras: period picker, funnel, year in books ---------- */
+.period-picker { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: -0.5rem 0 1.5rem; }
+.period-choice {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.period-choice:hover { color: var(--text); text-decoration: none; }
+.period-choice.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.tag-warn { background: var(--danger-soft); color: var(--danger); }
+
+.funnel { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; max-width: 760px; }
+.funnel-step { display: grid; grid-template-columns: 13rem 1fr 6rem; align-items: center; gap: 0.75rem; }
+.funnel-label { font-weight: 600; }
+.funnel-track { height: 1.6rem; border-radius: var(--radius-sm); background: var(--surface-muted); overflow: hidden; }
+.funnel-bar { display: block; height: 100%; border-radius: var(--radius-sm); background: var(--chart); }
+.funnel-value { text-align: right; white-space: nowrap; }
+.funnel-note { margin-top: 0.75rem; font-size: 0.9rem; }
+@media (max-width: 600px) {
+  .funnel-step { grid-template-columns: 1fr auto; }
+  .funnel-track { grid-column: 1 / -1; grid-row: 2; }
+}
+
+.year-hero { display: grid; grid-template-columns: auto 1fr; gap: 1rem 2rem; align-items: center; margin-bottom: 1.25rem; }
+.year-big { display: grid; text-align: center; }
+.year-big strong { font-family: var(--font-display); font-size: 3.5rem; line-height: 1; color: var(--primary); }
+.year-big span { color: var(--text-muted); font-weight: 600; }
+.year-goal p { margin: 0 0 0.4rem; }
+.year-facts { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.year-stats { margin-bottom: 2rem; }
+.year-genres { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.3rem; }
+@media (max-width: 600px) { .year-hero { grid-template-columns: 1fr; } }
 
 /* ---------- Phones ---------- */
 @media (max-width: 600px) {
