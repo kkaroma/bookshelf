@@ -1,0 +1,9 @@
+Hi <%= @recipient.name %>,
+
+<%= @message.sender.name %> sent you a message on Bookshelf:
+
+<%= truncate(@message.body, length: 600) %>
+
+Reply: <%= conversation_url(@message.conversation, anchor: "new_direct_message") %>
+
+You're getting this because "Messages" is switched on in your email settings: <%= edit_settings_notifications_url %>

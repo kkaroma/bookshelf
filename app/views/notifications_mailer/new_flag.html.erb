@@ -2,13 +2,15 @@
 <p style="margin-top:0;">Hi <%= @admin.name %>,</p>
 <p>
   <strong><%= @flag.reporter.name %></strong> reported
-  <% if @flag.flaggable_type == "Book" %>
+  <% if item.is_a?(Book) %>
     the book <strong>“<%= item.title %>”</strong> added by <%= item.user.name %>.
+  <% elsif item.is_a?(DirectMessage) %>
+    a private message <%= item.sender.name %> sent them:
   <% else %>
     a comment by <%= item.user.name %> on <strong>“<%= item.book.title %>”</strong>:
   <% end %>
 </p>
-<% if @flag.flaggable_type == "Comment" %>
+<% unless item.is_a?(Book) %>
   <blockquote style="margin:0 0 16px; padding:12px 16px; background:#f3efe8; border-radius:8px;"><%= truncate(item.body, length: 300) %></blockquote>
 <% end %>
 <p>Reason: <strong><%= @flag.reason_label %></strong><% if @flag.note %> — “<%= @flag.note %>”<% end %></p>

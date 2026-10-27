@@ -1,0 +1,42 @@
+<% content_for :title, "Messages" %>
+
+<div class="page-header">
+  <div>
+    <h1>Messages</h1>
+    <p class="muted">Private conversations with other members. To start one, open a member's profile and press “Message”.</p>
+  </div>
+</div>
+
+<% if @conversations.empty? %>
+  <div class="empty-state">
+    <h2>No messages yet</h2>
+    <p class="muted">Find someone on the Members page, open their profile and press “Message”.</p>
+    <%= link_to "Browse members", users_path, class: "btn btn-secondary" %>
+  </div>
+<% else %>
+  <ul class="conversation-list">
+    <% @conversations.each do |conversation| %>
+      <% other = conversation.other_participant(Current.user) %>
+      <% last = @last_messages[conversation.id] %>
+      <% unread = @unread_counts.fetch(conversation.id, 0) %>
+      <li id="<%= dom_id conversation %>" class="conversation-row<%= " is-unread" if unread.positive? %>">
+        <%= link_to conversation_path(conversation), class: "conversation-link" do %>
+          <span class="avatar" style="--hue: <%= avatar_hue(other) %>" aria-hidden="true"><%= initials(other.name) %></span>
+          <span class="conversation-summary">
+            <span class="conversation-top">
+              <strong><%= other.name %></strong>
+              <time datetime="<%= conversation.last_message_at.iso8601 %>"><%= time_ago_in_words(conversation.last_message_at) %> ago</time>
+            </span>
+            <span class="conversation-preview">
+              <% if last %><%= "You: " if last.sender_id == Current.user.id %><%= truncate(last.body, length: 90) %><% end %>
+            </span>
+          </span>
+          <% if unread.positive? %>
+            <span class="nav-count" aria-label="<%= pluralize(unread, "unread message") %>"><%= unread %></span>
+          <% end %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+  <%= render "shared/pagination", pagination: @pagination %>
+<% end %>

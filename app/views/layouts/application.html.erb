@@ -69,6 +69,12 @@
               <%= render "shared/bell_icon" %>
               <% if unread.positive? %><span class="bell-count"><%= unread > 99 ? "99+" : unread %></span><% end %>
             <% end %>
+            <% unread_messages = Current.user.unread_messages_count %>
+            <%= link_to conversations_path, class: [ "bell", ("active" if controller_name == "conversations") ],
+                  aria: { label: unread_messages.zero? ? "Messages" : "Messages (#{unread_messages} unread)" } do %>
+              <%= render "shared/chat_icon" %>
+              <% if unread_messages.positive? %><span class="bell-count"><%= unread_messages > 99 ? "99+" : unread_messages %></span><% end %>
+            <% end %>
             <span class="nav-user">
               <%= link_to Current.user.name, Current.user, class: "nav-user-name", title: "Signed in as #{Current.user.name} — your profile" %>
             </span>

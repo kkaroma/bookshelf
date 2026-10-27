@@ -534,7 +534,7 @@ class BooksTest < ApplicationSystemTestCase
     sign_in_as users(:two)
     assert_selector ".bell-count", text: "2" # the request, and the message
 
-    find("a.bell").click
+    find("a.bell[href='/notifications']").click
     assert_selector ".notification.is-unread", count: 2
     click_on "Alice Reader sent you a message about Dune"
     assert_selector ".message.is-theirs", text: "Could we meet on Saturday?"

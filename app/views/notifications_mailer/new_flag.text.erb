@@ -1,8 +1,12 @@
 <% item = @flag.flaggable %>
 Hi <%= @admin.name %>,
 
-<% if @flag.flaggable_type == "Book" -%>
+<% if item.is_a?(Book) -%>
 <%= @flag.reporter.name %> reported the book "<%= item.title %>" added by <%= item.user.name %>.
+<% elsif item.is_a?(DirectMessage) -%>
+<%= @flag.reporter.name %> reported a private message <%= item.sender.name %> sent them:
+
+  <%= truncate(item.body, length: 300) %>
 <% else -%>
 <%= @flag.reporter.name %> reported a comment by <%= item.user.name %> on "<%= item.book.title %>":
 

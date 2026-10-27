@@ -39,6 +39,13 @@ class NotificationsMailer < ApplicationMailer
          subject: "#{message.sender.name} sent you a message about “#{message.exchange_request.book.title}”"
   end
 
+  # A private message (only the first unread one in a conversation is emailed).
+  def new_direct_message(message)
+    @message = message
+    @recipient = message.recipient
+    mail to: @recipient.email_address, subject: "#{message.sender.name} sent you a message on Bookshelf"
+  end
+
   def wishlist_match(member, book)
     @member = member
     @book = book
@@ -49,8 +56,7 @@ class NotificationsMailer < ApplicationMailer
   def new_flag(flag, admin)
     @flag = flag
     @admin = admin
-    what = flag.flaggable_type == "Book" ? "a book" : "a comment"
-    mail to: admin.email_address, subject: "#{flag.reporter.name} reported #{what} on Bookshelf"
+    mail to: admin.email_address, subject: "#{flag.reporter.name} reported a #{flag.item_kind} on Bookshelf"
   end
 
   def new_follower(follow)

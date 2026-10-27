@@ -7,6 +7,16 @@ class User < ApplicationRecord
   has_many :reading_goals, dependent: :destroy
   has_many :wishlist_items, -> { order(:title) }, dependent: :destroy
   has_many :flags, foreign_key: :reporter_id, inverse_of: :reporter, dependent: :destroy
+
+  # Private messages. A conversation stores its two members in user_one/user_two,
+  # so a member's conversations are found from either side; deleting an
+  # account deletes its conversations (like its comments).
+  has_many :conversations_as_one, class_name: "Conversation", foreign_key: :user_one_id,
+           inverse_of: :user_one, dependent: :destroy
+  has_many :conversations_as_two, class_name: "Conversation", foreign_key: :user_two_id,
+           inverse_of: :user_two, dependent: :destroy
+  has_many :blocks, foreign_key: :blocker_id, inverse_of: :blocker, dependent: :destroy
+  has_many :blocks_received, class_name: "Block", foreign_key: :blocked_id, inverse_of: :blocked, dependent: :destroy
   has_many :notifications, -> { newest_first }, foreign_key: :recipient_id, inverse_of: :recipient, dependent: :destroy
   # Notifications others received about something this person did. If they
   # delete their account, those stay but no longer name them.
@@ -70,6 +80,19 @@ class User < ApplicationRecord
                             uniqueness: true,
                             format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 8 }, allow_nil: true
+
+  def conversations
+    Conversation.involving(self)
+  end
+
+  def unread_messages_count
+    DirectMessage.unread_for(self).count
+  end
+
+  # Has this member blocked `other` from messaging them?
+  def blocking?(other)
+    other.present? && blocks.exists?(blocked_id: other.id)
+  end
 
   def wishlisted?(book)
     wishlist_items.any? { |item| item.matches?(book) }

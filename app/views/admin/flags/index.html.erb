@@ -3,7 +3,7 @@
 <div class="page-header">
   <div>
     <h1>Admin</h1>
-    <p class="muted">Books and comments members have reported. Remove them, or dismiss the reports if nothing is wrong.</p>
+    <p class="muted">Books, comments and private messages members have reported. Remove them, or dismiss the reports if nothing is wrong.</p>
   </div>
 </div>
 <%= render "admin/tabs" %>
@@ -17,10 +17,11 @@
   <div class="flag-list">
     <% @reported.each do |item, flags| %>
       <% is_book = item.is_a?(Book) %>
-      <% target = is_book ? { book_id: item.id } : { comment_id: item.id } %>
+      <% kind = Flag::KINDS.fetch(item.class.name) %>
+      <% target = flaggable_param(item) %>
       <article id="<%= dom_id item, :reported %>" class="card flag-item">
         <header class="flag-item-header">
-          <span class="tag"><%= is_book ? "Book" : "Comment" %></span>
+          <span class="tag"><%= kind.capitalize %></span>
           <strong><%= pluralize(flags.size, "report") %></strong>
           <span class="muted">· first <%= time_ago_in_words(flags.first.created_at) %> ago</span>
         </header>
@@ -33,6 +34,13 @@
               <p class="muted">by <%= item.author %> · added by <%= link_to item.user.name, item.user %></p>
             </div>
           </div>
+        <% elsif item.is_a?(DirectMessage) %>
+          <%# Admins see only the reported message, never the conversation. %>
+          <blockquote class="flag-quote">
+            <%= link_to item.sender.name, item.sender %> wrote privately to
+            <%= link_to item.recipient.name, item.recipient %>:
+            <p><%= item.body %></p>
+          </blockquote>
         <% else %>
           <blockquote class="flag-quote">
             <%= link_to item.user.name, item.user %> on
@@ -52,9 +60,15 @@
         </ul>
 
         <div class="flag-actions">
-          <%= button_to (is_book ? "Remove book" : "Remove comment"), remove_admin_flags_path(target), method: :delete,
-                class: "btn btn-danger btn-sm",
-                form: { data: { turbo_confirm: is_book ? "Delete “#{item.title}” and everything on it (comments, ratings, requests)? This can't be undone." : "Delete this comment#{" and its replies" if item.replies.any?}? This can't be undone." } } %>
+          <% confirm = if is_book
+               "Delete “#{item.title}” and everything on it (comments, ratings, requests)? This can't be undone."
+             elsif item.is_a?(Comment)
+               "Delete this comment#{" and its replies" if item.replies.any?}? This can't be undone."
+             else
+               "Delete this message? This can't be undone."
+             end %>
+          <%= button_to "Remove #{is_book ? "book" : kind.split.last}", remove_admin_flags_path(target), method: :delete,
+                class: "btn btn-danger btn-sm", form: { data: { turbo_confirm: confirm } } %>
           <%= button_to "Dismiss — nothing wrong", dismiss_admin_flags_path(target), method: :patch, class: "btn btn-secondary btn-sm" %>
           <% unless item.user.admin? || item.user.suspended? %>
             <%= link_to "Manage #{item.user.name.split.first}…", admin_users_path(q: item.user.email_address), class: "btn btn-ghost btn-sm" %>
@@ -75,6 +89,8 @@
             <%= flag.reporter.name %> reported
             <% if flag.flaggable.is_a?(Book) %>
               <%= link_to flag.flaggable.title, flag.flaggable %>
+            <% elsif flag.flaggable.is_a?(DirectMessage) %>
+              a private message from <%= flag.flaggable.sender.name %>
             <% else %>
               <%= link_to "a comment by #{flag.flaggable.user.name}", book_path(flag.flaggable.book, anchor: dom_id(flag.flaggable)) %>
             <% end %>

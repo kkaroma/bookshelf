@@ -1,0 +1,11 @@
+<%= form_with model: message, url: conversation_messages_path(conversation), id: "new_direct_message",
+      class: "form message-form" do |form| %>
+  <%= render "shared/form_errors", object: message %>
+  <div class="field">
+    <%= form.label :body, "Message #{conversation.other_participant(Current.user).name}" %>
+    <%= form.textarea :body, required: true, maxlength: 2000, rows: 3, class: "input", placeholder: "Write a message…" %>
+  </div>
+  <div class="form-actions">
+    <%= form.submit "Send", class: "btn btn-primary btn-sm" %>
+  </div>
+<% end %>

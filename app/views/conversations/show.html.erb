@@ -1,0 +1,35 @@
+<% content_for :title, "Messages with #{@other.name}" %>
+
+<div class="form-page conversation-page">
+  <%= link_to "← All messages", conversations_path, class: "back-link" %>
+
+  <header class="conversation-header">
+    <span class="avatar" style="--hue: <%= avatar_hue(@other) %>" aria-hidden="true"><%= initials(@other.name) %></span>
+    <div>
+      <h1><%= link_to @other.name, @other %></h1>
+      <% if @other.city %><p class="muted">📍 <%= @other.city %></p><% end %>
+    </div>
+    <div class="conversation-actions">
+      <% if Current.user.blocking?(@other) %>
+        <%= button_to "Unblock", user_block_path(@other), method: :delete, class: "btn btn-secondary btn-sm" %>
+      <% else %>
+        <%= button_to "Block", user_block_path(@other), class: "btn btn-ghost btn-sm",
+              form: { data: { turbo_confirm: "Block #{@other.name}? They won't be able to send you messages. They aren't told." } } %>
+      <% end %>
+    </div>
+  </header>
+
+  <div id="direct_messages" class="messages">
+    <% if @messages.any? %>
+      <%= render partial: "conversations/message", collection: @messages %>
+    <% else %>
+      <p id="no_direct_messages" class="muted">No messages yet. Say hello!</p>
+    <% end %>
+  </div>
+
+  <% if (reason = @conversation.closed_reason_for(Current.user)) %>
+    <p id="new_direct_message" class="conversation-closed"><%= reason %></p>
+  <% else %>
+    <%= render "conversations/form", conversation: @conversation, message: DirectMessage.new %>
+  <% end %>
+</div>

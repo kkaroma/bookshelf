@@ -1,6 +1,7 @@
 # /admin/flags - books and comments members have reported. For each one an
 # admin either removes it or dismisses the reports.
 class Admin::FlagsController < Admin::BaseController
+  include FlaggableLookup
   before_action :set_flaggable, only: %i[ dismiss remove ]
 
   def index
@@ -16,15 +17,19 @@ class Admin::FlagsController < Admin::BaseController
     redirect_to admin_flags_path, notice: "Dismissed #{view_context.pluralize(count, "report")}. Nothing was removed."
   end
 
-  # Deleting the book or comment deletes its reports too.
+  # Deleting the book, comment or message deletes its reports too.
   def remove
     @flaggable.destroy!
-    what = @flaggable.is_a?(Book) ? "The book “#{@flaggable.title}”" : "The comment"
+    what = case @flaggable
+    when Book          then "The book “#{@flaggable.title}”"
+    when Comment       then "The comment"
+    when DirectMessage then "The private message"
+    end
     redirect_to admin_flags_path, notice: "#{what} was removed.", status: :see_other
   end
 
   private
     def set_flaggable
-      @flaggable = params[:comment_id] ? Comment.find(params[:comment_id]) : Book.find(params.expect(:book_id))
+      @flaggable = find_flaggable
     end
 end

@@ -63,4 +63,22 @@ class Admin::FlagsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert Comment.exists?(@comment.id)
   end
+
+  test "a reported private message shows only that message, and can be removed" do
+    conversation = Conversation.between(users(:one), users(:two))
+    conversation.messages.create!(sender: users(:one), body: "Earlier, not reported")
+    message = conversation.messages.create!(sender: users(:two), body: "Rude words here")
+    Flag.create!(reporter: users(:one), flaggable: message, reason: "offensive")
+
+    get admin_flags_url
+    assert_select "#reported_direct_message_#{message.id} .tag", "Private message"
+    assert_select "#reported_direct_message_#{message.id} .flag-quote", /Bob Bookworm wrote privately to\s+Alice Reader/
+    assert_select "#reported_direct_message_#{message.id} .flag-quote", /Rude words here/
+    assert_no_match "Earlier, not reported", response.body # never the rest of the conversation
+
+    assert_difference({ "DirectMessage.count" => -1, "Flag.count" => -1 }) do
+      delete remove_admin_flags_url(message_id: message.id)
+    end
+    assert_equal "The private message was removed.", flash[:notice]
+  end
 end

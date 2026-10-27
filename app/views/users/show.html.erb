@@ -21,6 +21,14 @@
       <% end %>
       <%= render "users/follow_box", user: @user %>
     </div>
+
+    <% if @user != Current.user && !@user.suspended? %>
+      <div class="profile-actions">
+        <%= button_to user_conversation_path(@user), class: "btn btn-secondary btn-sm" do %>
+          <%= render "shared/chat_icon" %> Message
+        <% end %>
+      </div>
+    <% end %>
   </div>
 </section>
 

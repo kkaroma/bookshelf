@@ -1,4 +1,4 @@
-# A member reporting a book or comment as inappropriate. Admins see open
+# A member reporting a book, comment or private message as inappropriate. Admins see open
 # reports at /admin/flags and either remove the thing or dismiss the report.
 class Flag < ApplicationRecord
   REASONS = {
@@ -20,13 +20,16 @@ class Flag < ApplicationRecord
   validates :reason, inclusion: { in: REASONS.keys, message: "must be chosen" }
   validates :note, length: { maximum: 1000 }
   validates :note, presence: { message: "can't be blank when you choose “Something else”" }, if: -> { reason == "other" }
-  validates :flaggable_type, inclusion: { in: %w[Book Comment] }
+  validates :flaggable_type, inclusion: { in: %w[Book Comment DirectMessage] }
   validate :reporter_may_flag, on: :create
   validate :not_already_reported, on: :create
 
   after_create_commit :tell_admins
 
+  KINDS = { "Book" => "book", "Comment" => "comment", "DirectMessage" => "private message" }.freeze
+
   def reason_label = REASONS.fetch(reason, reason)
+  def item_kind = KINDS.fetch(flaggable_type)
   def resolved? = resolved_at.present?
 
   # How many different books/comments are waiting for an admin (several

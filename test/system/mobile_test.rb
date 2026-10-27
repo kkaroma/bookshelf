@@ -31,9 +31,11 @@ class MobileTest < ApplicationSystemTestCase
     assert_fits_the_screen
 
     sign_in_on_phone users(:one)
+    conversation = Conversation.between(users(:one), users(:two))
+    conversation.messages.create!(sender: users(:two), body: "A fairly long message to check that chat bubbles wrap nicely on a small screen.")
     [ root_path, books_path, book_path(books(:dune)), new_book_path, exchanges_path,
       exchange_requests_path, users_path, user_path(users(:two)), notifications_path,
-      wishlist_items_path, edit_settings_profile_path ].each do |path|
+      wishlist_items_path, edit_settings_profile_path, conversations_path, conversation_path(conversation) ].each do |path|
       visit path
       assert_fits_the_screen
     end
@@ -82,5 +84,13 @@ class MobileTest < ApplicationSystemTestCase
     visit books_path
     assert_equal "16px", find("input[name=q]").evaluate_script("getComputedStyle(this).fontSize")
     assert_equal "16px", find("select[name=genre]").evaluate_script("getComputedStyle(this).fontSize")
+  end
+
+  test "the phone header's icons all fit on one row" do
+    sign_in_on_phone users(:admin)
+    rows = %w[.brand a.bell[href='/notifications'] a.bell[href='/conversations'] .btn-add .account-menu].map do |selector|
+      find(selector).evaluate_script("Math.round(this.getBoundingClientRect().top + this.getBoundingClientRect().height / 2)")
+    end
+    assert rows.max - rows.min <= 4, "header items are on different rows: #{rows.inspect}"
   end
 end

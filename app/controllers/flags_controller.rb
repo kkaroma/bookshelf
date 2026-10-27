@@ -2,6 +2,7 @@
 #   GET  /flags/new?book_id=1  (or ?comment_id=3) - the form
 #   POST /flags?book_id=1                         - send the report
 class FlagsController < ApplicationController
+  include FlaggableLookup
   before_action :require_confirmed_email
   before_action :set_flaggable
   rate_limit to: 10, within: 1.hour, only: :create,
@@ -24,18 +25,22 @@ class FlagsController < ApplicationController
   end
 
   private
-    # Only books and comments can be reported; which one comes from the
-    # parameter name, never from a class name typed into the address bar.
     def set_flaggable
-      @flaggable = params[:comment_id] ? Comment.find(params[:comment_id]) : Book.find(params.expect(:book_id))
+      @flaggable = find_flaggable
 
       unless @flaggable.flaggable_by?(Current.user)
-        redirect_to back_path, alert: "You can't report this."
+        # A private message someone else received: don't hint that it exists.
+        destination = @flaggable.is_a?(DirectMessage) ? root_path : back_path
+        redirect_to destination, alert: "You can't report this."
       end
     end
 
     def back_path
-      @flaggable.is_a?(Comment) ? book_path(@flaggable.book, anchor: helpers.dom_id(@flaggable)) : book_path(@flaggable)
+      case @flaggable
+      when Comment       then book_path(@flaggable.book, anchor: helpers.dom_id(@flaggable))
+      when DirectMessage then conversation_path(@flaggable.conversation, anchor: helpers.dom_id(@flaggable))
+      else book_path(@flaggable)
+      end
     end
 
     helper_method :back_path

@@ -86,6 +86,12 @@ Rails.application.routes.draw do
   # My wishlist: /wishlist (books I'd like; I'm told when one is offered for exchange).
   resources :wishlist_items, only: %i[ index create destroy ], path: "wishlist"
 
+  # Private messages: /conversations (inbox), /conversations/:id, and sending
+  # one: POST /conversations/:id/messages.
+  resources :conversations, only: %i[ index show ] do
+    resources :messages, only: :create, module: :conversations
+  end
+
   # The notification bell: /notifications, and /notifications/:id opens one.
   resources :notifications, only: %i[ index show ] do
     patch :mark_all_read, on: :collection
@@ -112,6 +118,10 @@ Rails.application.routes.draw do
     end
     # POST follows this user, DELETE unfollows them.
     resource :follow, only: %i[ create destroy ], module: :users
+    # "Message" on a profile: POST opens (or starts) your conversation with them.
+    resource :conversation, only: :create, module: :users
+    # Stop (POST) or allow again (DELETE) private messages from this member.
+    resource :block, only: %i[ create destroy ], module: :users
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

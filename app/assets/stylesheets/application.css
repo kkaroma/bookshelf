@@ -232,7 +232,7 @@ main.container {
 }
 
 /* Small screens: the page links get their own centred row. */
-@media (max-width: 960px) {
+@media (max-width: 1010px) {
   .nav { padding-block: 0.5rem; }
   .nav-main { margin: 0; order: 3; width: 100%; justify-content: center; flex-wrap: wrap; }
 }
@@ -1998,6 +1998,44 @@ ul.report-list { list-style: none; padding-left: 0; }
 .backup-help summary { cursor: pointer; font-weight: 600; }
 .backup-help ol { padding-left: 1.2rem; display: grid; gap: 0.5rem; }
 .backup-help pre { margin: 0.4rem 0 0; padding: 0.6rem 0.8rem; overflow-x: auto; background: var(--surface-muted); border-radius: var(--radius-sm); font-size: 0.85rem; }
+
+/* ---------- Private messages ---------- */
+.conversation-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; max-width: 760px; }
+.conversation-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+}
+.conversation-link:hover { text-decoration: none; color: var(--text); border-color: var(--primary); }
+.conversation-row.is-unread .conversation-link { background: var(--primary-soft); border-color: transparent; }
+.conversation-summary { flex: 1; min-width: 0; display: grid; gap: 0.1rem; }
+.conversation-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
+.conversation-top time { flex: none; font-size: 0.8rem; color: var(--text-muted); }
+.conversation-preview { color: var(--text-muted); font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conversation-row.is-unread .conversation-preview { color: var(--text); font-weight: 600; }
+
+.conversation-header { display: flex; align-items: center; gap: 0.85rem; margin: 0.5rem 0 1rem; }
+.conversation-header h1 { margin: 0; font-size: 1.5rem; }
+.conversation-header h1 a { color: var(--text); }
+.conversation-header p { margin: 0; font-size: 0.9rem; }
+.conversation-actions { margin-left: auto; }
+.conversation-actions form { margin: 0; }
+.conversation-closed {
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+.message-report { color: var(--text-muted); }
+
+.profile-actions { margin-top: 0.75rem; }
+.profile-actions form { margin: 0; }
+.profile-actions .btn svg { margin-right: 0.1rem; }
 
 /* ---------- Phones ---------- */
 @media (max-width: 600px) {

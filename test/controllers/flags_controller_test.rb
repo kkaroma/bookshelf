@@ -81,4 +81,30 @@ class FlagsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
     assert_match(/confirm your email/, flash[:alert])
   end
+
+  # --- Private messages ---
+
+  test "the recipient can report a private message" do
+    conversation = Conversation.between(users(:one), users(:two))
+    message = conversation.messages.create!(sender: users(:two), body: "Buy my cheap watches")
+
+    get new_flag_url(message_id: message.id)
+    assert_select "h1", "Report a private message"
+    assert_select ".flag-quote", /Buy my cheap watches/
+
+    assert_difference("Flag.count") do
+      post flags_url(message_id: message.id), params: { flag: { reason: "spam" } }
+    end
+    assert_redirected_to conversation_url(conversation, anchor: "direct_message_#{message.id}")
+    assert_equal "private message", Flag.last.item_kind
+  end
+
+  test "nobody else can report (or learn about) a private message" do
+    conversation = Conversation.between(users(:two), users(:admin))
+    message = conversation.messages.create!(sender: users(:two), body: "Private")
+
+    get new_flag_url(message_id: message.id)
+    assert_redirected_to root_url
+    assert_no_difference("Flag.count") { post flags_url(message_id: message.id), params: { flag: { reason: "spam" } } }
+  end
 end

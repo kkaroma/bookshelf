@@ -1,0 +1,4 @@
+<%= turbo_stream.remove "no_direct_messages" %>
+<%= turbo_stream.append "direct_messages", partial: "conversations/message", locals: { message: @message } %>
+<%= turbo_stream.replace "new_direct_message", partial: "conversations/form",
+      locals: { conversation: @conversation, message: DirectMessage.new } %>

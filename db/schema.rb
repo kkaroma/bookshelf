@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_090100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_27_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_090100) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "blocks", force: :cascade do |t|
+    t.bigint "blocker_id", null: false
+    t.bigint "blocked_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blocked_id"], name: "index_blocks_on_blocked_id"
+    t.index ["blocker_id", "blocked_id"], name: "index_blocks_on_blocker_id_and_blocked_id", unique: true
+    t.index ["blocker_id"], name: "index_blocks_on_blocker_id"
   end
 
   create_table "books", force: :cascade do |t|
@@ -77,6 +87,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_090100) do
     t.index ["book_id"], name: "index_comments_on_book_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
+  end
+
+  create_table "conversations", force: :cascade do |t|
+    t.bigint "user_one_id", null: false
+    t.bigint "user_two_id", null: false
+    t.bigint "started_by_id", null: false
+    t.datetime "last_message_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["last_message_at"], name: "index_conversations_on_last_message_at"
+    t.index ["started_by_id"], name: "index_conversations_on_started_by_id"
+    t.index ["user_one_id", "user_two_id"], name: "index_conversations_on_user_one_id_and_user_two_id", unique: true
+    t.index ["user_one_id"], name: "index_conversations_on_user_one_id"
+    t.index ["user_two_id"], name: "index_conversations_on_user_two_id"
+    t.check_constraint "user_one_id < user_two_id", name: "conversations_users_in_order"
+  end
+
+  create_table "direct_messages", force: :cascade do |t|
+    t.bigint "conversation_id", null: false
+    t.bigint "sender_id", null: false
+    t.text "body", null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conversation_id", "created_at"], name: "index_direct_messages_on_conversation_id_and_created_at"
+    t.index ["conversation_id", "read_at"], name: "index_direct_messages_on_conversation_id_and_read_at"
+    t.index ["conversation_id"], name: "index_direct_messages_on_conversation_id"
+    t.index ["sender_id"], name: "index_direct_messages_on_sender_id"
   end
 
   create_table "exchange_requests", force: :cascade do |t|
@@ -398,10 +436,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_090100) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "blocks", "users", column: "blocked_id"
+  add_foreign_key "blocks", "users", column: "blocker_id"
   add_foreign_key "books", "users"
   add_foreign_key "comments", "books"
   add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "users"
+  add_foreign_key "conversations", "users", column: "started_by_id"
+  add_foreign_key "conversations", "users", column: "user_one_id"
+  add_foreign_key "conversations", "users", column: "user_two_id"
+  add_foreign_key "direct_messages", "conversations"
+  add_foreign_key "direct_messages", "users", column: "sender_id"
   add_foreign_key "exchange_requests", "books"
   add_foreign_key "exchange_requests", "books", column: "offered_book_id"
   add_foreign_key "exchange_requests", "users", column: "owner_id"

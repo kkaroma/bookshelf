@@ -1,4 +1,4 @@
-# Something members can report to the admins (books and comments).
+# Something members can report to the admins (books, comments, private messages).
 # A *concern* is a module of shared model code: `include Flaggable` gives a
 # model everything below.
 module Flaggable

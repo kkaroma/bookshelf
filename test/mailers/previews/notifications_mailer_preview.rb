@@ -26,6 +26,13 @@ class NotificationsMailerPreview < ActionMailer::Preview
     NotificationsMailer.new_follower(Follow.first)
   end
 
+  def new_direct_message
+    alice, bob = User.first(2)
+    conversation = Conversation.new(id: 0, user_one: alice, user_two: bob, started_by: alice) # unsaved example
+    NotificationsMailer.new_direct_message(DirectMessage.new(conversation: conversation, sender: alice,
+                                                             body: "Hi! Is your copy of Dune still around?"))
+  end
+
   def new_flag
     comment = Comment.first
     reporter = User.where.not(id: comment.user_id).first
