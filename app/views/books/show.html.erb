@@ -12,6 +12,25 @@
     <% end %>
     <p class="book-detail-author">by <%= @book.author %></p>
 
+    <% if @book.given_away? %>
+      <p class="given-away-note">
+        <% if @book.given_to %>
+          <%= @book.owned_by?(Current.user) ? "You" : @book.user.name %> swapped this book to
+          <%= link_to @book.given_to.name, @book.given_to %> on <%= l(@book.given_away_at.to_date, format: :long) %>.
+          <% if @book.successor %><%= link_to "See #{@book.given_to.name.split.first}'s copy →", @book.successor %><% end %>
+        <% else %>
+          <%= @book.owned_by?(Current.user) ? "You no longer have" : "#{@book.user.name} no longer has" %> this book
+          (since <%= l(@book.given_away_at.to_date, format: :long) %>). The review and comments stay here.
+        <% end %>
+      </p>
+    <% elsif (earlier = @book.predecessor) %>
+      <p class="given-away-note">
+        Came to <%= @book.owned_by?(Current.user) ? "you" : @book.user.name %> from
+        <%= link_to earlier.user.name, earlier.user %> in a swap.
+        <%= link_to "See #{earlier.user.name.split.first}'s copy, review and comments →", earlier %>
+      </p>
+    <% end %>
+
     <div class="meta-list">
       <% if @book.published_year %>
         <span class="pill">Published <%= @book.published_year %></span>
@@ -31,7 +50,7 @@
       <% if @book.available_for_exchange? %>
         <span class="pill pill-exchange">⇄ Available for exchange</span>
       <% end %>
-      <span class="pill">Added by <%= @book.owned_by?(Current.user) ? "you" : link_to(@book.user.name, @book.user) %> <%= time_ago_in_words(@book.created_at) %> ago</span>
+      <span class="pill"><%= @book.given_away? ? "Had by" : "Added by" %> <%= @book.owned_by?(Current.user) ? "you" : link_to(@book.user.name, @book.user) %> <%= time_ago_in_words(@book.created_at) %> ago</span>
     </div>
 
     <%= render "books/reading_status", book: @book %>
@@ -54,13 +73,21 @@
           <p class="admin-note">You're an admin, so you can change this book even though it isn't yours.</p>
         <% end %>
         <%= link_to "Edit book", edit_book_path(@book), class: "btn btn-secondary" %>
-        <% if @book.available_for_exchange? %>
-          <%= button_to "Remove from exchange", book_exchange_listing_path(@book), method: :delete, class: "btn btn-secondary" %>
+        <% if @book.given_away? %>
+          <% unless @book.successor_id %>
+            <%= button_to "Put back on my shelf", book_removal_path(@book), method: :delete, class: "btn btn-secondary" %>
+          <% end %>
         <% else %>
-          <%= button_to "Offer for exchange", book_exchange_listing_path(@book), class: "btn btn-secondary" %>
+          <% if @book.available_for_exchange? %>
+            <%= button_to "Remove from exchange", book_exchange_listing_path(@book), method: :delete, class: "btn btn-secondary" %>
+          <% else %>
+            <%= button_to "Offer for exchange", book_exchange_listing_path(@book), class: "btn btn-secondary" %>
+          <% end %>
+          <%= button_to "I no longer have it", book_removal_path(@book), class: "btn btn-secondary",
+                form: { data: { turbo_confirm: "Move “#{@book.title}” to “Books I've had”? Its review, comments and ratings stay on your profile." } } %>
         <% end %>
         <%= button_to "Delete book", @book, method: :delete, class: "btn btn-danger",
-              form: { data: { turbo_confirm: "Delete “#{@book.title}”? This can't be undone." } } %>
+              form: { data: { turbo_confirm: "Delete “#{@book.title}” completely, with its review, comments and ratings? This can't be undone. (To keep them, use “I no longer have it”.)" } } %>
       </div>
     <% end %>
 

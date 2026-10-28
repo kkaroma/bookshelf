@@ -69,4 +69,15 @@ class YearInBooksTest < ActiveSupport::TestCase
     assert_nil year.busiest_month
     assert_not year.anything?
   end
+
+  test "received books link to your own copy, and books read before swapping still count" do
+    read_book("Emma", finished: Date.new(2026, 3, 2)).hand_over_to!(users(:two)) # read it, then swapped it away
+    request = ExchangeRequest.create!(requester: @alice, book: books(:dune))
+    request.update_columns(status: ExchangeRequest.statuses[:accepted])
+    request.complete!(by: @alice)
+
+    year = YearInBooks.new(@alice, 2026)
+    assert_includes year.books_read.map(&:title), "Emma"
+    assert_equal @alice, year.swaps.sole.received.user # Alice's new copy, not Bob's old one
+  end
 end

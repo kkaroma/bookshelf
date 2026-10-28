@@ -49,3 +49,5 @@
       total_label: pluralize(@pagination.total_count, "book") } do %>
   <p class="muted"><%= mine ? "You haven't added any books yet." : "#{@user.name} hasn't added any books yet." %></p>
 <% end %>
+
+<%= render "users/past_books", user: @user, books: @past_books, mine: mine %>

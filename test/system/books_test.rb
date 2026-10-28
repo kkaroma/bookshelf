@@ -549,7 +549,7 @@ class BooksTest < ApplicationSystemTestCase
     accept_confirm { click_on "Mark swap as done" }
     assert_text "Swap done! “Dune” is now on Alice Reader's shelf."
     assert_selector ".status-completed", text: "COMPLETED"
-    assert_equal users(:one), books(:dune).reload.user
+    assert_equal users(:one), books(:dune).reload.successor.user # Alice has her own copy now
   end
 
   test "searching members as you type, then following one" do

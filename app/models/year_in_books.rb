@@ -55,10 +55,12 @@ class YearInBooks
   def swaps
     ExchangeRequest.completed.where(completed_at: times)
                    .where("exchange_requests.requester_id = :id OR exchange_requests.owner_id = :id", id: user.id)
-                   .includes(:book, :offered_book, :requester, :owner).order(:completed_at)
+                   .includes({ book: :successor }, { offered_book: :successor }, :requester, :owner).order(:completed_at)
                    .map do |swap|
                      mine = swap.requester_id == user.id
-                     Swap.new(received: mine ? swap.book : swap.offered_book,
+                     # What you received is the copy you were given (the request points at the giver's).
+                     received = mine ? swap.book : swap.offered_book
+                     Swap.new(received: received&.successor || received,
                               gave: mine ? swap.offered_book : swap.book,
                               with: mine ? swap.owner : swap.requester,
                               completed_at: swap.completed_at)

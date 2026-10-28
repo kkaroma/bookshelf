@@ -1,7 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
-  has_many :books, dependent: :destroy
+  has_many :books, dependent: :destroy # includes books they've had (see Book#given_away?)
+  has_many :past_books, -> { given_away.order(given_away_at: :desc) }, class_name: "Book", inverse_of: :user
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
   has_many :reading_goals, dependent: :destroy

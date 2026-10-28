@@ -76,7 +76,7 @@ class GoodreadsImport
     end
 
     def existing_keys
-      books = @user.books.pluck(:isbn, :title, :author)
+      books = @user.books.on_shelf.pluck(:isbn, :title, :author)
       [ books.filter_map(&:first).to_set,
         books.map { |_isbn, title, author| [ title, author ].map { |value| value.to_s.downcase.squish } }.to_set ]
     end

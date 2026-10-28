@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_28_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_28_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -72,9 +72,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_090000) do
     t.date "finished_on"
     t.datetime "reviewed_at"
     t.datetime "listed_for_exchange_at"
+    t.datetime "given_away_at"
+    t.bigint "given_to_id"
+    t.bigint "successor_id"
     t.index ["available_for_exchange"], name: "index_books_on_available_for_exchange"
     t.index ["genre"], name: "index_books_on_genre"
+    t.index ["given_to_id"], name: "index_books_on_given_to_id"
+    t.index ["successor_id"], name: "index_books_on_successor_id"
     t.index ["user_id", "finished_on"], name: "index_books_on_user_id_and_finished_on"
+    t.index ["user_id", "given_away_at"], name: "index_books_on_user_id_and_given_away_at"
     t.index ["user_id"], name: "index_books_on_user_id"
   end
 
@@ -439,7 +445,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_090000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "blocks", "users", column: "blocked_id"
   add_foreign_key "blocks", "users", column: "blocker_id"
+  add_foreign_key "books", "books", column: "successor_id", on_delete: :nullify
   add_foreign_key "books", "users"
+  add_foreign_key "books", "users", column: "given_to_id", on_delete: :nullify
   add_foreign_key "comments", "books"
   add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "users"

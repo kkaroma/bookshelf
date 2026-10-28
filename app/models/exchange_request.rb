@@ -52,15 +52,16 @@ class ExchangeRequest < ApplicationRecord
   # Messages can be sent while the request is waiting or agreed, not after.
   def open_for_messages? = pending? || accepted?
 
-  # Either person confirms the swap happened. The books change owners: the
-  # requested book goes to the requester, and the offered one to the owner.
+  # Either person confirms the swap happened. Each receiver gets their own
+  # copy of the book; each giver keeps theirs (with its review and comments)
+  # as a book they've had. The request keeps pointing at the givers' copies.
   def complete!(by:)
     raise NotAccepted, "Only accepted requests can be marked as done" unless accepted?
 
     transaction do
       update!(status: :completed, completed_at: Time.current)
-      book.transfer_to!(requester)
-      offered_book&.transfer_to!(owner)
+      book.hand_over_to!(requester)
+      offered_book&.hand_over_to!(owner)
     end
     Notification.notify(other_party(by), "swap_completed", about: self, actor: by)
   end

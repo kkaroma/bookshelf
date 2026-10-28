@@ -43,4 +43,10 @@ class ActivityFeedTest < ActiveSupport::TestCase
     book.update!(review: "")
     assert_nil book.reviewed_at
   end
+
+  test "a copy received in a swap isn't shown as newly added" do
+    copy = books(:dune).hand_over_to!(@alice) # Bob follows Alice
+    added = ActivityFeed.new(@bob).events.select { |event| event.kind == :added }.map(&:book)
+    assert_not_includes added, copy
+  end
 end

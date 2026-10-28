@@ -2074,6 +2074,18 @@ ul.report-list { list-style: none; padding-left: 0; }
 .year-genres { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.3rem; }
 @media (max-width: 600px) { .year-hero { grid-template-columns: 1fr; } }
 
+/* ---------- Books I've had ---------- */
+.past-books { margin-top: 3rem; }
+.past-books .book-cover { filter: saturate(0.55); }
+.given-away-note {
+  margin: 0.25rem 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  font-size: 0.95rem;
+}
+.status-gone { color: var(--text-muted); }
+
 /* ---------- Phones ---------- */
 @media (max-width: 600px) {
   main.container { padding-block: 1.25rem 3rem; }

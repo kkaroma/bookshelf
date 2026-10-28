@@ -14,14 +14,16 @@
         <span class="muted">(<%= book.ratings_count %>)</span>
       </p>
     <% end %>
-    <% if book.owned_by?(Current.user) && book.loans.any?(&:outstanding?) %>
+    <% if book.given_away? %>
+      <p class="book-card-status status-gone"><%= book.given_to ? "Swapped to #{book.given_to.name}" : "No longer on the shelf" %></p>
+    <% elsif book.owned_by?(Current.user) && book.loans.any?(&:outstanding?) %>
       <p class="book-card-status status-lent">Lent out</p>
     <% end %>
     <% if book.reading_status %>
       <p class="book-card-status status-<%= book.reading_status.dasherize %>"><%= book.reading_status_label %></p>
     <% end %>
     <p class="book-card-owner">
-      Added by <%= book.owned_by?(Current.user) ? "you" : book.user.name %>
+      <%= book.given_away? ? "Had by" : "Added by" %> <%= book.owned_by?(Current.user) ? "you" : book.user.name %>
       <% if local_assigns[:show_city] && book.user.city %>
         · <span class="<%= "same-town" if book.user.same_city_as?(Current.user) %>">📍 <%= book.user.city %></span>
       <% end %>

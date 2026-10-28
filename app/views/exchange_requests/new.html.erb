@@ -19,7 +19,7 @@
 
       <div class="field">
         <%= form.label :offered_book_id, "Offer one of your books in return" %>
-        <%= form.collection_select :offered_book_id, Current.user.books.order(:title), :id, :title,
+        <%= form.collection_select :offered_book_id, Current.user.books.on_shelf.order(:title), :id, :title,
               { include_blank: "Nothing for now — just asking" }, class: "input" %>
         <span class="field-hint">Optional. <%= @book.user.name %> will see which book you're offering.</span>
       </div>

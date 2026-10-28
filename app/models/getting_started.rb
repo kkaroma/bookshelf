@@ -36,6 +36,6 @@ class GettingStarted
 
   private
     def books
-      @user.books
+      @user.books.on_shelf
     end
 end

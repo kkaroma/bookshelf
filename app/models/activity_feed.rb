@@ -24,7 +24,8 @@ class ActivityFeed
     end
 
     def added
-      books_by_followed.order(created_at: :desc).limit(@limit)
+      # Copies received in a swap aren't "added": the swap is its own event.
+      books_by_followed.not_from_swap.order(created_at: :desc).limit(@limit)
                        .map { |book| Event.new(:added, book.user, book, book.created_at, nil) }
     end
 

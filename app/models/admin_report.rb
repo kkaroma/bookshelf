@@ -22,10 +22,10 @@ class AdminReport
   def unconfirmed_count    = User.where(email_confirmed_at: nil).count
   def open_flags_count     = Flag.unresolved.count
   def members_this_month   = User.where(created_at: now.beginning_of_month..).count
-  def books_count          = Book.count
-  def books_with_cover     = Book.joins(:cover_attachment).count
-  def books_with_isbn      = Book.where.not(isbn: nil).count
-  def reviews_count        = Book.where.not(review: nil).count
+  def books_count          = Book.on_shelf.count
+  def books_with_cover     = Book.on_shelf.joins(:cover_attachment).count
+  def books_with_isbn      = Book.on_shelf.where.not(isbn: nil).count
+  def reviews_count        = Book.on_shelf.where.not(review: nil).count
   def comments_count       = Comment.count
   def ratings_count        = Rating.count
   def exchange_shelf_count = Book.for_exchange.count
@@ -137,7 +137,7 @@ class AdminReport
     end
 
     def books_missing_details_scope
-      without_cover = Book.left_joins(:cover_attachment)
+      without_cover = Book.on_shelf.left_joins(:cover_attachment)
       without_cover.where(active_storage_attachments: { id: nil }).or(without_cover.where(isbn: nil))
     end
 end

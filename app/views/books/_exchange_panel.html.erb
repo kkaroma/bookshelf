@@ -1,5 +1,7 @@
 <%# Exchange status and actions for a book, shown on its page. %>
-<% if book.owned_by?(Current.user) %>
+<% if book.given_away? %>
+  <%# Not on anyone's shelf here any more - nothing to swap or wish for. %>
+<% elsif book.owned_by?(Current.user) %>
   <% if pending_requests_count.to_i > 0 %>
     <div class="exchange-panel">
       <span><strong><%= pluralize(pending_requests_count, "person") %></strong> would like to swap for this book.</span>

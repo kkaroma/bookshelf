@@ -1,0 +1,11 @@
+<%# "Books I've had": books that left this member's shelf (swapped or given
+    away). They keep their review, comments and ratings, so they stay public. %>
+<% if books.any? %>
+  <section class="past-books" id="past_books" aria-labelledby="past_books_title">
+    <h2 id="past_books_title" class="section-title"><%= mine ? "Books I've had" : "Books #{user.name.split.first} has had" %></h2>
+    <p class="muted">Swapped or given away — their reviews and discussions are still here.</p>
+    <div class="book-grid">
+      <%= render books %>
+    </div>
+  </section>
+<% end %>

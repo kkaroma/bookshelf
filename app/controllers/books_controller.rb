@@ -7,7 +7,7 @@ class BooksController < ApplicationController
   # /books?q=hobbit searches; without q it lists every book.
   def index
     @filters = BookFilters.new(params)
-    books = @filters.apply(Book.with_attached_cover.includes(:user, :loans))
+    books = @filters.apply(Book.on_shelf.with_attached_cover.includes(:user, :loans))
     @pagination = Pagination.new(books, page: params[:page], per_page: 24)
     @books = @pagination.records
   end

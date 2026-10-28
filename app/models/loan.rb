@@ -15,6 +15,7 @@ class Loan < ApplicationRecord
   validates :note, length: { maximum: 500 }
   validate :dates_make_sense
   validate :book_not_already_lent_out, on: :create
+  validate :book_still_on_shelf, on: :create
 
   def outstanding? = returned_on.nil?
 
@@ -39,5 +40,9 @@ class Loan < ApplicationRecord
       if book && book.loans.outstanding.where.not(id: id).exists?
         errors.add(:base, "This book is already lent out - mark it as returned first")
       end
+    end
+
+    def book_still_on_shelf
+      errors.add(:base, "You can't lend a book you no longer have") if book&.given_away?
     end
 end

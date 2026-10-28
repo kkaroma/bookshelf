@@ -5,8 +5,11 @@ class Books::ExchangeListingsController < ApplicationController
   before_action :require_editor
 
   def create
-    @book.update!(available_for_exchange: true)
-    redirect_to @book, notice: "“#{@book.title}” is now on the Exchange shelf."
+    if @book.update(available_for_exchange: true)
+      redirect_to @book, notice: "“#{@book.title}” is now on the Exchange shelf."
+    else
+      redirect_to @book, alert: @book.errors.full_messages.to_sentence
+    end
   end
 
   def destroy

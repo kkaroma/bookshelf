@@ -1,7 +1,13 @@
 class Book < ApplicationRecord
   include Flaggable
 
-  belongs_to :user, counter_cache: true # keeps users.books_count up to date
+  belongs_to :user
+  # When a book leaves its owner's shelf it isn't deleted: it stays on their
+  # profile under "Books I've had", with its review, comments and ratings.
+  # After a swap, `given_to` is the new owner and `successor` their new copy.
+  belongs_to :given_to, class_name: "User", optional: true
+  belongs_to :successor, class_name: "Book", optional: true
+  has_one :predecessor, class_name: "Book", foreign_key: :successor_id, inverse_of: :successor, dependent: :nullify
   has_many :comments, dependent: :destroy
   has_many :ratings, dependent: :destroy
   has_many :notifications, as: :notifiable, dependent: :destroy
@@ -37,6 +43,18 @@ class Book < ApplicationRecord
 
   # Books whose owners are willing to swap them.
   scope :for_exchange, -> { where(available_for_exchange: true) }
+
+  # Books people have now, and ones that have left their shelf.
+  scope :on_shelf, -> { where(given_away_at: nil) }
+  scope :given_away, -> { where.not(given_away_at: nil) }
+  # Copies made for a new owner by a swap (they have a predecessor).
+  scope :not_from_swap, -> { where.not(id: Book.where.not(successor_id: nil).select(:successor_id)) }
+
+  # users.books_count is the number of books on their shelf now. (One
+  # after_commit with a condition: Rails keeps only the last of two
+  # after_commit lines that name the same method.)
+  after_commit :refresh_owner_books_count,
+               if: -> { destroyed? || previously_new_record? || saved_change_to_given_away_at? }
 
   GENRES = [
     "Fiction", "Fantasy", "Science fiction", "Mystery & thriller", "Romance",
@@ -87,6 +105,7 @@ class Book < ApplicationRecord
   # Remember when it went on the Exchange shelf (cleared when it comes off).
   before_save -> { self.listed_for_exchange_at = available_for_exchange? ? Time.current : nil },
               if: :will_save_change_to_available_for_exchange?
+  validate :not_offered_once_given_away
   validates :published_year,
             numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: -> { Date.current.year } },
             allow_nil: true
@@ -121,16 +140,38 @@ class Book < ApplicationRecord
     loans.outstanding.first
   end
 
-  # Hands the book to a new owner after a completed swap. The old owner's
-  # review, reading status and lending history are theirs, so they're cleared;
-  # the new owner's own rating is removed because owners can't rate their books.
-  def transfer_to!(new_owner)
-    transaction do
-      loans.destroy_all
-      ratings.where(user: new_owner).destroy_all
-      update!(user: new_owner, review: nil, reviewed_at: nil, reading_status: nil,
-              started_on: nil, finished_on: nil, available_for_exchange: false)
+  def given_away? = given_away_at.present?
+
+  # After a completed swap: the new owner gets their own copy (details and
+  # cover, but none of this copy's review, comments, ratings or reading
+  # history), and this copy stays with its old owner as a book they've had -
+  # so their review and its discussion stay on their profile.
+  # Returns the new copy.
+  def hand_over_to!(new_owner)
+    copy = transaction do
+      new_copy = new_owner.books.create!(title:, subtitle:, author:, description:, published_year:, isbn:, genre:)
+      loans.outstanding.update_all(returned_on: Date.current)
+      update!(given_away_at: Time.current, given_to: new_owner, successor: new_copy, available_for_exchange: false)
+      new_copy
     end
+    copy_cover_to(copy)
+    copy
+  end
+
+  # "I no longer have it" (given away outside the site, sold, lost...).
+  def give_away!
+    transaction do
+      loans.outstanding.update_all(returned_on: Date.current)
+      update!(given_away_at: Time.current, available_for_exchange: false)
+    end
+  end
+
+  # Undo "I no longer have it". A book that went to someone in a swap can't
+  # come back - they have their own copy now.
+  def put_back_on_shelf!
+    raise ArgumentError, "a swapped book can't be put back" if successor_id.present?
+
+    update!(given_away_at: nil, given_to: nil)
   end
 
   def reading_status_label
@@ -162,6 +203,11 @@ class Book < ApplicationRecord
     update_columns(ratings_count: ratings.count, average_rating: ratings.average(:score)&.round(1))
   end
 
+  # Lending only makes sense for books you still have.
+  def lendable_by?(someone)
+    owned_by?(someone) && !given_away?
+  end
+
   # Anyone signed in can ask to swap for a listed book, except its owner.
   def requestable_by?(someone)
     someone.present? && available_for_exchange? && !owned_by?(someone)
@@ -173,6 +219,27 @@ class Book < ApplicationRecord
   end
 
   private
+    def not_offered_once_given_away
+      if given_away? && available_for_exchange?
+        errors.add(:available_for_exchange, "isn't possible for a book you no longer have")
+      end
+    end
+
+    def refresh_owner_books_count
+      User.where(id: user_id).update_all(books_count: Book.on_shelf.where(user_id: user_id).count)
+    end
+
+    # The new owner gets their own copy of the cover file, so either of them
+    # deleting their book never removes the other's cover. A failure here
+    # just leaves the generated cover; the swap itself is already done.
+    def copy_cover_to(copy)
+      return unless cover_ready?
+
+      copy.cover.attach(io: StringIO.new(cover.download), filename: cover.filename.to_s, content_type: cover.content_type)
+    rescue ActiveStorage::Error, IOError => error
+      Rails.logger.warn("Couldn't copy the cover of book #{id}: #{error.message}")
+    end
+
     # Each member hears about a given book once, however many matching wishlist
     # entries they have.
     def alert_wishlists

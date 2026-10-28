@@ -52,44 +52,75 @@ class SwapTest < ActiveSupport::TestCase
     assert_raises(ExchangeRequest::NotAccepted) { @request.complete!(by: @bob) }
   end
 
-  test "completing a swap moves both books to their new owners" do
+  test "completing a swap gives each person their own copy and keeps the givers' copies" do
     @hobbit.update!(review: "Alice's thoughts", reading_status: "read", finished_on: Date.current)
+    comment = @hobbit.comments.create!(user: @bob, body: "Great review!")
     @hobbit.loans.create!(borrower_name: "Sam", lent_on: Date.current, returned_on: Date.current)
     @request.accept!
 
-    assert_difference -> { @alice.reload.books_count } => 0, -> { @bob.reload.books_count } => 0 do # one each way
+    assert_difference -> { Book.count } => 2 do
       @request.complete!(by: @bob)
     end
-
     assert @request.reload.completed?
     assert @request.completed_at.present?
-    assert_equal @alice, @dune.reload.user
-    assert_equal @bob, @hobbit.reload.user
 
-    # The previous owner's private details don't travel with the book
-    assert_nil @hobbit.review
-    assert_nil @hobbit.reading_status
-    assert_empty @hobbit.loans
+    # Alice keeps her Hobbit - review, comments and all - as a book she's had.
+    @hobbit.reload
+    assert_equal @alice, @hobbit.user
+    assert @hobbit.given_away?
+    assert_equal @bob, @hobbit.given_to
+    assert_equal "Alice's thoughts", @hobbit.review
+    assert_equal "read", @hobbit.reading_status
+    assert_includes @hobbit.comments, comment
+
+    # Bob gets a fresh copy: the details, none of Alice's words.
+    bobs_hobbit = @hobbit.successor
+    assert_equal @bob, bobs_hobbit.user
+    assert_equal [ "The Hobbit", "J.R.R. Tolkien" ], [ bobs_hobbit.title, bobs_hobbit.author ]
+    assert_nil bobs_hobbit.review
+    assert_nil bobs_hobbit.reading_status
+    assert_empty bobs_hobbit.comments
+    assert_equal @hobbit, bobs_hobbit.predecessor
+
+    # ...and the same the other way for Dune.
+    assert_equal @alice, @dune.reload.successor.user
     assert_not @dune.available_for_exchange?
 
-    # The requests still belong to the original owner
+    # The request still points at the givers' copies, and belongs to the original owner.
+    assert_equal [ @dune, @hobbit ], [ @request.book, @request.offered_book ]
     assert_includes ExchangeRequest.received_by(@bob), @request
     assert_equal "swap_completed", @alice.notifications.first.kind
   end
 
-  test "counter caches follow the books" do
-    @request.update!(offered_book: nil)
+  test "books_count counts books on the shelf, so a swap is one out, one in" do
     @request.accept!
-    assert_difference -> { @alice.reload.books_count } => 1, -> { @bob.reload.books_count } => -1 do
-      @request.complete!(by: @alice)
+    assert_difference -> { @alice.reload.books_count } => 0, -> { @bob.reload.books_count } => 0 do
+      @request.complete!(by: @bob)
+    end
+
+    @request2 = ExchangeRequest.create!(requester: @bob, book: Book.create!(user: @alice, title: "Emma", author: "Austen", available_for_exchange: true))
+    @request2.accept!
+    assert_difference -> { @alice.reload.books_count } => -1, -> { @bob.reload.books_count } => 1 do
+      @request2.complete!(by: @alice)
     end
   end
 
-  test "the new owner's own rating is removed (owners can't rate their books)" do
+  test "ratings stay with the copy they were given on" do
     @dune.ratings.create!(user: @alice, score: 5)
     @request.accept!
     @request.complete!(by: @alice)
-    assert_not @dune.ratings.exists?(user: @alice)
-    assert_equal 0, @dune.reload.ratings_count
+
+    assert @dune.reload.ratings.exists?(user: @alice) # on Bob's old copy, which isn't Alice's
+    assert_equal 0, @dune.successor.ratings_count      # Alice's new copy starts unrated
+  end
+
+  test "the new copy gets its own copy of the cover" do
+    @dune.cover.attach(io: file_fixture("cover.jpg").open, filename: "cover.jpg", content_type: "image/jpeg")
+    @request.accept!
+    @request.complete!(by: @alice)
+
+    copy = @dune.reload.successor
+    assert copy.cover_ready?
+    assert_not_equal @dune.cover.blob.id, copy.cover.blob.id # deleting one never removes the other
   end
 end

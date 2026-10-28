@@ -27,6 +27,8 @@ Rails.application.routes.draw do
     resources :loans, only: :create, module: :books do
       patch :return, on: :member
     end
+    # "I no longer have it": POST moves the book to "Books I've had", DELETE puts it back.
+    resource :removal, only: %i[ create destroy ], module: :books
     # POST lists the book for exchange, DELETE takes it off the list.
     resource :exchange_listing, only: %i[ create destroy ], module: :books
     resources :comments, only: %i[ create destroy ]

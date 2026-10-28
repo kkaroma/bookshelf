@@ -65,7 +65,7 @@ class SwapsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".request a[href=?]", exchange_request_path(@swap), text: /Send a message/
   end
 
-  test "marking an accepted swap as done moves the books" do
+  test "marking an accepted swap as done gives each person a copy" do
     @swap.accept!
     get exchange_request_url(@swap)
     assert_select "button", "Mark swap as done"
@@ -73,7 +73,8 @@ class SwapsControllerTest < ActionDispatch::IntegrationTest
     patch complete_exchange_request_url(@swap)
     assert_redirected_to exchange_request_path(@swap)
     assert @swap.reload.completed?
-    assert_equal @alice, books(:dune).reload.user
+    assert_equal @alice, books(:dune).reload.successor.user
+    assert_equal @bob, books(:dune).user # Bob keeps his copy as a book he's had
 
     follow_redirect!
     assert_select ".flash-notice", /Swap done! “Dune” is now on your shelf/

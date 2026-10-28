@@ -1,7 +1,7 @@
 <%# The owner's private Lending box: who has the book now (with "Mark as
     returned"), or a form to lend it, plus past loans. A Turbo Frame, so only
     this box refreshes. %>
-<% if book.owned_by?(Current.user) %>
+<% if book.lendable_by?(Current.user) %>
   <% loan = book.current_loan %>
   <%= turbo_frame_tag dom_id(book, :lending), class: "lending" do %>
     <div class="lending-header">

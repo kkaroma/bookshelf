@@ -13,8 +13,8 @@ class HomeController < ApplicationController
   private
     # Visitors: explain the site and show recent covers (titles and covers only).
     def landing
-      @recent_books = Book.with_attached_cover.order(created_at: :desc).limit(6)
-      @book_count = Book.count
+      @recent_books = Book.on_shelf.not_from_swap.with_attached_cover.order(created_at: :desc).limit(6)
+      @book_count = Book.on_shelf.count
       @reader_count = User.count
       render :landing
     end
@@ -30,7 +30,7 @@ class HomeController < ApplicationController
       @feed = ActivityFeed.new(user).events
       @exchange_books = Book.for_exchange.where.not(user: user)
                             .with_attached_cover.includes(:user).order(updated_at: :desc).limit(6)
-      @my_books = user.books.with_attached_cover.includes(:user).order(created_at: :desc).limit(6)
+      @my_books = user.books.on_shelf.with_attached_cover.includes(:user).order(created_at: :desc).limit(6)
       render :dashboard
     end
 end

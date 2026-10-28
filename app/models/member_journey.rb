@@ -62,7 +62,7 @@ class MemberJourney
 
     # SQL: "this member has a book that …"
     def has_book(condition)
-      "EXISTS (SELECT 1 FROM books WHERE books.user_id = users.id AND #{condition})"
+      "EXISTS (SELECT 1 FROM books WHERE books.user_id = users.id AND books.given_away_at IS NULL AND #{condition})"
     end
 
     def csv_rows
