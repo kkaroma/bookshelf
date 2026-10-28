@@ -1,0 +1,57 @@
+<%# The page visitors (no account) see for a public member's book. Built
+    separately from show.html.erb so nothing members-only can slip in. %>
+<% owner = @book.user %>
+<% content_for :title, "#{@book.title} · #{owner.name}'s review" %>
+<% description = @book.review.presence || @book.description.presence || "#{@book.title} by #{@book.author}, on #{owner.name}'s shelf on Bookshelf." %>
+<%= render "shared/social_meta", title: "#{@book.title} by #{@book.author} — #{owner.name} on Bookshelf",
+      description: truncate(description.squish, length: 200), url: book_url(@book), type: "article",
+      image: (rails_representation_url(@book.cover.variant(:large)) if @book.cover_ready?) %>
+
+<article class="book-detail public-book">
+  <%= render "books/cover", book: @book, size: :large %>
+
+  <div>
+    <h1><%= @book.title %></h1>
+    <% if @book.subtitle.present? %><p class="book-subtitle"><%= @book.subtitle %></p><% end %>
+    <p class="book-detail-author">by <%= @book.author %></p>
+
+    <div class="meta-list">
+      <% if @book.published_year %><span class="pill">Published <%= @book.published_year %></span><% end %>
+      <% if @book.genre %><span class="pill"><%= @book.genre %></span><% end %>
+      <span class="pill"><%= @book.given_away? ? "Had by" : "On the shelf of" %> <%= link_to owner.name, owner %></span>
+    </div>
+
+    <% if @book.ratings_count > 0 %>
+      <p class="public-rating"><%= star_rating(@book.average_rating) %>
+        <span class="muted"><%= @book.average_rating %> from <%= pluralize(@book.ratings_count, "rating") %></span></p>
+    <% end %>
+
+    <% if @book.description.present? %>
+      <p class="book-description"><%= @book.description %></p>
+    <% end %>
+
+    <section class="book-review">
+      <div class="book-review-header"><h2><%= owner.name %>'s review</h2></div>
+      <% if @book.review.present? %>
+        <blockquote class="book-review-text"><%= @book.review %></blockquote>
+      <% else %>
+        <p class="muted"><%= owner.name %> hasn't reviewed this book yet.</p>
+      <% end %>
+    </section>
+
+    <%= render "shared/share_button", url: book_url(@book), title: "#{@book.title} — #{owner.name}'s review" %>
+
+    <aside class="join-card card">
+      <% comments = @book.comments.count %>
+      <h2>Join the conversation</h2>
+      <p class="muted">
+        <% if comments.positive? %><strong><%= pluralize(comments, "comment") %></strong> from members. <% end %>
+        Join Bookshelf to read and add comments, follow <%= owner.name.split.first %>, rate books and swap with other readers. It's free.
+      </p>
+      <div class="join-actions">
+        <%= link_to "Create your free account", new_registration_path, class: "btn btn-primary" %>
+        <%= link_to "Sign in", new_session_path, class: "btn btn-ghost" %>
+      </div>
+    </aside>
+  </div>
+</article>

@@ -13,7 +13,7 @@ class HomeController < ApplicationController
   private
     # Visitors: explain the site and show recent covers (titles and covers only).
     def landing
-      @recent_books = Book.on_shelf.not_from_swap.with_attached_cover.order(created_at: :desc).limit(6)
+      @recent_books = Book.on_shelf.not_from_swap.with_attached_cover.includes(:user).order(created_at: :desc).limit(6)
       @book_count = Book.on_shelf.count
       @reader_count = User.count
       render :landing

@@ -1,0 +1,14 @@
+<%# Tags that make a shared link show a preview card (WhatsApp, Facebook, X…)
+    and tell search engines the page's proper address.
+    Locals: title, description, url, image (absolute URL, optional). %>
+<% content_for :head do %>
+  <meta name="description" content="<%= description %>">
+  <link rel="canonical" href="<%= url %>">
+  <meta property="og:site_name" content="Bookshelf">
+  <meta property="og:type" content="<%= local_assigns.fetch(:type, "website") %>">
+  <meta property="og:title" content="<%= title %>">
+  <meta property="og:description" content="<%= description %>">
+  <meta property="og:url" content="<%= url %>">
+  <meta property="og:image" content="<%= local_assigns[:image].presence || "#{request.base_url}/icon.png?v=#{ApplicationHelper::ICON_VERSION}" %>">
+  <meta name="twitter:card" content="summary">
+<% end %>

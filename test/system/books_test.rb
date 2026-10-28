@@ -483,8 +483,10 @@ class BooksTest < ApplicationSystemTestCase
 
     uncheck "For exchange only"
     select "Publication year", from: "Sort"
-    assert_selector ".book-card", count: 2
-    assert_equal [ "Dune", "The Hobbit" ], all(".book-card-title").map(&:text) # 1965 before 1937
+    # Wait for the re-sorted results (reading the titles straight away can catch
+    # the old list as it's being replaced): 1965 before 1937.
+    assert_selector "#books .book-card:nth-child(1) .book-card-title", text: "Dune"
+    assert_selector "#books .book-card:nth-child(2) .book-card-title", text: "The Hobbit"
   end
 
   test "marking my reading and setting a reading goal" do

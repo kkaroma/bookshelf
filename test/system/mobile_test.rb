@@ -93,4 +93,13 @@ class MobileTest < ApplicationSystemTestCase
     end
     assert rows.max - rows.min <= 4, "header items are on different rows: #{rows.inspect}"
   end
+
+  test "public pages fit a phone for visitors" do
+    users(:one).update!(public_profile: true)
+    [ book_path(books(:hobbit)), user_path(users(:one)) ].each do |path|
+      visit path
+      assert_selector ".join-card"
+      assert_fits_the_screen
+    end
+  end
 end

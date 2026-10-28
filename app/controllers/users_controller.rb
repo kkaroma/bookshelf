@@ -1,5 +1,7 @@
 # Members list and profile pages.
 class UsersController < ApplicationController
+  # A profile is public when its member chose that; everything else needs signing in.
+  allow_unauthenticated_access only: :show
   before_action :set_user, only: %i[ show followers following ]
 
   # /users?q=dar searches members by name or town.
@@ -11,6 +13,14 @@ class UsersController < ApplicationController
 
   # /users/:id?q=hobbit searches this person's books only.
   def show
+    unless authenticated?
+      return request_authentication unless @user.publicly_visible? && request.format.html?
+
+      return public_show
+    end
+    # "See your profile as visitors do" (your own, public profile only).
+    return public_show if params[:as] == "visitor" && @user == Current.user && @user.publicly_visible?
+
     @filters = BookFilters.new(params, allow_status: true)
     books = @filters.apply(@user.books.on_shelf.with_attached_cover.includes(:user, :loans))
     @pagination = Pagination.new(books, page: params[:page], per_page: 24)
@@ -30,6 +40,15 @@ class UsersController < ApplicationController
   end
 
   private
+    # What visitors see of a public member: books on their shelf, books they've
+    # had and their latest reviews - never their town, email or anything private.
+    def public_show
+      @books = @user.books.on_shelf.with_attached_cover.order(created_at: :desc).limit(48)
+      @past_books = @user.past_books.with_attached_cover.limit(48)
+      @reviews = @user.books.where.not(review: nil).order(reviewed_at: :desc).limit(10)
+      render :public_show
+    end
+
     def set_user
       @user = User.find(params.expect(:id))
     end

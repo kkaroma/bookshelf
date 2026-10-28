@@ -17,7 +17,19 @@
     <div class="field">
       <%= form.label :city, "Town or city" %>
       <%= form.text_field :city, maxlength: 60, autocomplete: "address-level2", placeholder: "e.g. Dar es Salaam", class: "input" %>
-      <span class="field-hint">Optional. Shown on your profile, and used to show books near you first on the Exchange shelf.</span>
+      <span class="field-hint">Optional. Shown to members on your profile (never publicly), and used to show books near you first on the Exchange shelf.</span>
+    </div>
+
+    <div class="field checkbox-field">
+      <%= form.check_box :public_profile %>
+      <div>
+        <%= form.label :public_profile, "Public profile" %>
+        <span class="field-hint">
+          Anyone — even without an account — can read your profile, your books and your reviews, share links to them,
+          and find them on Google. Your town, email, comments, lending, swaps and messages always stay private.
+          <% if @user.public_profile? %><br><%= link_to "See your profile as visitors do", user_path(@user, as: "visitor") %><% end %>
+        </span>
+      </div>
     </div>
 
     <div class="field">

@@ -1,0 +1,14 @@
+<%# A book card for visitors (no account): only the book's own details -
+    nothing about loans, swap partners or other members. %>
+<%= link_to book, id: dom_id(book), class: "book-card" do %>
+  <%= render "books/cover", book: book %>
+  <div>
+    <h3 class="book-card-title"><%= book.title %></h3>
+    <p class="book-card-meta"><%= book.author %><%= " · #{book.published_year}" if book.published_year %></p>
+    <% if book.ratings_count > 0 %>
+      <p class="book-card-rating"><span aria-hidden="true">★</span> <%= book.average_rating %>
+        <span class="muted">(<%= book.ratings_count %>)</span></p>
+    <% end %>
+    <% if book.review.present? %><p class="book-card-status status-reviewed">Reviewed</p><% end %>
+  </div>
+<% end %>

@@ -1,4 +1,7 @@
 class BooksController < ApplicationController
+  # A book page is public when its owner made their profile public; everything
+  # else still needs signing in (see #show).
+  allow_unauthenticated_access only: :show
   before_action :set_book, only: %i[ show edit update destroy ]
   before_action :require_owner, only: %i[ edit update destroy ]
   helper_method :can_edit?
@@ -13,7 +16,15 @@ class BooksController < ApplicationController
   end
 
   # GET /books/1 or /books/1.json
+  # Visitors get the separate public page (books/public_show) - and only for
+  # public members' books; members get the full page.
   def show
+    unless authenticated?
+      return request_authentication unless @book.publicly_visible? && request.format.html?
+
+      return render :public_show
+    end
+
     @my_rating = @book.ratings.find_by(user: Current.user)
     @my_pending_request = @book.exchange_requests.pending.find_by(requester: Current.user)
     @pending_requests_count = @book.exchange_requests.pending.count if @book.owned_by?(Current.user)

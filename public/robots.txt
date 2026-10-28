@@ -1,1 +1,8 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+# See https://www.robotstxt.org/robotstxt.html
+# Public profiles and book pages may be indexed; everything else needs an
+# account (search engines just reach the sign-in page).
+User-agent: *
+Disallow: /admin
+Disallow: /settings
+
+Sitemap: https://bookshelf.co.tz/sitemap.xml

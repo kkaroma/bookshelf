@@ -45,6 +45,8 @@ class User < ApplicationRecord
 
   # Members who can use the site (suspended members can't sign in).
   scope :active, -> { where(suspended_at: nil) }
+  # Members whose profile and reviews anyone can read, even without an account.
+  scope :publicly_visible, -> { active.where(public_profile: true) }
 
   # The Members page search: every word must match the name or town.
   # Email addresses are deliberately not searchable, to keep them private.
@@ -114,6 +116,13 @@ class User < ApplicationRecord
   end
 
   def suspended? = suspended_at.present?
+
+  # Anyone - signed in or not - can see this member's profile and books.
+  def publicly_visible? = public_profile? && !suspended?
+
+  # Readable addresses: /users/5-alice-reader. Only the number is used to
+  # find the member, so old links keep working after a name change.
+  def to_param = id && [ id, name.to_s.parameterize.presence ].compact.join("-")
 
   # Admins must be made members again before they can be suspended.
   def suspendable? = !admin? && !suspended?

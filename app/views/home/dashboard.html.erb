@@ -15,6 +15,10 @@
   </div>
 </section>
 
+<% if Current.user.public_profile_asked_at.nil? %>
+  <%= render "home/public_profile_question" %>
+<% end %>
+
 <% unless @getting_started.complete? %>
   <section class="checklist card" aria-labelledby="checklist-title">
     <div class="checklist-header">

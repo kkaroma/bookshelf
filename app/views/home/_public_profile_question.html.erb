@@ -1,0 +1,15 @@
+<%# Asked once on Home: "Make your profile public?" Either answer hides it;
+    the switch stays in Settings → Profile. %>
+<section class="card public-question" aria-labelledby="public_question_title">
+  <h2 id="public_question_title">Share your reviews with everyone?</h2>
+  <p class="muted">
+    With a public profile, anyone can read your books and reviews — even without an account — and you can share links
+    to them on WhatsApp and elsewhere. Your town, email, comments, swaps and messages always stay private.
+  </p>
+  <div class="join-actions">
+    <%= button_to "Make my profile public", settings_public_profile_path, method: :patch,
+          params: { public_profile: "1" }, class: "btn btn-primary btn-sm" %>
+    <%= button_to "Keep it private", settings_public_profile_path, method: :patch,
+          params: { public_profile: "0" }, class: "btn btn-ghost btn-sm" %>
+  </div>
+</section>

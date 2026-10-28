@@ -119,6 +119,8 @@ Rails.application.routes.draw do
   # /settings/notifications/edit and /settings/account (delete account).
   namespace :settings do
     resource :profile, only: %i[ edit update ]
+    # The one-time "Make your profile public?" question on Home.
+    resource :public_profile, only: :update
     resource :password, only: %i[ edit update ]
     resource :notifications, only: %i[ edit update ]
     resource :account, only: %i[ show destroy ]
@@ -139,6 +141,9 @@ Rails.application.routes.draw do
     resource :block, only: %i[ create destroy ], module: :users
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  # The public pages, for search engines.
+  get "sitemap.xml", to: "sitemaps#show", as: :sitemap, defaults: { format: :xml }
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

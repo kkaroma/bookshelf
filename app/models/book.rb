@@ -139,6 +139,13 @@ class Book < ApplicationRecord
 
   def given_away? = given_away_at.present?
 
+  # Readable addresses: /books/42-half-of-a-yellow-sun (found by the number).
+  def to_param = id && [ id, title.to_s.parameterize.presence ].compact.join("-")
+
+  # Visitors without an account can read this book's page when its owner
+  # has made their profile public.
+  def publicly_visible? = user.publicly_visible?
+
   # After a completed swap: the new owner gets their own copy (details and
   # cover, but none of this copy's review, comments, ratings or reading
   # history), and this copy stays with its old owner as a book they've had -

@@ -22,6 +22,19 @@
       <%= render "users/follow_box", user: @user %>
     </div>
 
+    <% if @user == Current.user %>
+      <p class="visibility-note">
+        <% if @user.publicly_visible? %>
+          🌍 Your profile is public. <%= link_to "See it as visitors do", user_path(@user, as: "visitor") %>
+        <% else %>
+          🔒 Only members can see your profile. <%= link_to "Make it public", edit_settings_profile_path %>
+        <% end %>
+      </p>
+    <% end %>
+    <% if @user.publicly_visible? %>
+      <div class="profile-actions"><%= render "shared/share_button", url: user_url(@user), title: "#{@user.name} on Bookshelf" %></div>
+    <% end %>
+
     <% if @user != Current.user && !@user.suspended? %>
       <div class="profile-actions">
         <%= button_to user_conversation_path(@user), class: "btn btn-secondary btn-sm" do %>

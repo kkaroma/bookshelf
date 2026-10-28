@@ -1,0 +1,63 @@
+<%# A public member's profile, as visitors (no account) see it. Built
+    separately from show.html.erb so nothing members-only can slip in:
+    no town, email, follower names, lending, swaps or wishlist. %>
+<% content_for :title, "#{@user.name} on Bookshelf" %>
+<%= render "shared/social_meta", title: "#{@user.name} on Bookshelf", url: user_url(@user), type: "profile",
+      description: "#{@user.name}'s books and reviews on Bookshelf — #{pluralize(@user.books_count, "book")} on the shelf." %>
+
+<section class="profile card">
+  <span class="avatar avatar-lg" style="--hue: <%= avatar_hue(@user) %>" aria-hidden="true"><%= initials(@user.name) %></span>
+  <div class="profile-main">
+    <h1><%= @user.name %></h1>
+    <p class="muted">Member since <%= @user.created_at.strftime("%B %Y") %></p>
+    <div class="profile-stats">
+      <span><strong><%= @user.books_count %></strong> <%= "book".pluralize(@user.books_count) %></span>
+      <span><strong><%= @user.followers_count %></strong> <%= "follower".pluralize(@user.followers_count) %></span>
+    </div>
+    <div class="profile-actions">
+      <%= render "shared/share_button", url: user_url(@user), title: "#{@user.name} on Bookshelf" %>
+      <%= link_to "Follow #{@user.name.split.first} on Bookshelf", new_registration_path, class: "btn btn-primary btn-sm" %>
+    </div>
+  </div>
+</section>
+
+<% if @reviews.any? %>
+  <section class="report-section" aria-labelledby="reviews_title">
+    <h2 id="reviews_title" class="section-title">Latest reviews</h2>
+    <ul class="public-reviews">
+      <% @reviews.each do |book| %>
+        <li>
+          <%= link_to book.title, book, class: "public-review-title" %> <span class="muted">by <%= book.author %></span>
+          <p><%= truncate(book.review, length: 220) %></p>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
+<h2 class="section-title"><%= @user.name %>'s books</h2>
+<% if @books.any? %>
+  <div class="book-grid">
+    <%= render partial: "books/public_card", collection: @books, as: :book %>
+  </div>
+<% else %>
+  <p class="muted"><%= @user.name %> hasn't added any books yet.</p>
+<% end %>
+
+<% if @past_books.any? %>
+  <section class="past-books" aria-labelledby="past_books_title">
+    <h2 id="past_books_title" class="section-title">Books <%= @user.name.split.first %> has had</h2>
+    <div class="book-grid">
+      <%= render partial: "books/public_card", collection: @past_books, as: :book %>
+    </div>
+  </section>
+<% end %>
+
+<aside class="join-card card">
+  <h2>Join <%= @user.name.split.first %> on Bookshelf</h2>
+  <p class="muted">Catalogue your books, share reviews, follow readers you like and swap books you've finished. It's free.</p>
+  <div class="join-actions">
+    <%= link_to "Create your free account", new_registration_path, class: "btn btn-primary" %>
+    <%= link_to "Sign in", new_session_path, class: "btn btn-ghost" %>
+  </div>
+</aside>

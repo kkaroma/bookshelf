@@ -37,7 +37,8 @@ class MessagesTest < ApplicationSystemTestCase
     # Alice can't send any more.
     sign_in_as users(:one)
     find("a.bell[aria-label='Messages (1 unread)']").click # Bob's reply
-    click_on "Bob Bookworm"
+    assert_selector "h1", text: "Messages" # wait for the inbox (Home also links to Bob)
+    within(".conversation-list") { click_on "Bob Bookworm" }
     assert_selector ".conversation-closed", text: "You can't send messages to Bob Bookworm."
     assert_no_field "Message Bob Bookworm"
   end

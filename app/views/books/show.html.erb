@@ -53,6 +53,15 @@
       <span class="pill"><%= @book.given_away? ? "Had by" : "Added by" %> <%= @book.owned_by?(Current.user) ? "you" : link_to(@book.user.name, @book.user) %> <%= time_ago_in_words(@book.created_at) %> ago</span>
     </div>
 
+    <% if @book.publicly_visible? %>
+      <div class="book-share">
+        <%= render "shared/share_button", url: book_url(@book), title: "#{@book.title} — #{@book.user.name}'s review" %>
+        <% if @book.owned_by?(Current.user) %><span class="muted">🌍 Anyone with the link can read this page.</span><% end %>
+      </div>
+    <% elsif @book.owned_by?(Current.user) %>
+      <p class="visibility-note">🔒 Only members can see this page. <%= link_to "Make your profile public", edit_settings_profile_path %> to share your review.</p>
+    <% end %>
+
     <%= render "books/reading_status", book: @book %>
     <%= render "books/rating", book: @book, my_rating: @my_rating %>
     <%= render "books/exchange_panel", book: @book, my_pending_request: @my_pending_request,

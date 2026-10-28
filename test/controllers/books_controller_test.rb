@@ -305,8 +305,8 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     patch book_url(@someone_elses_book), params: { book: { title: "Dune (Revised)" } }
-    assert_redirected_to book_url(@someone_elses_book)
-    assert_equal "Dune (Revised)", @someone_elses_book.reload.title
+    assert_redirected_to book_url(@someone_elses_book.reload) # the address now reads /books/…-dune-revised
+    assert_equal "Dune (Revised)", @someone_elses_book.title
   end
 
   test "an admin can delete someone else's book" do

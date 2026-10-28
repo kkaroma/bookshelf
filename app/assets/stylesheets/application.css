@@ -2109,6 +2109,24 @@ ul.report-list { list-style: none; padding-left: 0; }
 .genre-actions form { margin: 0; }
 .genre-actions .btn[disabled] { opacity: 0.35; cursor: default; }
 
+/* ---------- Public pages ---------- */
+.share { display: inline-flex; align-items: center; gap: 0.6rem; }
+.share .btn svg { margin-right: 0.15rem; }
+.book-share { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0.5rem 0 1rem; font-size: 0.9rem; }
+.visibility-note { margin: 0.5rem 0 0.75rem; font-size: 0.9rem; color: var(--text-muted); }
+.public-rating { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem; }
+.public-book .share { margin: 1rem 0 1.5rem; }
+.join-card { margin-top: 2rem; padding: 1.25rem 1.5rem; }
+.join-card h2 { margin-bottom: 0.4rem; }
+.join-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.join-actions form { margin: 0; }
+.public-question { margin-bottom: 1.5rem; padding: 1.25rem 1.5rem; }
+.public-question h2 { margin-bottom: 0.4rem; }
+.public-reviews { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; max-width: 760px; }
+.public-reviews p { margin: 0.25rem 0 0; color: var(--text-muted); }
+.public-review-title { font-weight: 700; }
+.status-reviewed { background: var(--primary-soft); color: var(--primary); }
+
 /* ---------- Phones ---------- */
 @media (max-width: 600px) {
   main.container { padding-block: 1.25rem 3rem; }

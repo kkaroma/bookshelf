@@ -63,13 +63,15 @@
     </div>
     <div class="book-grid recent-grid">
       <% @recent_books.each do |book| %>
-        <div class="book-card book-card-static">
+        <%# Public members' books link to their page; others are just a cover. %>
+        <%= content_tag(book.publicly_visible? ? :a : :div, class: [ "book-card", ("book-card-static" unless book.publicly_visible?) ],
+              href: (book_path(book) if book.publicly_visible?)) do %>
           <%= render "books/cover", book: book %>
           <div>
             <h3 class="book-card-title"><%= book.title %></h3>
             <p class="book-card-meta"><%= book.author %></p>
           </div>
-        </div>
+        <% end %>
       <% end %>
     </div>
   </section>
