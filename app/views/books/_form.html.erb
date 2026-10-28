@@ -33,7 +33,7 @@
   <div class="form-row">
     <div class="field">
       <%= form.label :genre %>
-      <%= form.select :genre, Book::GENRES, { include_blank: "Choose a genre…" }, class: "input" %>
+      <%= form.select :genre, Genre.choices_for(book), { include_blank: "Choose a genre…" }, class: "input" %>
     </div>
 
     <div class="field">

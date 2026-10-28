@@ -21,7 +21,7 @@
 
   <div class="filter-row">
     <%= form.label :genre, "Genre", class: "visually-hidden" %>
-    <%= form.select :genre, Book::GENRES, { include_blank: "All genres", selected: filters.genre },
+    <%= form.select :genre, Genre.names, { include_blank: "All genres", selected: filters.genre },
           class: "input filter-select", data: { action: "change->search#submitNow" } %>
 
     <% if local_assigns[:show_status] %>

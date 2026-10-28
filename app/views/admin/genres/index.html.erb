@@ -1,0 +1,54 @@
+<% content_for :title, "Genres" %>
+
+<div class="page-header">
+  <div>
+    <h1>Admin</h1>
+    <p class="muted">The genres members can give their books. Renaming one renames it on every book; retiring one stops it being offered without taking it off books that have it.</p>
+  </div>
+</div>
+<%= render "admin/tabs" %>
+
+<%= form_with model: [ :admin, @new_genre ], class: "genre-add" do |form| %>
+  <%= form.label :name, "New genre", for: "new_genre_name", class: "visually-hidden" %>
+  <%= form.text_field :name, id: "new_genre_name", class: "input", placeholder: "New genre, e.g. Swahili literature", maxlength: 40, required: true %>
+  <%= form.submit "Add genre", class: "btn btn-primary" %>
+<% end %>
+
+<ol class="genre-list">
+  <% @genres.each_with_index do |genre, index| %>
+    <% count = @book_counts.fetch(genre.name, 0) %>
+    <li id="<%= dom_id genre %>" class="genre-row<%= " is-retired" if genre.retired? %>">
+      <%= form_with model: [ :admin, genre ], class: "genre-rename" do |form| %>
+        <%# Each box needs its own id, or every label points at the first one. %>
+        <%= form.label :name, "Name of #{genre.name}", for: dom_id(genre, :name), class: "visually-hidden" %>
+        <%= form.text_field :name, id: dom_id(genre, :name), class: "input", maxlength: 40, required: true %>
+        <%= form.submit "Rename", class: "btn btn-ghost btn-sm" %>
+      <% end %>
+
+      <span class="genre-meta">
+        <% if count.positive? %>
+          <%= link_to pluralize(count, "book"), books_path(genre: genre.name) %>
+        <% else %>
+          <span class="muted">no books</span>
+        <% end %>
+        <% if genre.retired? %><span class="badge badge-muted">Retired</span><% end %>
+      </span>
+
+      <span class="genre-actions">
+        <%= button_to "↑", move_admin_genre_path(genre, direction: "up"), method: :patch, class: "btn btn-ghost btn-sm",
+              disabled: index.zero?, aria: { label: "Move #{genre.name} up" } %>
+        <%= button_to "↓", move_admin_genre_path(genre, direction: "down"), method: :patch, class: "btn btn-ghost btn-sm",
+              disabled: index == @genres.size - 1, aria: { label: "Move #{genre.name} down" } %>
+        <% if genre.retired? %>
+          <%= button_to "Restore", restore_admin_genre_path(genre), method: :patch, class: "btn btn-secondary btn-sm" %>
+        <% else %>
+          <%= button_to "Retire", retire_admin_genre_path(genre), method: :patch, class: "btn btn-secondary btn-sm" %>
+        <% end %>
+        <% if count.zero? %>
+          <%= button_to "Delete", admin_genre_path(genre), method: :delete, class: "btn btn-danger btn-sm",
+                form: { data: { turbo_confirm: "Delete “#{genre.name}”?" } } %>
+        <% end %>
+      </span>
+    </li>
+  <% end %>
+</ol>

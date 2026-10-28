@@ -19,3 +19,10 @@ User.find_or_create_by!(email_address: admin_email) do |user|
   user.role = :admin
   user.email_confirmed_at = Time.current
 end
+
+# --- Genres ------------------------------------------------------------------
+# A new site starts with the usual list; after that admins manage it at
+# /admin/genres, so this never adds to (or undoes) their changes.
+if Genre.none?
+  Genre::STARTING_NAMES.each { |name| Genre.create!(name: name) }
+end

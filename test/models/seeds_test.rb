@@ -15,4 +15,14 @@ class SeedsTest < ActiveSupport::TestCase
     Rails.application.load_seed
     assert_no_difference("User.count") { Rails.application.load_seed }
   end
+
+  test "seeds create the starting genres on an empty site, and leave admins' changes alone" do
+    Genre.delete_all
+    Rails.application.load_seed
+    assert_equal Genre::STARTING_NAMES, Genre.names
+
+    Genre.find_by!(name: "Cookery").destroy!
+    Rails.application.load_seed
+    assert_not Genre.exists?(name: "Cookery")
+  end
 end

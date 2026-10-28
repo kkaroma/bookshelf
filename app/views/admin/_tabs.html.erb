@@ -5,6 +5,7 @@
        [ "Swaps", admin_swaps_path ],
        [ "Member journey", admin_journey_path ],
        [ "Members", admin_users_path ],
+       [ "Genres", admin_genres_path ],
        [ "Reported content", admin_flags_path, open_reports ],
        [ "Backups", admin_backups_path ] ].each do |label, path, count| %>
     <%= link_to path, class: [ "tab", ("active" if current_page?(path)) ], aria: { current: ("page" if current_page?(path)) } do %>

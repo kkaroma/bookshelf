@@ -1,0 +1,76 @@
+# The starting list of genres (the same as the migration creates).
+fiction:
+  name: "Fiction"
+  position: 1
+
+fantasy:
+  name: "Fantasy"
+  position: 2
+
+science_fiction:
+  name: "Science fiction"
+  position: 3
+
+mystery_thriller:
+  name: "Mystery & thriller"
+  position: 4
+
+romance:
+  name: "Romance"
+  position: 5
+
+historical_fiction:
+  name: "Historical fiction"
+  position: 6
+
+children_s:
+  name: "Children's"
+  position: 7
+
+young_adult:
+  name: "Young adult"
+  position: 8
+
+poetry:
+  name: "Poetry"
+  position: 9
+
+non_fiction:
+  name: "Non-fiction"
+  position: 10
+
+biography_memoir:
+  name: "Biography & memoir"
+  position: 11
+
+history:
+  name: "History"
+  position: 12
+
+science_nature:
+  name: "Science & nature"
+  position: 13
+
+business_money:
+  name: "Business & money"
+  position: 14
+
+self_help:
+  name: "Self-help"
+  position: 15
+
+religion_spirituality:
+  name: "Religion & spirituality"
+  position: 16
+
+cookery:
+  name: "Cookery"
+  position: 17
+
+art_design:
+  name: "Art & design"
+  position: 18
+
+other:
+  name: "Other"
+  position: 19

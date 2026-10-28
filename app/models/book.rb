@@ -56,13 +56,7 @@ class Book < ApplicationRecord
   after_commit :refresh_owner_books_count,
                if: -> { destroyed? || previously_new_record? || saved_change_to_given_away_at? }
 
-  GENRES = [
-    "Fiction", "Fantasy", "Science fiction", "Mystery & thriller", "Romance",
-    "Historical fiction", "Children's", "Young adult", "Poetry",
-    "Non-fiction", "Biography & memoir", "History", "Science & nature",
-    "Business & money", "Self-help", "Religion & spirituality", "Cookery",
-    "Art & design", "Other"
-  ].freeze
+  # Genres are managed by admins (Genre model, /admin/genres).
 
   # The owner's reading of their copy. nil means "not set".
   enum :reading_status, { want_to_read: 0, reading: 1, read: 2 }, validate: { allow_nil: true }
@@ -94,7 +88,10 @@ class Book < ApplicationRecord
   validates :title, :author, presence: true
   validates :subtitle, length: { maximum: 200 }
   validate :isbn_is_valid, if: -> { isbn.present? }
-  validates :genre, inclusion: { in: GENRES, message: "isn't one of the listed genres" }, allow_nil: true
+  # Any genre on the list, including retired ones (books keep those; the
+  # form just doesn't offer them for new choices).
+  validates :genre, inclusion: { in: ->(_book) { Genre.names }, message: "isn't one of the listed genres" }, allow_nil: true,
+                    if: :will_save_change_to_genre?
   validate :reading_dates_make_sense
   validate :attach_open_library_cover, if: -> { open_library_cover_id.present? }
   validate :cover_is_a_reasonable_image

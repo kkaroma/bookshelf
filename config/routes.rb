@@ -70,6 +70,14 @@ Rails.application.routes.draw do
         patch :confirm_email
       end
     end
+    # The genre list members choose from: /admin/genres
+    resources :genres, only: %i[ index create update destroy ] do
+      member do
+        patch :move    # ?direction=up or down
+        patch :retire  # hide from new choices
+        patch :restore
+      end
+    end
     # Database backups: /admin/backups (list, "Back up now", download)
     resources :backups, only: %i[ index create show ]
     # Reported books and comments: /admin/flags

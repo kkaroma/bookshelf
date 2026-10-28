@@ -15,7 +15,7 @@ class BookFilters
 
   def initialize(params, allow_status: false)
     @query = params[:q].to_s.squish
-    @genre = params[:genre].presence_in(Book::GENRES)
+    @genre = params[:genre].presence_in(Genre.names)
     @status = params[:status].presence_in(Book.reading_statuses.keys) if allow_status
     @exchange_only = params[:exchange] == "1"
     @sort = params[:sort].presence_in(SORTS.keys) || "title"

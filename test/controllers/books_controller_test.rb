@@ -194,7 +194,7 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
 
   test "the Books page has genre, exchange and sort controls (no reading status)" do
     get books_url
-    assert_select "select[name=genre] option", Book::GENRES.size + 1
+    assert_select "select[name=genre] option", Genre.count + 1
     assert_select "input[type=checkbox][name=exchange]"
     assert_select "select[name=sort] option", BookFilters::SORTS.size
     assert_select "select[name=status]", count: 0
