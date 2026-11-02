@@ -30,7 +30,8 @@ class HomeController < ApplicationController
       @feed = ActivityFeed.new(user).events
       @exchange_books = Book.for_exchange.where.not(user: user)
                             .with_attached_cover.includes(:user).order(updated_at: :desc).limit(6)
-      @my_books = user.books.on_shelf.with_attached_cover.includes(:user).order(created_at: :desc).limit(6)
+      # Enough for two full rows on a wide screen (see .book-grid-two-rows).
+      @my_books = user.books.on_shelf.with_attached_cover.includes(:user, :loans).order(created_at: :desc).limit(12)
       render :dashboard
     end
 end

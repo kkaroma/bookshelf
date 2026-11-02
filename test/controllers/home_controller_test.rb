@@ -105,4 +105,14 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select "#my_books #book_#{books(:hobbit).id}"
     assert_select "#my_books a[href=?]", user_path(users(:one)), text: "See all →"
   end
+
+  test "Your books shows the newest 12, then See all" do
+    sign_in_as users(:one)
+    14.times { |i| Book.create!(user: users(:one), title: format("Shelf book %02d", i), author: "A") }
+    get root_url
+
+    assert_select "#my_books .book-grid.book-grid-two-rows .book-card", 12
+    assert_select "#my_books .book-card-title", text: "Shelf book 13" # newest first
+    assert_select "#my_books .section-heading a[href=?]", user_path(users(:one)), "See all →"
+  end
 end

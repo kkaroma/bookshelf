@@ -22,6 +22,15 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # star buttons whose visible text is just "★".
   Capybara.enable_aria_label = true
 
+  # Phone and tablet tests emulate a small screen with Chrome DevTools. Reset
+  # that before every test, so a narrow screen can never leak into the next one
+  # (sign_in_as expects the wide header, which shows the member's name).
+  setup do
+    page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
+  rescue StandardError
+    nil # no browser yet, or it crashed - a fresh one starts at full size
+  end
+
   # Headless Chrome (since v154 on macOS) occasionally crashes mid-test. Without
   # this, every later test fails on the dead browser ("invalid session id").
   # Throwing it away makes Capybara start a fresh Chrome for the next test, so a

@@ -102,6 +102,6 @@
       see_all_path: exchanges_path,
       empty: "No one else is offering books for exchange right now. Check back soon!" %>
 
-<%= render "home/shelf", id: "my_books", title: "Your books", books: @my_books,
+<%= render "home/shelf", id: "my_books", title: "Your books", books: @my_books, grid_class: "book-grid-two-rows",
       see_all_path: user_path(Current.user),
       empty: safe_join([ "You haven't added any books yet. ", link_to("Add your first book", new_book_path), "." ]) %>

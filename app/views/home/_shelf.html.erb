@@ -1,4 +1,5 @@
-<%# One row of books on the Home page, with a heading and a "see all" link. %>
+<%# A row of books on the Home page, with a heading and a "see all" link.
+    Optional local: grid_class (e.g. "book-grid-two-rows"). %>
 <section class="home-section" id="<%= id %>">
   <div class="section-heading">
     <h2><%= title %></h2>
@@ -8,7 +9,7 @@
   </div>
 
   <% if books.any? %>
-    <div class="book-grid">
+    <div class="book-grid <%= local_assigns[:grid_class] %>">
       <%= render books %>
     </div>
   <% else %>
